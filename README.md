@@ -1,37 +1,28 @@
-# VYRON — Plug & Play Vercel Store
+# VYRON Store v3
 
-Premium Next.js starter voor VYRON: Engineered for Modern Utility.
+Premium Next.js + Tailwind ecommerce starter.
 
-## Wat zit erin
-- Next.js + Tailwind
-- Premium VYRON homepage
-- 20 samengestelde producten
-- Categoriepagina's
-- Productpagina's met info, features, specs, supplier notes, margin notes en content ideeën
-- Cart placeholder
-- Mollie checkout placeholder
+## Run locally
 
-## Installeren
 ```bash
 npm install
 npm run dev
 ```
 
-## Deploy op Vercel
-1. Upload deze map naar GitHub
-2. Import project in Vercel
-3. Framework: Next.js
-4. Deploy
+## Deploy
 
-## Payments
-Aanbevolen PSP voor NL/EU: Mollie.
-Waarom: iDEAL | Wero, PayPal, kaarten, Apple Pay, Google Pay, Bancontact, Klarna en meer via één integratie.
+Push to GitHub. Vercel should use:
+- Framework: Next.js
+- Build command: npm run build
+- Install command: npm install
+- Output directory: empty
 
-Later toevoegen in `.env.local`:
-```bash
-MOLLIE_API_KEY=live_xxxxxxxxx
-NEXT_PUBLIC_SITE_URL=https://jouwdomein.nl
-```
+## V3 upgrades
 
-## Belangrijk
-De productprijzen en supplier notes zijn startstrategie. Voor livegang moeten we per product nog echte leveranciers kiezen, levertijd controleren, testbestelling doen en marktprijs finaliseren.
+- Cinematic hero section
+- Premium sticky glass navbar
+- Improved product cards
+- Upgraded product detail pages
+- Trust/conversion blocks
+- Improved cart UI
+- Fixed Tailwind v4 PostCSS config

@@ -1,6 +1,56 @@
-import ProductCard from '@/components/ProductCard'
-import AddToCartButton from '@/components/AddToCartButton'
-import { byCategory, getProduct, products } from '@/lib/products'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { products, getProduct } from '@/lib/products'
+import AddToCartButton from '@/components/AddToCartButton'
+import ProductCard from '@/components/ProductCard'
+import { ArrowLeft, BadgeCheck, Lock, PackageCheck, ShieldCheck, Star, Truck } from 'lucide-react'
+
 export function generateStaticParams(){return products.map(p=>({slug:p.slug}))}
-export default async function ProductPage({params}:{params:Promise<{slug:string}>}){const {slug}=await params; const p=getProduct(slug); if(!p) return notFound(); const related=byCategory(p.category).filter(x=>x.slug!==p.slug).slice(0,4); return <main className="mx-auto max-w-7xl px-5 py-10"><div className="grid gap-10 lg:grid-cols-[.95fr_1.05fr]"><div className="card overflow-hidden rounded-[2rem]"><img src={p.hero} alt={p.name} className="product-detail-img opacity-90"/></div><div className="py-2"><div className="mb-4 inline-flex rounded-full bg-vyron-olive/40 px-4 py-2 text-sm font-bold">{p.badge}</div><h1 className="text-4xl font-black text-balance md:text-6xl">{p.name}</h1><p className="mt-4 text-lg text-white/65 md:text-xl">{p.short}</p><div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{p.price.toFixed(2)}</span>{p.compareAt&&<span className="text-xl text-white/35 line-through">€{p.compareAt.toFixed(2)}</span>}</div><AddToCartButton product={p}/><p className="mt-3 text-center text-sm text-white/45">Checkout koppelen we straks via Mollie: iDEAL | Wero, PayPal, cards, Apple Pay en Google Pay.</p><div className="mt-10"><h2 className="text-2xl font-black">Product Info</h2><p className="mt-3 text-white/60">{p.description}</p></div><div className="mt-8 grid gap-4 md:grid-cols-2"><div className="card rounded-3xl p-5"><h3 className="font-black">Features</h3><ul className="mt-3 space-y-2 text-sm text-white/60">{p.features.map(f=><li key={f}>• {f}</li>)}</ul></div><div className="card rounded-3xl p-5"><h3 className="font-black">Specs</h3><ul className="mt-3 space-y-2 text-sm text-white/60">{p.specs.map(s=><li key={s}>• {s}</li>)}</ul></div></div></div></div><section className="mt-12 grid gap-5 md:grid-cols-3"><div className="card rounded-3xl p-6"><h3 className="font-black">Supplier Notes</h3><p className="mt-3 text-sm text-white/55">{p.supplierNotes}</p></div><div className="card rounded-3xl p-6"><h3 className="font-black">Margin Strategy</h3><p className="mt-3 text-sm text-white/55">Estimated landed cost: €{p.cost.toFixed(2)}. {p.marginNote}</p></div><div className="card rounded-3xl p-6"><h3 className="font-black">Content Ideas</h3><ul className="mt-3 space-y-2 text-sm text-white/55">{p.contentIdeas.map(i=><li key={i}>• {i}</li>)}</ul></div></section>{related.length>0&&<section className="mt-16"><h2 className="text-3xl font-black">Related Utility</h2><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{related.map(r=><ProductCard key={r.slug} p={r}/>)}</div></section>}</main>}
+
+export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
+  const { slug } = await params
+  const p = getProduct(slug)
+  if(!p) return notFound()
+  const related = products.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
+  return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
+    <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
+    <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
+      <div className="space-y-4">
+        <div className="card overflow-hidden rounded-[2rem] p-3"><img src={p.hero} alt={p.name} className="product-detail-img rounded-[1.5rem] opacity-90"/></div>
+        <div className="grid grid-cols-3 gap-3">
+          {[p.hero,p.hero,p.hero].map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><img src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
+        </div>
+      </div>
+      <aside className="lg:sticky lg:top-24">
+        <div className="card rounded-[2rem] p-6 md:p-8">
+          <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{p.badge}</div>
+          <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{p.name}</h1>
+          <p className="mt-4 text-lg leading-8 text-white/58">{p.short}</p>
+          <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{p.price.toFixed(2)}</span>{p.compareAt&&<span className="pb-1 text-white/35 line-through">€{p.compareAt.toFixed(2)}</span>}</div>
+          <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Launch product • premium utility selection</div>
+          <div className="mt-7"><AddToCartButton product={{slug:p.slug,name:p.name,price:p.price,hero:p.hero}} /></div>
+          <div className="mt-6 grid gap-3 text-sm text-white/62">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> Secure checkout ready</div>
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck size={18}/> Tracked shipping supplier flow</div>
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Low refund product positioning</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section className="mt-12 grid gap-5 lg:grid-cols-3">
+      <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Product Story</p><h2 className="mt-2 text-2xl font-black">Modern utility, premium positioned.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>
+      <div className="card rounded-[1.7rem] p-6"><p className="kicker">Margin Note</p><p className="mt-4 leading-7 text-white/58">{p.marginNote}</p></div>
+    </section>
+
+    <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <Info title="Key Features" items={p.features}/>
+      <Info title="Specs" items={p.specs}/>
+      <Info title="Content Ideas" items={p.contentIdeas}/>
+      <div className="card rounded-[1.7rem] p-6"><PackageCheck/><h3 className="mt-4 font-black">Supplier Notes</h3><p className="mt-3 text-sm leading-6 text-white/55">{p.supplierNotes}</p></div>
+    </section>
+
+    {related.length>0 && <section className="mt-16"><p className="kicker">Related Utility</p><h2 className="mt-2 text-3xl font-black md:text-5xl">More in {p.category.replace('-',' ')}</h2><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{related.map(x=><ProductCard key={x.slug} p={x}/>)}</div></section>}
+  </main>
+}
+function Info({title,items}:{title:string;items:string[]}){return <div className="card rounded-[1.7rem] p-6"><BadgeCheck/><h3 className="mt-4 font-black">{title}</h3><ul className="mt-3 grid gap-2 text-sm leading-6 text-white/55">{items.map(i=><li key={i}>• {i}</li>)}</ul></div>}
