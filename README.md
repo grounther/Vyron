@@ -1,15 +1,20 @@
-# VYRON Store v3.1
+# VYRON Store v3.2
 
-Premium Next.js storefront for VYRON.
+Premium Next.js + Tailwind ecommerce starter for VYRON.
 
-## v3.1 updates
+## v3.2 upgrades
 - Smooth add-to-cart slide notification
-- Live cart counter badge
-- Improved cart button contrast
-- Product-specific branded SVG images instead of random photos
+- Live cart counter badge in navbar
+- Fixed cart button contrast
+- Product image fallback system to prevent broken images
+- Mobile menu in navbar
+- More robust product card image loading
 
 ## Run locally
 ```bash
 npm install
 npm run dev
 ```
+
+## Deploy
+Push to GitHub. Vercel deploys automatically.

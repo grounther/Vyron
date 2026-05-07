@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="950" viewBox="0 0 1400 950">
+<defs><radialGradient id="g" cx="70%" cy="20%" r="80%"><stop offset="0" stop-color="#5B6653" stop-opacity=".5"/><stop offset=".5" stop-color="#111"/><stop offset="1" stop-color="#050505"/></radialGradient><filter id="s"><feDropShadow dx="0" dy="28" stdDeviation="35" flood-opacity=".55"/></filter></defs>
+<rect width="1400" height="950" fill="url(#g)"/><rect x="115" y="105" width="1170" height="735" rx="58" fill="#101010" opacity=".75" stroke="#fff" stroke-opacity=".08"/>
+<g filter="url(#s)"><path d="M700 250 L920 475 L700 700 L480 475 Z" fill="#d6d6d6" opacity=".15"/><path d="M700 320 L850 475 L700 630 L550 475 Z" fill="#5B6653" opacity=".55"/><text x="660" y="505" fill="#fff" font-family="Arial" font-size="95" font-weight="900">V</text></g>
+<text x="120" y="150" fill="#fff" opacity=".62" font-family="Arial" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+<text x="120" y="770" fill="#fff" font-family="Arial" font-size="56" font-weight="900">MODERN UTILITY PRODUCT</text>
+<text x="120" y="820" fill="#D6D6D6" opacity=".72" font-family="Arial" font-size="24" font-weight="800" letter-spacing="7">PREMIUM • TACTICAL • UTILITY</text>
+</svg>

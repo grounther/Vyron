@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { products, getProduct } from '@/lib/products'
 import AddToCartButton from '@/components/AddToCartButton'
 import ProductCard from '@/components/ProductCard'
+import ProductImage from '@/components/ProductImage'
 import { ArrowLeft, BadgeCheck, Lock, PackageCheck, ShieldCheck, Star, Truck } from 'lucide-react'
 
 export function generateStaticParams(){return products.map(p=>({slug:p.slug}))}
@@ -16,9 +17,9 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
     <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
     <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
       <div className="space-y-4">
-        <div className="card overflow-hidden rounded-[2rem] p-3"><img src={p.hero} alt={p.name} className="product-detail-img rounded-[1.5rem] opacity-90"/></div>
+        <div className="card overflow-hidden rounded-[2rem] p-3"><ProductImage src={p.hero} alt={p.name} className="product-detail-img rounded-[1.5rem] opacity-90"/></div>
         <div className="grid grid-cols-3 gap-3">
-          {[p.hero,p.hero,p.hero].map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><img src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
+          {[p.hero,p.hero,p.hero].map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><ProductImage src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
         </div>
       </div>
       <aside className="lg:sticky lg:top-24">
