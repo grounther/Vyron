@@ -18,3 +18,10 @@ npm run dev
 
 ## Deploy
 Push to GitHub. Vercel deploys automatically.
+
+
+## v3.3
+- Darker cart icon contrast
+- Premium cart badge visibility
+- Smoother mobile drawer styling
+- Add-to-cart visual polish
