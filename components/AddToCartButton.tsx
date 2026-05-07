@@ -1,0 +1,3 @@
+'use client'
+import { Product } from '@/lib/products'
+export default function AddToCartButton({product}:{product:Product}){function add(){const key='vyron_cart'; const current=JSON.parse(localStorage.getItem(key)||'[]'); const found=current.find((i:any)=>i.slug===product.slug); if(found) found.qty+=1; else current.push({slug:product.slug,name:product.name,price:product.price,hero:product.hero,qty:1}); localStorage.setItem(key,JSON.stringify(current)); window.dispatchEvent(new Event('vyron-cart')); alert('Added to cart')} return <button onClick={add} className="mt-8 w-full rounded-full bg-white px-8 py-4 text-lg font-black text-black transition hover:bg-vyron-silver">Add to Cart</button>}

@@ -1,0 +1,3 @@
+import ProductCard from '@/components/ProductCard'
+import { products } from '@/lib/products'
+export default function ShopPage(){return <main className="mx-auto max-w-7xl px-5 py-12"><p className="text-xs font-bold uppercase tracking-[.28em] text-white/40">Catalog</p><h1 className="mt-2 text-5xl font-black">All Products</h1><p className="mt-4 max-w-2xl text-white/55">Curated premium utility products for tactical carry, automotive upgrades, smart setups and daily performance.</p><div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.map(p=><ProductCard key={p.slug} p={p}/>)}</div></main>}

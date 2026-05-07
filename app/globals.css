@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+:root{--bg:#050505;--panel:#0d0d0d;--panel2:#141414;--line:rgba(255,255,255,.10);--text:#f4f4f4;--muted:rgba(255,255,255,.62);--olive:#5B6653;--silver:#D6D6D6}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 70% 0%,rgba(91,102,83,.18),transparent 32%),var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.metal{background:linear-gradient(135deg,#050505,#101010 45%,#0a0d08)}
+.text-balance{text-wrap:balance}
+.product-img{height:220px;width:100%;object-fit:cover}
+@media(min-width:768px){.product-img{height:240px}.product-detail-img{height:460px}}
+.product-detail-img{height:340px;width:100%;object-fit:cover}

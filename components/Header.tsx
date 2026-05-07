@@ -1,0 +1,4 @@
+import Link from 'next/link'
+import { ShoppingBag, Search } from 'lucide-react'
+import { categories } from '@/lib/products'
+export default function Header(){return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/75 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4"><Link href="/" className="text-xl font-black tracking-[.35em]">VYRON</Link><nav className="hidden items-center gap-6 text-sm text-white/70 md:flex"><Link href="/shop">Shop</Link>{categories.slice(0,5).map(c=><Link key={c.slug} href={`/category/${c.slug}`}>{c.name}</Link>)}</nav><div className="flex items-center gap-3"><Link aria-label="Search" href="/search" className="rounded-full border border-white/10 p-2 hover:bg-white/10"><Search size={18}/></Link><Link href="/cart" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-black"><ShoppingBag size={17}/>Cart</Link></div></div></header>}
