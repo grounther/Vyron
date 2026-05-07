@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="950" viewBox="0 0 1400 950">
+  <defs>
+    <radialGradient id="g1" cx="70%" cy="15%" r="75%"><stop offset="0" stop-color="#857B69" stop-opacity="0.55"/><stop offset="0.45" stop-color="#121212"/><stop offset="1" stop-color="#050505"/></radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2f2f2"/><stop offset="0.24" stop-color="#8e8e8e"/><stop offset="0.5" stop-color="#d8d8d8"/><stop offset="0.77" stop-color="#565656"/><stop offset="1" stop-color="#ededed"/></linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="28" stdDeviation="35" flood-color="#000" flood-opacity="0.55"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="50"/></filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#fff" stroke-opacity=".035" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1400" height="950" fill="url(#g1)"/>
+  <rect width="1400" height="950" fill="url(#grid)"/>
+  <circle cx="1030" cy="210" r="260" fill="#857B69" opacity=".16" filter="url(#soft)"/>
+  <circle cx="310" cy="760" r="230" fill="#D6D6D6" opacity=".055" filter="url(#soft)"/>
+  <rect x="115" y="105" width="1170" height="735" rx="58" fill="#101010" opacity=".7" stroke="#fff" stroke-opacity=".08"/>
+  <g transform="translate(505 220) scale(3.05)" filter="url(#shadow)">
+    <rect x="-30" y="-24" width="250" height="220" rx="42" fill="#0b0b0b" stroke="#fff" stroke-opacity=".08"/>
+    <path d="M30 84 C48 54 80 112 98 62 M98 62 L90 62 M98 62 L98 70 M30 84 L38 84 M30 84 L30 76" fill="url(#metal)" opacity=".95"/>
+  </g>
+  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+  <text x="120" y="760" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="55" font-weight="900" letter-spacing="1">CABLE MANAGEMENT KIT</text>
+  <text x="120" y="812" fill="#D6D6D6" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" letter-spacing="7">DESK SETUP • MODERN UTILITY</text>
+  <path d="M118 680 H420" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+</svg>
