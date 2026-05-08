@@ -19,7 +19,7 @@ export default function AddToCartButton({product}:{product:CartProduct}){
   },[show])
 
   function add(){
-    const key='vyron_cart'
+    const key='asorta_cart'
     const current=JSON.parse(localStorage.getItem(key)||'[]')
     const found=current.find((i:any)=>i.slug===product.slug)
     if(found) found.qty+=1
@@ -27,7 +27,7 @@ export default function AddToCartButton({product}:{product:CartProduct}){
     localStorage.setItem(key,JSON.stringify(current))
     const total=cartCount(current)
     setCount(total)
-    window.dispatchEvent(new CustomEvent('vyron-cart',{detail:{product,count:total}}))
+    window.dispatchEvent(new CustomEvent('asorta-cart',{detail:{product,count:total}}))
     setShow(false)
     requestAnimationFrame(()=>setShow(true))
   }
@@ -42,14 +42,14 @@ export default function AddToCartButton({product}:{product:CartProduct}){
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#aab6a0]"><Check size={14}/> Added to cart</div>
             <p className="mt-1 truncate text-sm font-black text-white">{product.name}</p>
-            <p className="text-xs text-white/50">Sliding straight into your VYRON cart.</p>
+            <p className="text-xs text-white/50">Added to your ASORTA cart.</p>
           </div>
           <div className="relative grid h-12 w-12 place-items-center rounded-full bg-white text-zinc-950">
             <ShoppingCart size={20} strokeWidth={3} className="text-black"/>
             {count>0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#6f7d64] px-1 text-[11px] font-black text-white ring-2 ring-black shadow-[0_0_18px_rgba(111,125,100,.55)]">{count}</span>}
           </div>
         </div>
-        <div className="relative mt-3 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full w-full origin-left animate-[vyronToast_2.4s_linear_forwards] bg-[#5B6653]"/></div>
+        <div className="relative mt-3 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full w-full origin-left animate-[asortaToast_2.4s_linear_forwards] bg-[#5B6653]"/></div>
       </div>
     </div>
   </>

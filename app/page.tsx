@@ -18,8 +18,8 @@ export default function Home(){return <main>
     <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.02fr_.98fr]">
       <div className="pt-8 md:pt-16">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-white/55"><Star size={14}/> Tactical Luxury Utility</div>
-        <h1 className="text-balance text-6xl font-black tracking-[-.06em] md:text-8xl lg:text-9xl">VYRON</h1>
-        <p className="mt-4 text-2xl font-semibold text-white/82 md:text-4xl">Engineered for Modern Utility.</p>
+        <h1 className="text-balance text-6xl font-black tracking-[-.06em] md:text-8xl lg:text-9xl">ASORTA</h1>
+        <p className="mt-4 text-2xl font-semibold text-white/82 md:text-4xl">Just what you need.</p>
         <p className="mt-6 max-w-xl text-base leading-7 text-white/55 md:text-lg">Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.</p>
         <div className="mt-9 flex flex-wrap gap-4"><Link href="/shop" className="btn-primary">Explore Collection <ArrowRight className="ml-2" size={18}/></Link><Link href="#featured" className="btn-secondary">Best Sellers</Link></div>
         <div className="mt-10 grid max-w-xl grid-cols-3 gap-3 text-xs text-white/45">
@@ -31,7 +31,7 @@ export default function Home(){return <main>
       <div className="relative">
         <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle,rgba(214,214,214,.12),transparent_62%)] blur-2xl"/>
         <div className="card relative overflow-hidden rounded-[2.2rem] p-3 shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop" alt="VYRON premium utility" className="h-[330px] w-full rounded-[1.7rem] object-cover opacity-85 md:h-[540px]"/>
+          <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop" alt="ASORTA premium utility" className="h-[330px] w-full rounded-[1.7rem] object-cover opacity-85 md:h-[540px]"/>
           <div className="absolute bottom-6 left-6 right-6 rounded-3xl border border-white/10 bg-black/55 p-5 backdrop-blur-xl"><p className="text-xs font-black uppercase tracking-[.28em] text-white/45">Launch System</p><p className="mt-2 text-xl font-black">Premium products. Clean checkout. Built to scale.</p></div>
         </div>
       </div>
@@ -48,10 +48,10 @@ export default function Home(){return <main>
     <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
   </section>
 
-  <section className="mx-auto max-w-7xl px-5 py-12"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{trust.map(x=><div key={x.t} className="card rounded-[1.7rem] p-6"><div className="text-vyron-silver">{x.i}</div><h3 className="mt-4 font-black">{x.t}</h3><p className="mt-2 text-sm leading-6 text-white/55">{x.d}</p></div>)}</div></section>
+  <section className="mx-auto max-w-7xl px-5 py-12"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{trust.map(x=><div key={x.t} className="card rounded-[1.7rem] p-6"><div className="text-white/70">{x.i}</div><h3 className="mt-4 font-black">{x.t}</h3><p className="mt-2 text-sm leading-6 text-white/55">{x.d}</p></div>)}</div></section>
 
   <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">All Products</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,12).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 
-  <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">VYRON Insiders</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">Exclusive drops, early access.</h2><p className="mt-4 max-w-xl text-white/55">Later koppelen we dit aan e-mail automation. Nu staat de premium sectie klaar voor conversie.</p></div><Link href="/shop" className="btn-primary">Start shopping</Link></div></div></section>
+  <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">ASORTA Insiders</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">Exclusive drops, early access.</h2><p className="mt-4 max-w-xl text-white/55">Later koppelen we dit aan e-mail automation. Nu staat de premium sectie klaar voor conversie.</p></div><Link href="/shop" className="btn-primary">Start shopping</Link></div></div></section>
   <PaymentNote/>
 </main>}

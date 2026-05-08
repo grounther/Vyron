@@ -40,4 +40,4 @@ img{display:block;max-width:100%}
 @media(min-width:640px){.product-img{height:210px}}
 @media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
 
-@keyframes vyronToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}

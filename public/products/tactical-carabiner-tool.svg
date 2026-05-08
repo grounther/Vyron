@@ -15,7 +15,7 @@
     <rect x="-30" y="-24" width="250" height="220" rx="42" fill="#0b0b0b" stroke="#fff" stroke-opacity=".08"/>
     <path d="M76 24 C92 30 102 44 102 62 C102 80 90 92 76 101 L64 110 C48 122 26 112 24 92 C23 78 31 67 44 60 L58 52 C65 48 74 52 76 60 C78 68 74 74 66 78 L52 86 C48 88 47 94 51 97 C54 100 59 100 63 97 L75 88 C85 81 92 72 92 62 C92 49 85 38 73 34 C60 30 50 35 42 45 L34 40 C44 26 60 18 76 24 Z" fill="url(#metal)" opacity=".95"/>
   </g>
-  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">ASORTA</text>
   <text x="120" y="760" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="55" font-weight="900" letter-spacing="1">TACTICAL CARABINER MULTI-TOOL</text>
   <text x="120" y="812" fill="#D6D6D6" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" letter-spacing="7">TACTICAL • MODERN UTILITY</text>
   <path d="M118 680 H420" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>

@@ -15,7 +15,7 @@
     <rect x="-30" y="-24" width="250" height="220" rx="42" fill="#0b0b0b" stroke="#fff" stroke-opacity=".08"/>
     <path d="M18 42 C18 34 24 28 32 28 H96 C104 28 110 34 110 42 V98 C110 106 104 112 96 112 H32 C24 112 18 106 18 98 Z M34 50 H94 V60 H34 Z M34 72 H70 V82 H34 Z" fill="url(#metal)" opacity=".95"/>
   </g>
-  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">ASORTA</text>
   <text x="120" y="760" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="55" font-weight="900" letter-spacing="1">PREMIUM DESK MAT</text>
   <text x="120" y="812" fill="#D6D6D6" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" letter-spacing="7">DESK SETUP • MODERN UTILITY</text>
   <path d="M118 680 H420" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>

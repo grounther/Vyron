@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const fallback = '/products/vyron-product-fallback.svg'
+const fallback = '/products/asorta-product-fallback.svg'
 
 export default function ProductImage({src, alt, className}:{src:string; alt:string; className?:string}){
   const [imageSrc,setImageSrc] = useState(src || fallback)

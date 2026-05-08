@@ -15,7 +15,7 @@
     <rect x="-30" y="-24" width="250" height="220" rx="42" fill="#0b0b0b" stroke="#fff" stroke-opacity=".08"/>
     <path d="M44 78 C32 78 22 68 22 56 C22 44 32 34 44 34 C54 34 63 41 66 50 H112 V64 H100 V76 H88 V64 H66 C63 72 54 78 44 78 Z M44 50 C41 50 38 53 38 56 C38 59 41 62 44 62 C47 62 50 59 50 56 C50 53 47 50 44 50 Z" fill="url(#metal)" opacity=".95"/>
   </g>
-  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">ASORTA</text>
   <text x="120" y="760" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="55" font-weight="900" letter-spacing="1">SMART KEY FINDER</text>
   <text x="120" y="812" fill="#D6D6D6" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" letter-spacing="7">SMART UTILITY • MODERN UTILITY</text>
   <path d="M118 680 H420" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>

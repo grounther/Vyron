@@ -1,14 +1,20 @@
-# VYRON Store v3.2
+# ASORTA Store v4
 
-Premium Next.js + Tailwind ecommerce starter for VYRON.
+Premium Next.js + Tailwind ecommerce foundation for ASORTA.
 
-## v3.2 upgrades
-- Smooth add-to-cart slide notification
-- Live cart counter badge in navbar
-- Fixed cart button contrast
-- Product image fallback system to prevent broken images
-- Mobile menu in navbar
-- More robust product card image loading
+## Brand
+ASORTA  
+Just what you need.
+
+## V4 includes
+- Full ASORTA rebrand
+- Dynamic product architecture foundation
+- Advanced shop search and filters
+- Live search page
+- Cart drawer 4.0 with quantity/remove/subtotal
+- Product page 4.0 structure
+- Cart counter + add-to-cart toast
+- Vercel-ready Next.js setup
 
 ## Run locally
 ```bash
@@ -16,12 +22,9 @@ npm install
 npm run dev
 ```
 
-## Deploy
-Push to GitHub. Vercel deploys automatically.
-
-
-## v3.3
-- Darker cart icon contrast
-- Premium cart badge visibility
-- Smoother mobile drawer styling
-- Add-to-cart visual polish
+## Deploy workflow
+```bash
+git add .
+git commit -m "Upgrade ASORTA to v4"
+git push
+```

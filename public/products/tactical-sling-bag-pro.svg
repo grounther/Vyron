@@ -15,7 +15,7 @@
     <rect x="-30" y="-24" width="250" height="220" rx="42" fill="#0b0b0b" stroke="#fff" stroke-opacity=".08"/>
     <path d="M32 70 C32 48 48 34 64 34 C80 34 96 48 96 70 L96 104 C96 111 91 116 84 116 L44 116 C37 116 32 111 32 104 Z M48 70 L48 58 C48 49 55 44 64 44 C73 44 80 49 80 58 L80 70" fill="url(#metal)" opacity=".95"/>
   </g>
-  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">VYRON</text>
+  <text x="120" y="150" fill="#fff" opacity=".62" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="900" letter-spacing="12">ASORTA</text>
   <text x="120" y="760" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="55" font-weight="900" letter-spacing="1">TACTICAL SLING BAG PRO</text>
   <text x="120" y="812" fill="#D6D6D6" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" letter-spacing="7">TACTICAL • MODERN UTILITY</text>
   <path d="M118 680 H420" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>

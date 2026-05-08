@@ -6,8 +6,8 @@ import { Lock, Trash2 } from 'lucide-react'
 type Item={slug:string;name:string;price:number;hero:string;qty:number}
 export default function CartClient(){
   const [items,setItems]=useState<Item[]>([])
-  useEffect(()=>{setItems(JSON.parse(localStorage.getItem('vyron_cart')||'[]'))},[])
-  function save(next:Item[]){setItems(next); localStorage.setItem('vyron_cart',JSON.stringify(next)); window.dispatchEvent(new Event('vyron-cart'))}
+  useEffect(()=>{setItems(JSON.parse(localStorage.getItem('asorta_cart')||'[]'))},[])
+  function save(next:Item[]){setItems(next); localStorage.setItem('asorta_cart',JSON.stringify(next)); window.dispatchEvent(new Event('asorta-cart'))}
   const subtotal=items.reduce((s,i)=>s+i.price*i.qty,0)
   if(!items.length)return <div className="card rounded-[2rem] p-8 md:p-12"><p className="kicker">Cart</p><h1 className="mt-3 text-4xl font-black md:text-6xl">Your cart is empty.</h1><p className="mt-4 text-white/60">Kies eerst een premium utility product uit de catalogus.</p><Link href="/shop" className="btn-primary mt-7">Shop products</Link></div>
   return <div className="grid gap-8 lg:grid-cols-[1fr_390px]">
