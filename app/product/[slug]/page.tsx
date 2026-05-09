@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { products, getProduct } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
 import ProductPurchasePanel from '@/components/ProductPurchasePanel'
@@ -7,12 +8,50 @@ import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
 
 export function generateStaticParams(){return products.map(p=>({slug:p.slug}))}
 
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}): Promise<Metadata>{
+  const { slug } = await params
+  const p = getProduct(slug)
+  if(!p) return { title:'Product not found | ASORTA' }
+  return {
+    title: `${p.name} | ASORTA`,
+    description: p.short,
+    alternates:{canonical:`https://asorta.nl/product/${p.slug}`},
+    openGraph:{
+      title:`${p.name} | ASORTA`,
+      description:p.short,
+      url:`https://asorta.nl/product/${p.slug}`,
+      siteName:'ASORTA',
+      images:[{url:p.hero,alt:p.name}],
+      type:'website'
+    }
+  }
+}
+
 export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
   const { slug } = await params
   const p = getProduct(slug)
   if(!p) return notFound()
   const related = products.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
+  const productSchema = {
+    '@context':'https://schema.org',
+    '@type':'Product',
+    name:p.name,
+    description:p.description,
+    image:p.images?.length ? p.images.map(img=>`https://asorta.nl${img}`) : [`https://asorta.nl${p.hero}`],
+    brand:{'@type':'Brand',name:'ASORTA'},
+    sku:p.variants?.[0]?.sku || p.supplier?.productId || p.slug,
+    category:p.category,
+    offers:{
+      '@type':'Offer',
+      url:`https://asorta.nl/product/${p.slug}`,
+      priceCurrency:'EUR',
+      price:p.price.toFixed(2),
+      availability:'https://schema.org/InStock',
+      itemCondition:'https://schema.org/NewCondition'
+    }
+  }
   return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(productSchema)}} />
     <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
 
     <ProductPurchasePanel product={p}/>

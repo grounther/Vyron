@@ -1,32 +1,59 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Lock, ShieldCheck, ShoppingCart, Star, Truck } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Lock, Play, ShieldCheck, ShoppingCart, Star, Truck } from 'lucide-react'
 import AddToCartButton from './AddToCartButton'
 import ProductImage from './ProductImage'
 import type { Product, ProductVariant } from '@/lib/products'
 
+type MediaItem = {
+  type: 'image' | 'video'
+  src: string
+  poster?: string
+  title: string
+}
+
 export default function ProductPurchasePanel({ product }: { product: Product }) {
   const variants = product.variants || []
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(variants[0])
-  const gallery = useMemo(() => {
+
+  const gallery = useMemo<MediaItem[]>(() => {
     const base = product.images?.length ? product.images : [product.hero]
     const variantImage = selectedVariant?.image
-    return variantImage ? [variantImage, ...base.filter((img) => img !== variantImage)] : base
+    const orderedImages = variantImage ? [variantImage, ...base.filter((img) => img !== variantImage)] : base
+    const imageMedia = orderedImages.map((img, index) => ({
+      type: 'image' as const,
+      src: img,
+      title: index === 0 ? `${product.name} selected view` : `${product.name} view ${index + 1}`,
+    }))
+    const videoMedia = (product.videos || []).map((video) => ({
+      type: 'video' as const,
+      src: video.src,
+      poster: video.poster || product.hero,
+      title: video.title,
+    }))
+    return [...imageMedia, ...videoMedia]
   }, [product, selectedVariant])
-  const [activeImage, setActiveImage] = useState(gallery[0] || product.hero)
+
+  const [activeMedia, setActiveMedia] = useState<MediaItem>(gallery[0] || { type: 'image', src: product.hero, title: product.name })
+
+  useEffect(() => {
+    setActiveMedia(gallery[0] || { type: 'image', src: product.hero, title: product.name })
+  }, [gallery, product.hero, product.name])
 
   function selectVariant(sku: string) {
     const next = variants.find((v) => v.sku === sku)
     setSelectedVariant(next)
-    if (next?.image) setActiveImage(next.image)
+    if (next?.image) {
+      setActiveMedia({ type: 'image', src: next.image, title: `${product.name} ${next.name}` })
+    }
   }
 
   const cartProduct = {
     slug: product.slug,
     name: product.name,
     price: product.price,
-    hero: activeImage || product.hero,
+    hero: activeMedia.type === 'image' ? activeMedia.src : product.hero,
     variantName: selectedVariant?.name,
     variantSku: selectedVariant?.sku,
   }
@@ -34,12 +61,37 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
   return <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
     <div className="space-y-4">
       <div className="card overflow-hidden rounded-[2rem] p-3">
-        <ProductImage src={activeImage || product.hero} alt={product.name} className="product-detail-img rounded-[1.5rem] opacity-95" />
+        {activeMedia.type === 'video' ? (
+          <video
+            key={activeMedia.src}
+            src={activeMedia.src}
+            poster={activeMedia.poster}
+            controls
+            playsInline
+            preload="metadata"
+            className="product-detail-img rounded-[1.5rem] bg-black object-cover opacity-95"
+          />
+        ) : (
+          <ProductImage src={activeMedia.src || product.hero} alt={product.name} className="product-detail-img rounded-[1.5rem] opacity-95" />
+        )}
       </div>
-      <div className="grid grid-cols-4 gap-3 md:grid-cols-5">
-        {gallery.slice(0,10).map((img,i)=><button key={`${img}-${i}`} onClick={()=>setActiveImage(img)} className={`card overflow-hidden rounded-2xl p-1 transition hover:border-white/25 ${activeImage===img?'border-white/35 ring-2 ring-white/20':'border-white/10'}`}>
-          <ProductImage src={img} alt={`${product.name} view ${i+1}`} className="h-20 w-full rounded-xl object-cover opacity-80 md:h-24" />
-        </button>)}
+
+      <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-5 md:overflow-visible">
+        {gallery.slice(0,12).map((media,i)=>{
+          const active = activeMedia.src === media.src && activeMedia.type === media.type
+          const thumb = media.type === 'video' ? (media.poster || product.hero) : media.src
+          return <button
+            key={`${media.type}-${media.src}-${i}`}
+            onClick={()=>setActiveMedia(media)}
+            className={`card relative min-w-24 overflow-hidden rounded-2xl p-1 transition hover:border-white/25 ${active?'border-[#b7c8ad]/60 ring-2 ring-[#b7c8ad]/25':'border-white/10'}`}
+            aria-label={media.type === 'video' ? `Play ${media.title}` : `Show ${media.title}`}
+          >
+            <ProductImage src={thumb} alt={media.title} className="h-20 w-full rounded-xl object-cover opacity-80 md:h-24" />
+            {media.type === 'video' && <span className="absolute inset-1 grid place-items-center rounded-xl bg-black/35">
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-black shadow-[0_12px_30px_rgba(0,0,0,.45)]"><Play size={18} className="ml-0.5 fill-black" /></span>
+            </span>}
+          </button>
+        })}
       </div>
     </div>
     <aside className="lg:sticky lg:top-24">

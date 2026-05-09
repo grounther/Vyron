@@ -6,6 +6,12 @@ export type ProductVariant = {
   color?: string
 }
 
+export type ProductVideo = {
+  src: string
+  poster?: string
+  title: string
+}
+
 export type SupplierInfo = {
   name: string
   productUrl: string
@@ -32,6 +38,7 @@ export type Product = {
   cost:number
   hero:string
   images?: string[]
+  videos?: ProductVideo[]
   badge:string
   short:string
   description:string
@@ -59,7 +66,11 @@ const slingImages = [
   '/products/urban-sling-pro/1.jpg','/products/urban-sling-pro/2.jpg','/products/urban-sling-pro/3.jpg','/products/urban-sling-pro/4.jpg','/products/urban-sling-pro/5.jpg','/products/urban-sling-pro/6.jpg','/products/urban-sling-pro/7.jpg','/products/urban-sling-pro/8.jpg','/products/urban-sling-pro/9.jpg','/products/urban-sling-pro/10.jpg','/products/urban-sling-pro/11.jpg','/products/urban-sling-pro/12.jpg','/products/urban-sling-pro/13.jpg'
 ]
 const mountImages = [
-  '/products/drivecharge-mount/1.jpg','/products/drivecharge-mount/2.jpg','/products/drivecharge-mount/3.jpg','/products/drivecharge-mount/4.png','/products/drivecharge-mount/5.jpg','/products/drivecharge-mount/6.jpg','/products/drivecharge-mount/7.jpg','/products/drivecharge-mount/8.jpg','/products/drivecharge-mount/9.png','/products/drivecharge-mount/10.png','/products/drivecharge-mount/11.png','/products/drivecharge-mount/12.png'
+  '/products/drivecharge-mount/1.png','/products/drivecharge-mount/2.png','/products/drivecharge-mount/3.png','/products/drivecharge-mount/4.jpg','/products/drivecharge-mount/5.png','/products/drivecharge-mount/6.png','/products/drivecharge-mount/7.png','/products/drivecharge-mount/8.jpg','/products/drivecharge-mount/9.jpg','/products/drivecharge-mount/10.jpg','/products/drivecharge-mount/11.jpg','/products/drivecharge-mount/12.jpg','/products/drivecharge-mount/13.jpg','/products/drivecharge-mount/14.jpg','/products/drivecharge-mount/15.png','/products/drivecharge-mount/16.jpg','/products/drivecharge-mount/17.jpg','/products/drivecharge-mount/18.jpg','/products/drivecharge-mount/19.jpg','/products/drivecharge-mount/20.png'
+]
+const mountVideos = [
+  {src:'/products/drivecharge-mount/videos/auto-clamp-demo.mp4', poster: mountImages[0], title:'Automatic clamp demo'},
+  {src:'/products/drivecharge-mount/videos/dashboard-use.mp4', poster: mountImages[1], title:'Dashboard use preview'}
 ]
 const ambientImages = ['/products/ambientdrive-rgb/1.jpg','/products/ambientdrive-rgb/2.jpg','/products/ambientdrive-rgb/3.jpg','/products/ambientdrive-rgb/4.jpg','/products/ambientdrive-rgb/5.jpg']
 const micImages = ['/products/wavemic-rgb/1.jpg','/products/wavemic-rgb/2.jpg','/products/wavemic-rgb/3.jpg','/products/wavemic-rgb/4.jpg','/products/wavemic-rgb/5.jpg','/products/wavemic-rgb/6.jpg']
@@ -106,6 +117,7 @@ export const products: Product[] = [
     cost:34,
     hero:mountImages[0],
     images:mountImages,
+    videos:mountVideos,
     badge:'Smart Car',
     short:'Automatic wireless charging mount for modern drivers.',
     description:'A clean and intelligent charging solution for modern drivers. The ASORTA DriveCharge Mount combines automatic clamping technology with wireless charging for a seamless dashboard experience.',
