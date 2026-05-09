@@ -9,7 +9,7 @@ const links = [
   ['Shop','/shop'], ['Tactical','/category/tactical'], ['Automotive','/category/automotive'], ['Desk Setup','/category/desk-setup'], ['Gaming','/category/gaming'], ['Smart Utility','/category/smart-utility'], ['Account','/account']
 ]
 
-type CartItem={slug:string;name:string;price:number;hero:string;qty:number}
+type CartItem={slug:string;name:string;price:number;hero:string;qty:number;cartKey?:string;variantName?:string;variantSku?:string}
 const CART_KEY='asorta_cart'
 
 function readCart():CartItem[]{
@@ -78,10 +78,10 @@ function CartDrawer({open,setOpen,items,setItems}:{open:boolean;setOpen:(v:boole
         <div className="card rounded-[1.6rem] p-6"><h3 className="text-2xl font-black">Your cart is empty.</h3><p className="mt-3 text-sm leading-6 text-white/55">Selecteer eerst een premium utility product.</p><Link onClick={()=>setOpen(false)} href="/shop" className="btn-primary mt-6 w-full">Shop products <ArrowRight size={18} className="ml-2"/></Link></div>
       </div> : <div className="flex h-[calc(100%-4rem)] flex-col">
         <div className="flex-1 overflow-y-auto p-5">
-          <div className="grid gap-4">{items.map(item=><div key={item.slug} className="card grid grid-cols-[82px_1fr] gap-3 rounded-[1.4rem] p-3">
+          <div className="grid gap-4">{items.map(item=><div key={item.cartKey || item.slug} className="card grid grid-cols-[82px_1fr] gap-3 rounded-[1.4rem] p-3">
             <ProductImage src={item.hero} alt="" className="h-20 w-20 rounded-2xl object-cover"/>
-            <div className="min-w-0"><h3 className="truncate font-black">{item.name}</h3><p className="mt-1 text-sm text-white/55">€{item.price.toFixed(2)}</p>
-              <div className="mt-3 flex items-center gap-2"><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>i.slug===item.slug?{...i,qty:Math.max(1,i.qty-1)}:i))}><Minus size={14}/></button><span className="min-w-6 text-center text-sm font-black">{item.qty}</span><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>i.slug===item.slug?{...i,qty:i.qty+1}:i))}><Plus size={14}/></button><button className="ml-auto text-white/38 hover:text-white" onClick={()=>save(items.filter(i=>i.slug!==item.slug))}><Trash2 size={15}/></button></div>
+            <div className="min-w-0"><h3 className="truncate font-black">{item.name}</h3>{item.variantName && <p className="mt-0.5 truncate text-xs text-white/38">{item.variantName}</p>}<p className="mt-1 text-sm text-white/55">€{item.price.toFixed(2)}</p>
+              <div className="mt-3 flex items-center gap-2"><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>(i.cartKey || i.slug)===(item.cartKey || item.slug)?{...i,qty:Math.max(1,i.qty-1)}:i))}><Minus size={14}/></button><span className="min-w-6 text-center text-sm font-black">{item.qty}</span><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>(i.cartKey || i.slug)===(item.cartKey || item.slug)?{...i,qty:i.qty+1}:i))}><Plus size={14}/></button><button className="ml-auto text-white/38 hover:text-white" onClick={()=>save(items.filter(i=>(i.cartKey || i.slug)!==(item.cartKey || item.slug)))}><Trash2 size={15}/></button></div>
             </div>
           </div>)}</div>
         </div>

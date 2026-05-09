@@ -41,3 +41,6 @@ img{display:block;max-width:100%}
 @media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
 
 @keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+.auth-tab-active{background:#fff!important;color:#09090b!important}
+.auth-tab-active *{color:#09090b!important}

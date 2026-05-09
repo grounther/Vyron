@@ -56,8 +56,8 @@ export default function LoginClient({ next = '/account', mode = 'login' }: { nex
     </p>
 
     <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/30 p-1 text-sm font-black">
-      <Link href={`/login?next=${encodeURIComponent(next)}`} className={`rounded-xl px-3 py-2 text-center ${!isRegister ? 'bg-white text-black' : 'text-white/45 hover:text-white'}`}>Inloggen</Link>
-      <Link href={`/register?next=${encodeURIComponent(next)}`} className={`rounded-xl px-3 py-2 text-center ${isRegister ? 'bg-white text-black' : 'text-white/45 hover:text-white'}`}>Registreren</Link>
+      <Link href={`/login?next=${encodeURIComponent(next)}`} className={`rounded-xl px-3 py-2 text-center ${!isRegister ? 'bg-white !text-zinc-950 shadow-[0_12px_40px_rgba(255,255,255,.08)]' : 'text-white/45 hover:text-white'}`}>Inloggen</Link>
+      <Link href={`/register?next=${encodeURIComponent(next)}`} className={`rounded-xl px-3 py-2 text-center ${isRegister ? 'bg-white !text-zinc-950 shadow-[0_12px_40px_rgba(255,255,255,.08)]' : 'text-white/45 hover:text-white'}`}>Registreren</Link>
     </div>
 
     <div className="mt-6 grid gap-3">

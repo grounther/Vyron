@@ -2,11 +2,11 @@ import { redirect } from 'next/navigation'
 import { products } from '@/lib/products'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock } from 'lucide-react'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, Boxes } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
-  { id:'AS-1002', customer:'guest checkout', product:'ASORTA Urban Sling Pro', total:69.95, cost:35, status:'Draft', supplier:'CJ: not sent' }
+  { id:'AS-1002', customer:'guest checkout', product:'ASORTA Urban Sling Pro', total:39.95, cost:12.72, status:'Draft', supplier:'CJ: not sent' }
 ]
 
 export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: false, follow: false } }
@@ -19,11 +19,14 @@ export default async function AtlasPage(){
   const admin = createAdminClient()
   let isAdmin = false
   let adminCheckReady = false
+  let liveOrders:any[] = []
 
   if (admin) {
     const { data } = await admin.from('admin_users').select('email, role, active').eq('email', user.email).eq('active', true).maybeSingle()
     isAdmin = Boolean(data)
     adminCheckReady = true
+    const ordersResult = await admin.from('orders').select('*').order('created_at', { ascending:false }).limit(25)
+    if (!ordersResult.error && ordersResult.data) liveOrders = ordersResult.data
   }
 
   if (adminCheckReady && !isAdmin) {
@@ -36,10 +39,22 @@ export default async function AtlasPage(){
     </main>
   }
 
-  const revenue = mockOrders.reduce((s,o)=>s+o.total,0)
-  const cost = mockOrders.reduce((s,o)=>s+o.cost,0)
+  const orders = liveOrders.length ? liveOrders.map((o:any)=>({
+    id:o.order_number || o.id,
+    customer:o.customer_email || o.email || 'customer',
+    product:o.product_name || 'Mixed order',
+    total:Number(o.total || o.total_amount || 0),
+    cost:Number(o.estimated_cost || o.cost || 0),
+    status:o.status || 'New',
+    supplier:o.supplier_status || 'CJ: pending'
+  })) : mockOrders
+
+  const revenue = orders.reduce((s,o)=>s+o.total,0)
+  const cost = orders.reduce((s,o)=>s+o.cost,0)
   const profit = revenue - cost
   const avgMargin = revenue ? Math.round((profit/revenue)*100) : 0
+  const mappedProducts = products.filter(p=>p.supplier?.productId)
+  const totalFactoryStock = mappedProducts.reduce((sum,p)=>sum + Number(p.supplier?.factoryStock || 0),0)
 
   return <main className="mx-auto max-w-7xl px-4 py-10 md:px-6">
     <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(111,125,100,.18),transparent_38%),linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02))] p-6 md:p-10">
@@ -53,19 +68,20 @@ export default async function AtlasPage(){
       </div>
     </section>
 
-    <section className="mt-8 grid gap-4 md:grid-cols-4">
+    <section className="mt-8 grid gap-4 md:grid-cols-5">
       <Stat icon={<Package/>} label="Launch products" value={String(products.length)} />
-      <Stat icon={<Euro/>} label="Demo revenue" value={`€${revenue.toFixed(2)}`} />
+      <Stat icon={<Boxes/>} label="Factory stock" value={totalFactoryStock ? `±${totalFactoryStock.toLocaleString('nl-NL')}` : 'Pending'} />
+      <Stat icon={<Euro/>} label={liveOrders.length?'Live revenue':'Demo revenue'} value={`€${revenue.toFixed(2)}`} />
       <Stat icon={<TrendingUp/>} label="Est. profit" value={`€${profit.toFixed(2)}`} />
       <Stat icon={<Truck/>} label="Avg. margin" value={`${avgMargin}%`} />
     </section>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
       <div className="card rounded-[2rem] p-5">
-        <div className="mb-5 flex items-center justify-between"><h2 className="text-2xl font-black">Orders overview</h2><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/50">demo mode</span></div>
+        <div className="mb-5 flex items-center justify-between"><h2 className="text-2xl font-black">Orders overview</h2><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/50">{liveOrders.length?'live mode':'demo mode'}</span></div>
         <div className="overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm">
           <thead className="text-xs uppercase tracking-[.18em] text-white/35"><tr><th className="py-3">Order</th><th>Customer</th><th>Product</th><th>Total</th><th>Est. profit</th><th>Status</th><th>Supplier</th></tr></thead>
-          <tbody>{mockOrders.map(o=><tr key={o.id} className="border-t border-white/10 text-white/70"><td className="py-4 font-black text-white">{o.id}</td><td>{o.customer}</td><td>{o.product}</td><td>€{o.total.toFixed(2)}</td><td>€{(o.total-o.cost).toFixed(2)}</td><td>{o.status}</td><td>{o.supplier}</td></tr>)}</tbody>
+          <tbody>{orders.map(o=><tr key={o.id} className="border-t border-white/10 text-white/70"><td className="py-4 font-black text-white">{o.id}</td><td>{o.customer}</td><td>{o.product}</td><td>€{o.total.toFixed(2)}</td><td>€{(o.total-o.cost).toFixed(2)}</td><td>{o.status}</td><td>{o.supplier}</td></tr>)}</tbody>
         </table></div>
       </div>
 
@@ -80,10 +96,21 @@ export default async function AtlasPage(){
         {!adminCheckReady && <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Service role key ontbreekt. Atlas login werkt, maar admin allowlist kan nog niet server-side worden gecontroleerd.</div>}
       </div>
     </section>
+
+    <section className="mt-8 card rounded-[2rem] p-5">
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div><h2 className="text-2xl font-black">Launch product intelligence</h2><p className="mt-2 text-sm text-white/50">CJ SKU mapping, factory stock, ASORTA prijs en estimated landed cost.</p></div>
+        <span className="rounded-full bg-[#b7c8ad]/10 px-3 py-1 text-xs font-black text-[#b7c8ad]">v4.6 mapped</span>
+      </div>
+      <div className="overflow-x-auto"><table className="w-full min-w-[860px] text-left text-sm">
+        <thead className="text-xs uppercase tracking-[.18em] text-white/35"><tr><th className="py-3">Product</th><th>Category</th><th>Price</th><th>Landed</th><th>Variants</th><th>Stock</th><th>CJ Product</th><th>Status</th></tr></thead>
+        <tbody>{products.map(p=><tr key={p.slug} className="border-t border-white/10 text-white/68"><td className="py-4 font-black text-white">{p.name}</td><td>{p.category}</td><td>€{p.price.toFixed(2)}</td><td>{p.supplier?.landedCost ? `€${p.supplier.landedCost.toFixed(2)}` : 'Pending'}</td><td>{p.variants?.length || 0}</td><td>{p.supplier?.factoryStock ? `±${p.supplier.factoryStock.toLocaleString('nl-NL')}` : 'Pending'}</td><td>{p.supplier?.productId || 'Pending'}</td><td>{p.supplier?.status || 'pending'}</td></tr>)}</tbody>
+      </table></div>
+    </section>
   </main>
 }
 
 function Stat({icon,label,value}:{icon:React.ReactNode;label:string;value:string}){
-  return <div className="card rounded-[1.5rem] p-5"><div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-3xl font-black">{value}</p></div>
+  return <div className="card rounded-[1.5rem] p-5"><div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-2xl font-black md:text-3xl">{value}</p></div>
 }
 function Step({title,text}:{title:string;text:string}){return <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><h3 className="font-black text-white">{title}</h3><p className="mt-1 leading-6">{text}</p></div>}

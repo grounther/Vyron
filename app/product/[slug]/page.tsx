@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { products, getProduct } from '@/lib/products'
-import AddToCartButton from '@/components/AddToCartButton'
 import ProductCard from '@/components/ProductCard'
-import ProductImage from '@/components/ProductImage'
-import { ArrowLeft, BadgeCheck, Lock, PackageCheck, ShieldCheck, Star, Truck } from 'lucide-react'
+import ProductPurchasePanel from '@/components/ProductPurchasePanel'
+import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
 
 export function generateStaticParams(){return products.map(p=>({slug:p.slug}))}
 
@@ -15,29 +14,8 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
   const related = products.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
   return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
     <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
-    <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
-      <div className="space-y-4">
-        <div className="card overflow-hidden rounded-[2rem] p-3"><ProductImage src={p.hero} alt={p.name} className="product-detail-img rounded-[1.5rem] opacity-90"/></div>
-        <div className="grid grid-cols-3 gap-3">
-          {(p.images || [p.hero]).slice(0,3).map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><ProductImage src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
-        </div>
-      </div>
-      <aside className="lg:sticky lg:top-24">
-        <div className="card rounded-[2rem] p-6 md:p-8">
-          <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{p.badge}</div>
-          <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{p.name}</h1>
-          <p className="mt-4 text-lg leading-8 text-white/58">{p.short}</p>
-          <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{p.price.toFixed(2)}</span>{p.compareAt&&<span className="pb-1 text-white/35 line-through">€{p.compareAt.toFixed(2)}</span>}</div>
-          <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Launch product • premium utility selection</div>
-          <div className="mt-7"><AddToCartButton product={{slug:p.slug,name:p.name,price:p.price,hero:p.hero}} /></div>
-          <div className="mt-6 grid gap-3 text-sm text-white/62">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> Secure checkout ready</div>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck size={18}/> Tracked shipping supplier flow</div>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Low refund product positioning</div>
-          </div>
-        </div>
-      </aside>
-    </section>
+
+    <ProductPurchasePanel product={p}/>
 
     <section className="mt-12 grid gap-5 lg:grid-cols-3">
       <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Product Story</p><h2 className="mt-2 text-2xl font-black">Modern utility, premium positioned.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>

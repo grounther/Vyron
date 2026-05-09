@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Check, ShoppingCart } from 'lucide-react'
 import ProductImage from './ProductImage'
 
-type CartProduct={slug:string;name:string;price:number;hero:string}
+type CartProduct={slug:string;name:string;price:number;hero:string;variantName?:string;variantSku?:string}
 
 function cartCount(items:any[]){return items.reduce((sum,item)=>sum + Number(item.qty || 0),0)}
 
@@ -21,9 +21,10 @@ export default function AddToCartButton({product}:{product:CartProduct}){
   function add(){
     const key='asorta_cart'
     const current=JSON.parse(localStorage.getItem(key)||'[]')
-    const found=current.find((i:any)=>i.slug===product.slug)
+    const cartKey=product.variantSku ? `${product.slug}::${product.variantSku}` : product.slug
+    const found=current.find((i:any)=> (i.cartKey || i.slug)===cartKey)
     if(found) found.qty+=1
-    else current.push({...product,qty:1})
+    else current.push({...product,cartKey,qty:1})
     localStorage.setItem(key,JSON.stringify(current))
     const total=cartCount(current)
     setCount(total)
@@ -42,6 +43,7 @@ export default function AddToCartButton({product}:{product:CartProduct}){
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#aab6a0]"><Check size={14}/> Added to cart</div>
             <p className="mt-1 truncate text-sm font-black text-white">{product.name}</p>
+            {product.variantName && <p className="truncate text-xs text-white/45">{product.variantName}</p>}
             <p className="text-xs text-white/50">Added to your ASORTA cart.</p>
           </div>
           <div className="relative grid h-12 w-12 place-items-center rounded-full bg-white text-zinc-950">
