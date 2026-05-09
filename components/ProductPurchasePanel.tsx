@@ -21,18 +21,27 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
     const base = product.images?.length ? product.images : [product.hero]
     const variantImage = selectedVariant?.image
     const orderedImages = variantImage ? [variantImage, ...base.filter((img) => img !== variantImage)] : base
+
     const imageMedia = orderedImages.map((img, index) => ({
       type: 'image' as const,
       src: img,
-      title: index === 0 ? `${product.name} selected view` : `${product.name} view ${index + 1}`,
+      title: index === 0 && selectedVariant ? `${product.name} - ${selectedVariant.name}` : `${product.name} view ${index + 1}`,
     }))
+
     const videoMedia = (product.videos || []).map((video) => ({
       type: 'video' as const,
       src: video.src,
-      poster: video.poster || product.hero,
+      poster: video.poster || selectedVariant?.image || product.hero,
       title: video.title,
     }))
-    return [...imageMedia, ...videoMedia]
+
+    // Put videos early in the gallery so they are always visible, but keep
+    // the selected variant image as the first/main media.
+    return [
+      ...imageMedia.slice(0, 3),
+      ...videoMedia,
+      ...imageMedia.slice(3),
+    ]
   }, [product, selectedVariant])
 
   const [activeMedia, setActiveMedia] = useState<MediaItem>(gallery[0] || { type: 'image', src: product.hero, title: product.name })
@@ -77,13 +86,13 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
       </div>
 
       <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-5 md:overflow-visible">
-        {gallery.slice(0,12).map((media,i)=>{
+        {gallery.map((media,i)=>{
           const active = activeMedia.src === media.src && activeMedia.type === media.type
           const thumb = media.type === 'video' ? (media.poster || product.hero) : media.src
           return <button
             key={`${media.type}-${media.src}-${i}`}
             onClick={()=>setActiveMedia(media)}
-            className={`card relative min-w-24 overflow-hidden rounded-2xl p-1 transition hover:border-white/25 ${active?'border-[#b7c8ad]/60 ring-2 ring-[#b7c8ad]/25':'border-white/10'}`}
+            className={`card relative min-w-24 overflow-hidden rounded-2xl p-1 transition focus:outline-none hover:border-white/25 ${active?'border-[#b7c8ad]/70 ring-2 ring-[#b7c8ad]/35 shadow-[0_0_24px_rgba(183,200,173,.12)]':'border-white/10'}`}
             aria-label={media.type === 'video' ? `Play ${media.title}` : `Show ${media.title}`}
           >
             <ProductImage src={thumb} alt={media.title} className="h-20 w-full rounded-xl object-cover opacity-80 md:h-24" />
