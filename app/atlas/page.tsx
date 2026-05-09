@@ -14,7 +14,7 @@ export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: fal
 export default async function AtlasPage(){
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) redirect('/login?next=/atlas')
+  if (!user?.email) redirect('/atlas-access?next=/atlas')
 
   const admin = createAdminClient()
   let isAdmin = false
