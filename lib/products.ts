@@ -7,6 +7,11 @@ export type SupplierInfo = {
   landedCost: number
   status: 'approved' | 'high-priority' | 'testing'
   notes: string
+  productId?: string
+  variantIds?: string[]
+  variants?: string[]
+  processingTime?: string
+  deliveryTime?: string
 }
 
 export type Product = {
@@ -45,22 +50,22 @@ export const products: Product[] = [
     slug:'asorta-urban-sling-pro',
     name:'ASORTA Urban Sling Pro',
     category:'tactical',
-    price:69.95,
-    compareAt:89.95,
-    cost:35,
+    price:39.95,
+    compareAt:59.95,
+    cost:12.72,
     hero:'/products/tactical-sling-bag-pro.svg',
     images:['/products/tactical-sling-bag-pro.svg','/products/minimalist-rfid-wallet.svg','/products/tactical-carabiner-tool.svg'],
     badge:'Launch Pick',
     short:'Urban everyday carry sling with modern tactical utility.',
     description:'Designed for modern everyday carry. The ASORTA Urban Sling Pro combines tactical utility with a clean urban aesthetic for travel, commuting, daily essentials and lightweight gear organization.',
     features:['Water-resistant exterior','Adjustable crossbody fit','Multi-compartment storage','Lightweight utility design','Urban tactical aesthetic'],
-    specs:['Category: Tactical / EDC','Estimated landed cost: ± €35','Warehouse: China','Recommended retail price: €69.95 incl. VAT','Refund risk: Low'],
+    specs:['Category: Tactical / EDC','Estimated landed cost: ± €12.72','Warehouse: China','Recommended retail price: €39.95 incl. VAT','Refund risk: Low'],
     tags:['edc','sling bag','tactical','urban utility','travel'],
-    shippingInfo:'Estimated delivery: 6–12 business days. Tracked shipping included.',
+    shippingInfo:'Estimated delivery: 7–15 business days after processing. Tracked shipping included.',
     contentIdeas:['EDC loadout video','Travel day carry setup','Before/after pocket dump','Urban commute POV'],
-    supplierNotes:'Approved CJ product. Prefer black/dark variants and avoid camo-heavy visuals for ASORTA positioning.',
-    marginNote:'Premium price gives room for VAT, shipping reserve, support and future marketing.',
-    supplier:{name:'CJ Dropshipping',productUrl:'https://cjdropshipping.com/product/outdoor-wear-resistant-sports-chest-bag-p-1739198066604904448.html',warehouse:'China',estimatedProductCost:15,estimatedShipping:20,landedCost:35,status:'approved',notes:'Strong ASORTA fit, low technical defect risk.'}
+    supplierNotes:'Approved CJ product. CJ data received: product cost €3.41 + estimated shipping €9.31. Variants include Black, Khaki, Military Green and camouflage options. Prefer Black/Khaki/Military Green for ASORTA positioning.',
+    marginNote:'Launch price is adjusted around the real landed cost while preserving VAT, support reserve and future marketing room.',
+    supplier:{name:'CJ Dropshipping',productUrl:'https://cjdropshipping.com/product/outdoor-wear-resistant-sports-chest-bag-p-1739198066604904448.html',warehouse:'China',estimatedProductCost:3.41,estimatedShipping:9.31,landedCost:12.72,status:'approved',notes:'Strong ASORTA fit, low technical defect risk.',productId:'CJYD1929689',variantIds:['CJYD192968906FU','CJYD192968902BY','CJYD192968905EV','CJYD192968904DW','CJYD192968903CX','CJYD192968901AZ','CJYD192968908HS','CJYD192968907GT'],variants:['ACU Digital','Black','CP camouflage','Desert Digital','Jungle Digital','Khaki','Military Green','Sansha camouflage'],processingTime:'1–3 days for 90% orders',deliveryTime:'7–15 days'}
   },
   {
     slug:'asorta-drivecharge-mount',

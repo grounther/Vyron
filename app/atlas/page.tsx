@@ -1,14 +1,41 @@
+import { redirect } from 'next/navigation'
 import { products } from '@/lib/products'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
   { id:'AS-1002', customer:'guest checkout', product:'ASORTA Urban Sling Pro', total:69.95, cost:35, status:'Draft', supplier:'CJ: not sent' }
 ]
 
-export const metadata = { title: 'Atlas | ASORTA internal' }
+export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: false, follow: false } }
 
-export default function AtlasPage(){
+export default async function AtlasPage(){
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) redirect('/login?next=/atlas')
+
+  const admin = createAdminClient()
+  let isAdmin = false
+  let adminCheckReady = false
+
+  if (admin) {
+    const { data } = await admin.from('admin_users').select('email, role, active').eq('email', user.email).eq('active', true).maybeSingle()
+    isAdmin = Boolean(data)
+    adminCheckReady = true
+  }
+
+  if (adminCheckReady && !isAdmin) {
+    return <main className="mx-auto max-w-xl px-4 py-16 md:px-6">
+      <div className="card rounded-[2rem] p-6 text-center">
+        <Lock className="mx-auto text-[#b7c8ad]" size={42}/>
+        <h1 className="mt-4 text-3xl font-black">Access denied</h1>
+        <p className="mt-3 text-white/55">Je bent ingelogd, maar dit account heeft geen ASORTA Atlas rechten. Voeg dit e-mailadres toe aan de Supabase tabel <code>admin_users</code>.</p>
+      </div>
+    </main>
+  }
+
   const revenue = mockOrders.reduce((s,o)=>s+o.total,0)
   const cost = mockOrders.reduce((s,o)=>s+o.cost,0)
   const profit = revenue - cost
@@ -20,9 +47,9 @@ export default function AtlasPage(){
         <div>
           <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Internal control</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Atlas</h1>
-          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor orders, productkosten, winstindicatie, supplier status en launch monitoring. Dit is foundation data totdat Supabase en payments live gaan.</p>
+          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor orders, productkosten, winstindicatie, supplier status en launch monitoring.</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/55"><ShieldCheck className="mb-2 text-[#b7c8ad]"/> Protected route foundation. Later: auth + role check.</div>
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/55"><ShieldCheck className="mb-2 text-[#b7c8ad]"/> Protected by Supabase Auth + admin allowlist.</div>
       </div>
     </section>
 
@@ -50,7 +77,7 @@ export default function AtlasPage(){
           <Step title="Payments" text="Mollie/iDEAL/Wero after KvK verification." />
           <Step title="CJ fulfilment" text="Only after payment success: createOrderV2 + confirmOrder." />
         </div>
-        <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Dit paneel is nu nog foundation. Zet straks echte auth op voordat orders live gaan.</div>
+        {!adminCheckReady && <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Service role key ontbreekt. Atlas login werkt, maar admin allowlist kan nog niet server-side worden gecontroleerd.</div>}
       </div>
     </section>
   </main>

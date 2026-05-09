@@ -1,16 +1,19 @@
 {
+  "name": "asorta-store",
+  "version": "4.2.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
     "framer-motion": "latest",
     "lucide-react": "latest",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "@supabase/supabase-js": "latest"
+    "react-dom": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
@@ -22,7 +25,5 @@
     "postcss": "latest",
     "tailwindcss": "latest",
     "typescript": "latest"
-  },
-  "name": "asorta-store",
-  "version": "4.1.0"
+  }
 }
