@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Menu, Search, ShoppingCart, X, Trash2, Minus, Plus, ArrowRight } from 'lucide-react'
 
 const links = [
-  ['Shop','/shop'], ['Tactical','/category/tactical'], ['Automotive','/category/automotive'], ['Desk Setup','/category/desk-setup'], ['Gaming','/category/gaming'], ['Smart Utility','/category/smart-utility']
+  ['Shop','/shop'], ['Tactical','/category/tactical'], ['Automotive','/category/automotive'], ['Desk Setup','/category/desk-setup'], ['Gaming','/category/gaming'], ['Smart Utility','/category/smart-utility'], ['Account','/account']
 ]
 
 type CartItem={slug:string;name:string;price:number;hero:string;qty:number}
@@ -89,7 +89,7 @@ function CartDrawer({open,setOpen,items,setItems}:{open:boolean;setOpen:(v:boole
           <div className="flex justify-between text-sm text-white/58"><span>Subtotal</span><span>€{subtotal.toFixed(2)}</span></div>
           <div className="mt-3 flex justify-between text-sm text-white/58"><span>Shipping</span><span>Calculated at checkout</span></div>
           <div className="mt-5 flex justify-between border-t border-white/10 pt-5 text-xl font-black"><span>Total</span><span>€{subtotal.toFixed(2)}</span></div>
-          <Link onClick={()=>setOpen(false)} href="/cart" className="btn-primary mt-5 w-full">View cart</Link>
+          <Link onClick={()=>setOpen(false)} href="/cart" className="btn-secondary mt-5 w-full">View cart</Link><Link onClick={()=>setOpen(false)} href="/checkout" className="btn-primary mt-3 w-full">Checkout</Link>
           <p className="mt-3 text-center text-xs text-white/38">Mollie/iDEAL/Wero checkout komt in de payment-fase.</p>
         </div>
       </div>}

@@ -19,7 +19,7 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
       <div className="space-y-4">
         <div className="card overflow-hidden rounded-[2rem] p-3"><ProductImage src={p.hero} alt={p.name} className="product-detail-img rounded-[1.5rem] opacity-90"/></div>
         <div className="grid grid-cols-3 gap-3">
-          {[p.hero,p.hero,p.hero].map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><ProductImage src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
+          {(p.images || [p.hero]).slice(0,3).map((img,i)=><div key={i} className="card overflow-hidden rounded-2xl p-2"><ProductImage src={img} alt={`${p.name} view ${i+1}`} className="h-24 w-full rounded-xl object-cover opacity-75 md:h-32"/></div>)}
         </div>
       </div>
       <aside className="lg:sticky lg:top-24">
@@ -41,7 +41,7 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
 
     <section className="mt-12 grid gap-5 lg:grid-cols-3">
       <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Product Story</p><h2 className="mt-2 text-2xl font-black">Modern utility, premium positioned.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>
-      <div className="card rounded-[1.7rem] p-6"><p className="kicker">Margin Note</p><p className="mt-4 leading-7 text-white/58">{p.marginNote}</p></div>
+      <div className="card rounded-[1.7rem] p-6"><p className="kicker">Pricing</p><p className="mt-4 leading-7 text-white/58">{p.marginNote}</p>{p.supplier && <div className="mt-5 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/55"><strong className="text-white">Estimated landed cost:</strong> €{p.supplier.landedCost.toFixed(2)}<br/><strong className="text-white">Warehouse:</strong> {p.supplier.warehouse}<br/><strong className="text-white">Supplier:</strong> {p.supplier.name}</div>}</div>
     </section>
 
     <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
