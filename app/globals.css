@@ -88,3 +88,41 @@ img{display:block;max-width:100%}
 }
 .category-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(91,102,83,.14)}
 .brandmark-glow{filter:drop-shadow(0 10px 30px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(183,200,173,.08))}
+
+/* ASORTA v5.3 cinematic homepage */
+.cinematic-hero{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
+    radial-gradient(circle at 78% 18%,rgba(91,130,150,.18),transparent 32%),
+    #050505;
+}
+.asorta-metal-title{
+  font-size:clamp(4rem,9vw,9.5rem);
+  line-height:.78;
+  letter-spacing:-.075em;
+  font-weight:1000;
+  color:#fff;
+  text-shadow:0 5px 24px rgba(255,255,255,.08),0 22px 90px rgba(0,0,0,.65);
+}
+@supports((-webkit-background-clip:text) or (background-clip:text)){
+  .asorta-metal-title{
+    background:linear-gradient(180deg,#fff 0%,#f3f3f3 36%,#aeb4b4 56%,#fff 72%,#6e7474 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+}
+.hero-trust-card{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:1.15rem;
+  background:rgba(255,255,255,.045);
+  padding:1rem;
+  box-shadow:0 18px 60px rgba(0,0,0,.24);
+  backdrop-filter:blur(18px);
+  transition:.25s ease;
+}
+.hero-trust-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07)}
+.hero-shell{min-height:auto}
+.category-tile{position:relative;min-height:140px;overflow:hidden;border-radius:1.15rem;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.hero-arrow{position:absolute;top:50%;z-index:20;display:grid;height:3rem;width:3rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.42);color:rgba(255,255,255,.78);backdrop-filter:blur(16px);transition:.22s ease;transform:translateY(-50%)}
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
