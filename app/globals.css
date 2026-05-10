@@ -41,3 +41,50 @@ img{display:block;max-width:100%}
 @media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
 
 @keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ASORTA v5.2 premium homepage */
+.hero-shell{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.58) 42%,rgba(0,0,0,.18) 100%),
+    radial-gradient(circle at 82% 24%,rgba(99,138,152,.20),transparent 31%),
+    radial-gradient(circle at 26% 42%,rgba(255,255,255,.055),transparent 26%),
+    linear-gradient(135deg,#030303,#101410 58%,#030303);
+}
+.hero-arrow{
+  position:absolute;
+  top:50%;
+  z-index:20;
+  display:none;
+  height:3.25rem;
+  width:3.25rem;
+  transform:translateY(-50%);
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.30);
+  color:rgba(255,255,255,.78);
+  backdrop-filter:blur(14px);
+  transition:.25s ease;
+}
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
+@media(min-width:1024px){.hero-arrow{display:grid}}
+.asorta-hero-title{
+  font-size:clamp(4.5rem,10vw,8.8rem);
+  line-height:.78;
+  font-weight:950;
+  letter-spacing:-.075em;
+  color:#fff;
+  text-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.category-tile{
+  position:relative;
+  min-height:11rem;
+  overflow:hidden;
+  border-radius:1.35rem;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.035);
+  box-shadow:0 20px 90px rgba(0,0,0,.28);
+  transition:.28s ease;
+}
+.category-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(91,102,83,.14)}
+.brandmark-glow{filter:drop-shadow(0 10px 30px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(183,200,173,.08))}

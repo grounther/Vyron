@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import PaymentNote from '@/components/PaymentNote'
+import HomeHeroSlider from '@/components/HomeHeroSlider'
 import { categories, featured, products } from '@/lib/products'
-import { ArrowRight, ShieldCheck, Truck, Sparkles, Zap, Star, Lock, BadgeCheck } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles, Truck, Zap } from 'lucide-react'
 
 const trust = [
   {i:<ShieldCheck/>,t:'Premium Selection',d:'Alleen producten met utility, marktvraag en premium fit.'},
@@ -11,46 +13,47 @@ const trust = [
   {i:<Zap/>,t:'Content Ready',d:'Gekozen voor TikTok, Reels en hoge visuele conversie.'}
 ]
 
+const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNode}> = {
+  tactical: { image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg', line: 'Built for performance', icon: <ShieldCheck size={22}/> },
+  automotive: { image: '/products/drivecharge/1_1c3d32e3-9eb6-47f9-b217-e2911571c64a.jpg', line: 'Upgrade your drive', icon: <Car size={22}/> },
+  'desk-setup': { image: '/products/monitor-lightbar-ultra.svg', line: 'Organized & productive', icon: <Laptop size={22}/> },
+  gaming: { image: '/products/wavemic/1_a09d4f0d-2641-4a83-9da9-58e22e5d8d55.jpg', line: 'Elevate your game', icon: <Gamepad2 size={22}/> },
+  'smart-utility': { image: '/products/drivecharge/13_99d408a4-2bbd-41f4-a3e8-0fc05e190202.jpg', line: 'Smarter everyday', icon: <PackageCheck size={22}/> },
+  outdoor: { image: '/products/gps/1_f6ad23a2-5a67-4fd1-8c98-803f658e6409.jpg', line: 'Ready for travel', icon: <Sparkles size={22}/> },
+}
+
 export default function Home(){return <main>
-  <section className="noise metal relative min-h-[calc(100vh-4rem)] overflow-hidden px-5 py-16 md:py-24">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(91,102,83,.34),transparent_34%)]"/>
-    <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#050505] to-transparent"/>
-    <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.02fr_.98fr]">
-      <div className="pt-8 md:pt-16">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-white/55"><Star size={14}/> Tactical Luxury Utility</div>
-        <h1 className="text-balance text-6xl font-black tracking-[-.06em] md:text-8xl lg:text-9xl">ASORTA</h1>
-        <p className="mt-4 text-2xl font-semibold text-white/82 md:text-4xl">Just what you need.</p>
-        <p className="mt-6 max-w-xl text-base leading-7 text-white/55 md:text-lg">Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.</p>
-        <div className="mt-9 flex flex-wrap gap-4"><Link href="/shop" className="btn-primary">Explore Collection <ArrowRight className="ml-2" size={18}/></Link><Link href="#featured" className="btn-secondary">Best Sellers</Link></div>
-        <div className="mt-10 grid max-w-xl grid-cols-3 gap-3 text-xs text-white/45">
-          <div className="card rounded-2xl p-4"><Lock className="mb-2" size={17}/><b className="text-white/80">Secure checkout</b></div>
-          <div className="card rounded-2xl p-4"><BadgeCheck className="mb-2" size={17}/><b className="text-white/80">Curated gear</b></div>
-          <div className="card rounded-2xl p-4"><Truck className="mb-2" size={17}/><b className="text-white/80">Tracked shipping</b></div>
-        </div>
-      </div>
-      <div className="relative">
-        <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle,rgba(214,214,214,.12),transparent_62%)] blur-2xl"/>
-        <div className="card relative overflow-hidden rounded-[2.2rem] p-3 shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop" alt="ASORTA premium utility" className="h-[330px] w-full rounded-[1.7rem] object-cover opacity-85 md:h-[540px]"/>
-          <div className="absolute bottom-6 left-6 right-6 rounded-3xl border border-white/10 bg-black/55 p-5 backdrop-blur-xl"><p className="text-xs font-black uppercase tracking-[.28em] text-white/45">Launch System</p><p className="mt-2 text-xl font-black">Premium products. Clean checkout. Built to scale.</p></div>
-        </div>
-      </div>
+  <HomeHeroSlider/>
+
+  <section id="shop" className="mx-auto max-w-7xl px-5 py-14">
+    <div className="mb-6 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">Browse categories</p></div>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {categories.slice(0,5).map((c)=>{
+        const v = categoryVisuals[c.slug]
+        return <Link key={c.slug} href={`/category/${c.slug}`} className="category-tile group">
+          <img src={v?.image || '/products/asorta-product-fallback.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-36 transition duration-700 group-hover:scale-110 group-hover:opacity-50"/>
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.28)),linear-gradient(0deg,rgba(0,0,0,.75),transparent_70%)]"/>
+          <div className="relative z-10 flex h-full flex-col justify-end p-5">
+            <h3 className="text-xl font-black">{c.name}</h3>
+            <p className="mt-1 text-sm text-white/58">{v?.line || c.text}</p>
+            <span className="mt-5 grid h-10 w-10 place-items-center rounded-full border border-white/18 bg-black/35 text-white/75 transition group-hover:translate-x-1 group-hover:border-white/35 group-hover:text-white"><ArrowRight size={18}/></span>
+          </div>
+        </Link>
+      })}
     </div>
   </section>
 
-  <section id="shop" className="mx-auto max-w-7xl px-5 py-16">
-    <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="kicker">Collections</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Shop by Utility</h2></div><p className="max-w-md text-sm leading-6 text-white/52">Geen chaos, geen overvolle AliExpress vibe. Alleen duidelijke collecties die direct te begrijpen zijn.</p></div>
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{categories.map((c,idx)=><Link key={c.slug} href={`/category/${c.slug}`} className="card group relative overflow-hidden rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><div className="absolute right-5 top-5 text-5xl font-black text-white/[.035]">0{idx+1}</div><h3 className="text-2xl font-black">{c.name}</h3><p className="mt-3 max-w-xs text-sm leading-6 text-white/55">{c.text}</p><span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-white/70 group-hover:text-white">Explore <ArrowRight size={16}/></span></Link>)}</div>
+  <section id="featured" className="mx-auto max-w-7xl px-5 py-12">
+    <div className="mb-7 flex items-end justify-between gap-4">
+      <div><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">Best sellers</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">Launch products</h2></div>
+      <Link href="/shop" className="hidden items-center gap-2 text-sm font-black text-white/58 transition hover:text-white md:inline-flex">View all <ArrowRight size={16}/></Link>
+    </div>
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
   </section>
 
-  <section id="featured" className="mx-auto max-w-7xl px-5 py-16">
-    <p className="kicker">Launch Picks</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Hero Products</h2>
-    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
-  </section>
+  <section className="mx-auto max-w-7xl px-5 py-12"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{trust.map(x=><div key={x.t} className="card rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/20"><div className="text-white/70">{x.i}</div><h3 className="mt-4 font-black">{x.t}</h3><p className="mt-2 text-sm leading-6 text-white/55">{x.d}</p></div>)}</div></section>
 
-  <section className="mx-auto max-w-7xl px-5 py-12"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{trust.map(x=><div key={x.t} className="card rounded-[1.7rem] p-6"><div className="text-white/70">{x.i}</div><h3 className="mt-4 font-black">{x.t}</h3><p className="mt-2 text-sm leading-6 text-white/55">{x.d}</p></div>)}</div></section>
-
-  <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">All Products</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,12).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
+  <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Just what you need.</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 
   <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">ASORTA Insiders</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">Exclusive drops, early access.</h2><p className="mt-4 max-w-xl text-white/55">Later koppelen we dit aan e-mail automation. Nu staat de premium sectie klaar voor conversie.</p></div><Link href="/shop" className="btn-primary">Start shopping</Link></div></div></section>
   <PaymentNote/>
