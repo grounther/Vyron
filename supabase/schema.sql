@@ -98,42 +98,17 @@ for select using (auth.uid() = auth_user_id);
 -- insert into admin_users (email, role, active) values ('your@email.com', 'owner', true)
 -- on conflict (email) do update set active = true, role = excluded.role;
 
-
--- ASORTA v5.0 content/order foundation
+-- ASORTA v5.1 content foundation
 create table if not exists site_content (
   id uuid primary key default gen_random_uuid(),
   key text unique not null,
-  value text not null,
+  value text,
   type text default 'text',
   updated_at timestamptz default now()
 );
 
-create table if not exists orders (
-  id text primary key,
-  customer_email text,
-  total numeric default 0,
-  estimated_profit numeric default 0,
-  status text default 'draft',
-  supplier_status text default 'CJ: not sent',
-  created_at timestamptz default now()
-);
+alter table site_content enable row level security;
 
-create table if not exists order_items (
-  id uuid primary key default gen_random_uuid(),
-  order_id text references orders(id) on delete cascade,
-  product_slug text,
-  product_name text,
-  variant_name text,
-  sku text,
-  quantity int default 1,
-  unit_price numeric default 0,
-  landed_cost numeric default 0,
-  created_at timestamptz default now()
-);
-
-insert into site_content (key,value,type) values
-('homepage.hero.title','ASORTA','text'),
-('homepage.hero.subtitle','Just what you need.','text'),
-('homepage.promo.1.title','Launch picks now live.','text'),
-('homepage.promo.1.text','Ontdek de eerste ASORTA utility producten met tracked shipping en premium productpagina’s.','text')
-on conflict (key) do nothing;
+drop policy if exists "Public can read site content" on site_content;
+create policy "Public can read site content" on site_content
+for select using (true);

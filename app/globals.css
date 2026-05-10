@@ -41,8 +41,3 @@ img{display:block;max-width:100%}
 @media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
 
 @keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-
-.media-thumb{transform:translateZ(0)}
-.media-thumb:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 16px 45px rgba(91,102,83,.22)}
-select option{background:#090909;color:white}
-.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

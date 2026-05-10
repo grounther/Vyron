@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import ProductImage from './ProductImage'
 import { useEffect, useState } from 'react'
-import { Menu, Search, ShoppingCart, X, Trash2, Minus, Plus, ArrowRight } from 'lucide-react'
+import { Menu, Search, ShoppingCart, X, Trash2, Minus, Plus, ArrowRight, UserRound } from 'lucide-react'
 
 const links = [
   ['Shop','/shop'], ['Tactical','/category/tactical'], ['Automotive','/category/automotive'], ['Desk Setup','/category/desk-setup'], ['Gaming','/category/gaming'], ['Smart Utility','/category/smart-utility'], ['Account','/account']
 ]
 
-type CartItem={key?:string;slug:string;name:string;price:number;hero:string;qty:number;variantName?:string;sku?:string}
+type CartItem={slug:string;name:string;price:number;hero:string;qty:number;variant?:string;sku?:string}
 const CART_KEY='asorta_cart'
 
 function readCart():CartItem[]{
@@ -47,13 +47,11 @@ export default function Header(){
         </nav>
         <div className="flex items-center gap-2">
           <Link href="/search" className="rounded-full border border-white/10 p-2.5 text-white/70 transition hover:bg-white/10" aria-label="Search"><Search size={18}/></Link>
+          <Link href="/account" className="rounded-full border border-white/10 p-2.5 text-white/70 transition hover:bg-white/10 hover:text-white" aria-label="Account"><UserRound size={18}/></Link>
           <button onClick={()=>setCartOpen(true)} className="relative inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-black shadow-[0_10px_40px_rgba(255,255,255,.14)] ring-1 ring-white/30 transition hover:-translate-y-0.5 hover:bg-zinc-100 hover:shadow-[0_14px_48px_rgba(255,255,255,.18)]" aria-label="Open cart">
             <ShoppingCart size={18} strokeWidth={3.4} className="text-zinc-950"/> <span className="hidden text-zinc-950 sm:inline">Cart</span>
             {count>0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#6f7d64] px-1 text-[11px] font-black text-white ring-2 ring-black shadow-[0_0_18px_rgba(111,125,100,.55)]">{count}</span>}
           </button>
-          <Link href="/account" className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[.035] transition hover:-translate-y-0.5 hover:border-[#b7c8ad]/50 hover:bg-white/[.075]" aria-label="Account login">
-            <img src="/brand/asorta-icon.png" alt="ASORTA account" className="h-8 w-8 object-contain" />
-          </Link>
           <button onClick={()=>setMenuOpen(v=>!v)} className="rounded-full border border-white/10 p-2.5 text-white/70 lg:hidden" aria-label="Menu">{menuOpen?<X size={18}/>:<Menu size={18}/>}</button>
         </div>
       </div>
@@ -81,10 +79,10 @@ function CartDrawer({open,setOpen,items,setItems}:{open:boolean;setOpen:(v:boole
         <div className="card rounded-[1.6rem] p-6"><h3 className="text-2xl font-black">Your cart is empty.</h3><p className="mt-3 text-sm leading-6 text-white/55">Selecteer eerst een premium utility product.</p><Link onClick={()=>setOpen(false)} href="/shop" className="btn-primary mt-6 w-full">Shop products <ArrowRight size={18} className="ml-2"/></Link></div>
       </div> : <div className="flex h-[calc(100%-4rem)] flex-col">
         <div className="flex-1 overflow-y-auto p-5">
-          <div className="grid gap-4">{items.map(item=><div key={item.key || item.slug} className="card grid grid-cols-[82px_1fr] gap-3 rounded-[1.4rem] p-3">
+          <div className="grid gap-4">{items.map(item=><div key={item.slug} className="card grid grid-cols-[82px_1fr] gap-3 rounded-[1.4rem] p-3">
             <ProductImage src={item.hero} alt="" className="h-20 w-20 rounded-2xl object-cover"/>
-            <div className="min-w-0"><h3 className="truncate font-black">{item.name}</h3><p className="mt-1 text-sm text-white/55">€{item.price.toFixed(2)}</p>{item.variantName && <p className="mt-1 text-xs text-[#b7c8ad]">{item.variantName}</p>}
-              <div className="mt-3 flex items-center gap-2"><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>(i.key || i.slug)===(item.key || item.slug)?{...i,qty:Math.max(1,i.qty-1)}:i))}><Minus size={14}/></button><span className="min-w-6 text-center text-sm font-black">{item.qty}</span><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>(i.key || i.slug)===(item.key || item.slug)?{...i,qty:i.qty+1}:i))}><Plus size={14}/></button><button className="ml-auto text-white/38 hover:text-white" onClick={()=>save(items.filter(i=>(i.key || i.slug)!==(item.key || item.slug)))}><Trash2 size={15}/></button></div>
+            <div className="min-w-0"><h3 className="truncate font-black">{item.name}</h3><p className="mt-1 text-sm text-white/55">€{item.price.toFixed(2)}</p>{item.variant && <p className="mt-1 text-xs text-white/38">Uitvoering: {item.variant}</p>}
+              <div className="mt-3 flex items-center gap-2"><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>i.slug===item.slug?{...i,qty:Math.max(1,i.qty-1)}:i))}><Minus size={14}/></button><span className="min-w-6 text-center text-sm font-black">{item.qty}</span><button className="rounded-full border border-white/10 p-1 text-white/60 hover:bg-white/10" onClick={()=>save(items.map(i=>i.slug===item.slug?{...i,qty:i.qty+1}:i))}><Plus size={14}/></button><button className="ml-auto text-white/38 hover:text-white" onClick={()=>save(items.filter(i=>i.slug!==item.slug))}><Trash2 size={15}/></button></div>
             </div>
           </div>)}</div>
         </div>

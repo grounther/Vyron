@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'ASORTA | Just what you need.',
   description: 'ASORTA is een premium modern utility shop voor smart daily gear, automotive upgrades, desk setup, gaming, tactical carry en outdoor essentials.',
   metadataBase: new URL('https://asorta.nl'),
-  icons: { icon: '/favicon.png', shortcut: '/favicon.png', apple: '/favicon.png' },
+  icons: { icon: '/asorta-icon.png', apple: '/asorta-icon.png' },
   openGraph: {
     title: 'ASORTA | Just what you need.',
     description: 'Premium utility products geselecteerd op bruikbaarheid, uitstraling en kwaliteit.',

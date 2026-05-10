@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import PaymentNote from '@/components/PaymentNote'
-import PromoSlider from '@/components/PromoSlider'
 import { categories, featured, products } from '@/lib/products'
 import { ArrowRight, ShieldCheck, Truck, Sparkles, Zap, Star, Lock, BadgeCheck } from 'lucide-react'
 
@@ -19,7 +18,7 @@ export default function Home(){return <main>
     <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.02fr_.98fr]">
       <div className="pt-8 md:pt-16">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-white/55"><Star size={14}/> Tactical Luxury Utility</div>
-        <div className="flex items-center gap-4"><img src="/brand/asorta-icon.png" alt="ASORTA icon" className="hidden h-20 w-20 object-contain sm:block md:h-28 md:w-28"/><h1 className="text-balance text-6xl font-black tracking-[-.06em] md:text-8xl lg:text-9xl">ASORTA</h1></div>
+        <h1 className="text-balance text-6xl font-black tracking-[-.06em] md:text-8xl lg:text-9xl">ASORTA</h1>
         <p className="mt-4 text-2xl font-semibold text-white/82 md:text-4xl">Just what you need.</p>
         <p className="mt-6 max-w-xl text-base leading-7 text-white/55 md:text-lg">Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.</p>
         <div className="mt-9 flex flex-wrap gap-4"><Link href="/shop" className="btn-primary">Explore Collection <ArrowRight className="ml-2" size={18}/></Link><Link href="#featured" className="btn-secondary">Best Sellers</Link></div>
@@ -31,7 +30,10 @@ export default function Home(){return <main>
       </div>
       <div className="relative">
         <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle,rgba(214,214,214,.12),transparent_62%)] blur-2xl"/>
-        <PromoSlider />
+        <div className="card relative overflow-hidden rounded-[2.2rem] p-3 shadow-2xl">
+          <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop" alt="ASORTA premium utility" className="h-[330px] w-full rounded-[1.7rem] object-cover opacity-85 md:h-[540px]"/>
+          <div className="absolute bottom-6 left-6 right-6 rounded-3xl border border-white/10 bg-black/55 p-5 backdrop-blur-xl"><p className="text-xs font-black uppercase tracking-[.28em] text-white/45">Launch System</p><p className="mt-2 text-xl font-black">Premium products. Clean checkout. Built to scale.</p></div>
+        </div>
       </div>
     </div>
   </section>
