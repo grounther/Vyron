@@ -32,7 +32,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
       type: 'video' as const,
       src: video.src,
       poster: video.poster || selectedVariant?.image || product.hero,
-      title: video.title,
+      title: video.title || video.label || "Product video",
     }))
 
     // Put videos early in the gallery so they are always visible, but keep
