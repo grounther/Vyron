@@ -42,5 +42,7 @@ img{display:block;max-width:100%}
 
 @keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
-.auth-tab-active{background:#fff!important;color:#09090b!important}
-.auth-tab-active *{color:#09090b!important}
+.media-thumb{transform:translateZ(0)}
+.media-thumb:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 16px 45px rgba(91,102,83,.22)}
+select option{background:#090909;color:white}
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
