@@ -49,6 +49,7 @@ export type Product = {
   contentIdeas:string[]
   supplierNotes:string
   marginNote:string
+  inBox?: string[]
   variants?: ProductVariant[]
   supplier?: SupplierInfo
 }
@@ -96,6 +97,7 @@ export const products: Product[] = [
     contentIdeas:['EDC loadout video','Travel day carry setup','Before/after pocket dump','Urban commute POV'],
     supplierNotes:'Approved CJ product. CJ data received: product cost €3.41 + estimated shipping €9.31. Prefer Black, Khaki and Military Green for ASORTA positioning.',
     marginNote:'Launch price is adjusted around the real landed cost while preserving VAT, support reserve and future marketing room.',
+    inBox:['ASORTA Urban Sling Pro','Selected color/variant','Tracked supplier packaging','ASORTA care and usage instructions will be added before paid launch'],
     variants:[
       {name:'ACU Digital',sku:'CJYD192968906FU',stock:10000,image:slingImages[1]},
       {name:'Black',sku:'CJYD192968902BY',stock:14000,image:slingImages[3]},
@@ -122,14 +124,14 @@ export const products: Product[] = [
     short:'Automatic wireless charging mount for modern drivers.',
     description:'A clean and intelligent charging solution for modern drivers. The ASORTA DriveCharge Mount combines automatic clamping technology with wireless charging for a seamless dashboard experience.',
     features:['Wireless charging','Automatic sensor clamp','One-hand operation','Dashboard and vent compatible','Clean premium design'],
-    specs:['Category: Automotive','Estimated landed cost: ± €34','Warehouse: China','Recommended retail price: €59.95 incl. VAT','Refund risk: Medium-low','Supplier mapping: pending final variant cost confirmation'],
+    specs:['Category: Automotive','Charging: wireless charging mount','Mounting: dashboard/vent support where applicable','Estimated landed cost: ± €34','Warehouse: China','Recommended retail price: €59.95 incl. VAT','Refund risk: Medium-low','USB-only variant removed from ASORTA launch selection'],
     tags:['car mount','wireless charging','automotive','dashboard','phone holder'],
     shippingInfo:'Estimated delivery: 7–15 business days. Tracked shipping included. Exact shipping profile will be confirmed before paid launch.',
     contentIdeas:['Drop-and-charge demo','Clean dashboard setup','Commute setup reel','Cable-free cockpit transformation'],
     supplierNotes:'Check charging speed, phone compatibility and heat complaints before scaling. Product images and variant media are now connected.',
     marginNote:'Good margin if quality is stable; avoid overclaiming MagSafe compatibility unless confirmed.',
+    inBox:['ASORTA DriveCharge Mount','Mounting accessories as supplied by CJ','Charging cable where included by supplier','Quick-start installation card will be added by ASORTA before launch'],
     variants:[
-      {name:'USB Version',sku:'CJSJ1244113-USB',stock:10000,image:mountImages[0]},
       {name:'Plus Version',sku:'CJSJ1244113-PLUS',stock:10000,image:mountImages[1]},
       {name:'Set Plus Version',sku:'CJSJ1244113-SET-PLUS',stock:10000,image:mountImages[2]},
     ],
@@ -148,12 +150,13 @@ export const products: Product[] = [
     short:'Premium interior ambient lighting with strong visual impact.',
     description:'Transform your interior with immersive ambient lighting. Designed to create a premium nighttime driving atmosphere with customizable RGB illumination and a high-end interior feel.',
     features:['Multi-color RGB lighting','Dual remote control','Music-reactive modes','Premium interior ambiance','Universal vehicle compatibility'],
-    specs:['Category: Automotive','Estimated landed cost: ± €42','Warehouse: China','Recommended retail price: €89.95 incl. VAT','Refund risk: Medium','Factory stock seen: ± 40.000 units'],
+    specs:['Category: Automotive','Control: 24-button dual remote kit','Lighting: RGB ambient interior lighting','Use: universal vehicle interior ambience','Estimated landed cost: ± €42','Warehouse: China','Recommended retail price: €89.95 incl. VAT','Refund risk: Medium','Factory stock seen: ± 40.000 units'],
     tags:['ambient lighting','rgb car','automotive','led interior','night drive'],
     shippingInfo:'Estimated delivery: 6–12 business days. Tracked shipping included. Installation clarity will be shown before checkout in the paid launch version.',
     contentIdeas:['Before/after night interior','Luxury car vibe transformation','Install timelapse','Night drive POV'],
     supplierNotes:'Traffic product. Needs clear installation expectations and honest compatibility copy.',
     marginNote:'Strong premium pricing is justified by high perceived value and visual impact.',
+    inBox:['Ambient RGB light kit','Dual remote control set','Connection/control accessories as supplied by CJ','Installation guidance will be added to ASORTA before paid launch'],
     variants:[{name:'Ambient RGB Kit',sku:'CJQT112130701AZ',stock:40000,image:ambientImages[0]}],
     supplier:{name:'CJ Dropshipping',productUrl:'https://cjdropshipping.com/product/dual-remote-24-button-ambient-light-p-1391653099806003200.html',warehouse:'China',estimatedProductCost:22,estimatedShipping:20,landedCost:42,status:'high-priority',notes:'Likely first viral traffic product.',productId:'CJQT1121307',variantIds:['CJQT112130701AZ'],factoryStock:40000}
   },
@@ -176,6 +179,7 @@ export const products: Product[] = [
     contentIdeas:['Streamer desk setup','RGB setup glow-up','Before/after audio desk upgrade','Creator workspace reel'],
     supplierNotes:'Quality control matters. Audio products need honest expectations and clear compatibility.',
     marginNote:'Higher ticket item with good perceived value, but support risk is higher than non-electronics.',
+    inBox:['ASORTA WaveMic RGB microphone','Desktop stand/base as supplied by CJ','USB connection cable where included','Quick-start usage card will be added before launch'],
     variants:[{name:'RGB Desktop Microphone',sku:'CJYD184184201AZ',stock:13000,image:micImages[0]}],
     supplier:{name:'CJ Dropshipping',productUrl:'https://cjdropshipping.com/product/desktop-microphone-live-conference-microphone-p-1699966126878371840.html',warehouse:'China',estimatedProductCost:28,estimatedShipping:20,landedCost:48,status:'approved',notes:'Good niche product, not main hero.',productId:'CJYD1841842',variantIds:['CJYD184184201AZ'],factoryStock:13000}
   },
@@ -191,13 +195,14 @@ export const products: Product[] = [
     badge:'Outdoor Utility',
     short:'Compact outdoor navigation utility for travel and exploration.',
     description:'Compact navigation utility for outdoor exploration. Designed for hiking, camping and lightweight travel support with a modern minimalist form factor.',
-    features:['Compact outdoor design','Lightweight utility build','Navigation support','Portable form factor','Adventure-ready aesthetic'],
-    specs:['Category: Outdoor Utility','Estimated landed cost: ± €36','Warehouse: China','Recommended retail price: €64.95 incl. VAT','Refund risk: Medium','Factory stock seen: ± 13.000 units'],
+    features:['Compact outdoor design','Lightweight utility build','Navigation support','Portable form factor','Adventure-ready aesthetic','Available in Green only for launch'],
+    specs:['Category: Outdoor Utility','Launch color: Green only','Estimated landed cost: ± €36','Warehouse: China','Recommended retail price: €64.95 incl. VAT','Refund risk: Medium','Factory stock seen: ± 13.000 units'],
     tags:['gps','outdoor','hiking','utility gadget','camping'],
     shippingInfo:'Estimated delivery: 6–12 business days. Tracked shipping included. Product is positioned as navigation support, not as an emergency rescue device.',
     contentIdeas:['Hiking gear loadout','Camping utility kit','Outdoor exploration POV','Travel bag utility setup'],
     supplierNotes:'Verify whether it is true GPS, GPS assist or basic locator before scaling. Claims are intentionally conservative.',
     marginNote:'Good niche utility product; position as outdoor support tool, not emergency rescue device.',
+    inBox:['ASORTA TrailPoint Mini in Green','Outdoor locator device','Accessory set as supplied by CJ','Safety and claim disclaimer card will be added before launch'],
     variants:[{name:'Green',sku:'CJQCQCQC00271-Green',stock:13000,image:gpsImages[0]}],
     supplier:{name:'CJ Dropshipping',productUrl:'https://cjdropshipping.com/product/mini-gps-multi-function-locator-road-search-treasure-outdoor-climbing-gps-tracker-mini-handheld-gps-positioning-p-094DC89C-2D2F-4726-868E-4F388BB7CF0E.html',warehouse:'China',estimatedProductCost:16,estimatedShipping:20,landedCost:36,status:'approved',notes:'Interesting outdoor utility product, needs claim control.',productId:'CJQCQCQC00271',variantIds:['CJQCQCQC00271-Green'],factoryStock:13000}
   },

@@ -97,3 +97,26 @@ for select using (auth.uid() = auth_user_id);
 -- Insert your own admin email after running this schema:
 -- insert into admin_users (email, role, active) values ('your@email.com', 'owner', true)
 -- on conflict (email) do update set active = true, role = excluded.role;
+
+-- v4.9 content editor foundation
+create table if not exists site_content (
+  id uuid primary key default gen_random_uuid(),
+  key text unique not null,
+  value text not null default '',
+  type text not null default 'text',
+  group_name text default 'general',
+  updated_at timestamptz default now(),
+  updated_by uuid references auth.users(id) on delete set null
+);
+
+alter table site_content enable row level security;
+
+drop policy if exists "Public can read published site content" on site_content;
+create policy "Public can read published site content" on site_content
+for select using (true);
+
+insert into site_content (key, value, type, group_name) values
+('homepage.hero.title', 'ASORTA', 'text', 'homepage'),
+('homepage.hero.subtitle', 'Just what you need.', 'text', 'homepage'),
+('shipping.delivery.estimate', '6–12 business days with tracked shipping. Exceptions may apply during peak periods, customs or carrier delays.', 'textarea', 'shipping')
+on conflict (key) do nothing;

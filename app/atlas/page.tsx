@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import { products } from '@/lib/products'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, Boxes } from 'lucide-react'
+import Link from 'next/link'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, Boxes, FileText, PackagePlus } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
@@ -62,9 +63,9 @@ export default async function AtlasPage(){
         <div>
           <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Internal control</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Atlas</h1>
-          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor orders, productkosten, winstindicatie, supplier status en launch monitoring.</p>
+          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor orders, productkosten, winstindicatie, supplier status, launch monitoring en beheerfundament.</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/55"><ShieldCheck className="mb-2 text-[#b7c8ad]"/> Protected by Supabase Auth + admin allowlist.</div>
+        <div className="grid gap-3 md:grid-cols-3"><Link href="/atlas/pages" className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm font-black text-white/70 transition hover:bg-white/10 hover:text-white"><FileText className="mb-2 text-[#b7c8ad]"/> Page Editor</Link><Link href="/atlas/products" className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm font-black text-white/70 transition hover:bg-white/10 hover:text-white"><PackagePlus className="mb-2 text-[#b7c8ad]"/> Product Editor</Link><div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/55"><ShieldCheck className="mb-2 text-[#b7c8ad]"/> Protected by Supabase Auth + admin allowlist.</div></div>
       </div>
     </section>
 
@@ -100,7 +101,7 @@ export default async function AtlasPage(){
     <section className="mt-8 card rounded-[2rem] p-5">
       <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div><h2 className="text-2xl font-black">Launch product intelligence</h2><p className="mt-2 text-sm text-white/50">CJ SKU mapping, factory stock, ASORTA prijs en estimated landed cost.</p></div>
-        <span className="rounded-full bg-[#b7c8ad]/10 px-3 py-1 text-xs font-black text-[#b7c8ad]">v4.6 mapped</span>
+        <span className="rounded-full bg-[#b7c8ad]/10 px-3 py-1 text-xs font-black text-[#b7c8ad]">v4.9 mapped</span>
       </div>
       <div className="overflow-x-auto"><table className="w-full min-w-[860px] text-left text-sm">
         <thead className="text-xs uppercase tracking-[.18em] text-white/35"><tr><th className="py-3">Product</th><th>Category</th><th>Price</th><th>Landed</th><th>Variants</th><th>Stock</th><th>CJ Product</th><th>Status</th></tr></thead>

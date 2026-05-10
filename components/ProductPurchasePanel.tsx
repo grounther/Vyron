@@ -92,7 +92,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
           return <button
             key={`${media.type}-${media.src}-${i}`}
             onClick={()=>setActiveMedia(media)}
-            className={`card relative min-w-24 overflow-hidden rounded-2xl p-1 transition focus:outline-none hover:border-white/25 ${active?'border-[#b7c8ad]/70 ring-2 ring-[#b7c8ad]/35 shadow-[0_0_24px_rgba(183,200,173,.12)]':'border-white/10'}`}
+            className={`card relative min-w-24 overflow-hidden rounded-2xl p-1 transition duration-200 focus:outline-none hover:-translate-y-[2px] hover:scale-[1.025] hover:border-white/25 hover:shadow-[0_0_26px_rgba(183,200,173,.16)] ${active?'border-[#b7c8ad]/70 ring-2 ring-[#b7c8ad]/35 shadow-[0_0_24px_rgba(183,200,173,.12)]':'border-white/10'}`}
             aria-label={media.type === 'video' ? `Play ${media.title}` : `Show ${media.title}`}
           >
             <ProductImage src={thumb} alt={media.title} className="h-20 w-full rounded-xl object-cover opacity-80 md:h-24" />
