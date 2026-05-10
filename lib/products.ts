@@ -10,6 +10,7 @@ export type ProductVideo = {
   src: string
   poster?: string
   label?: string
+  title?: string
 }
 
 export type SupplierInfo = {
