@@ -112,3 +112,21 @@ alter table site_content enable row level security;
 drop policy if exists "Public can read site content" on site_content;
 create policy "Public can read site content" on site_content
 for select using (true);
+
+-- ASORTA v5.4 support tickets foundation
+create table if not exists support_tickets (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  email text not null,
+  subject text,
+  message text not null,
+  source text default 'website',
+  status text default 'new',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table support_tickets enable row level security;
+
+-- Support tickets are inserted server-side with the service role.
+-- Admin viewing/editing will be added to Atlas in a later build.

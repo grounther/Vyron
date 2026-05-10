@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, BadgeCheck, Headphones, Lock, ShieldCheck, Truck } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Lock, ShieldCheck, Truck } from 'lucide-react'
 
 const slides = [
   {
@@ -47,7 +47,6 @@ const trust = [
   { icon: Lock, title: 'Secure checkout', text: 'Safe & encrypted' },
   { icon: BadgeCheck, title: 'Curated gear', text: 'Quality selected' },
   { icon: Truck, title: 'Tracked shipping', text: 'Fast & reliable' },
-  { icon: Headphones, title: 'Support', text: "We're here" },
 ]
 
 export default function HomeHeroSlider() {
@@ -124,12 +123,14 @@ export default function HomeHeroSlider() {
             </Link>
           </div>
 
-          <div className="mt-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/52">
             {trust.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="hero-trust-card">
-                <Icon className="mb-2 text-white/78" size={20} />
-                <p className="text-xs font-black text-white/90">{title}</p>
-                <p className="mt-1 text-xs text-white/42">{text}</p>
+              <div key={title} className="hero-trust-inline">
+                <Icon className="text-white/82" size={21} />
+                <span>
+                  <b className="block text-xs font-black text-white/86">{title}</b>
+                  <small className="block text-xs text-white/42">{text}</small>
+                </span>
               </div>
             ))}
           </div>
