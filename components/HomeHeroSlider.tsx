@@ -77,7 +77,6 @@ export default function HomeHeroSlider() {
     <section className="asorta-flagship-hero noise relative overflow-hidden border-b border-white/10">
       <div className="flagship-bg-glow" />
 
-      {/* De productfoto's aan de rechterkant */}
       <div className="flagship-visual" aria-hidden="true">
         {slides.map((s, idx) => (
           <img
@@ -91,7 +90,6 @@ export default function HomeHeroSlider() {
         <div className="flagship-image-grade" />
       </div>
 
-      {/* DE TACTICAL DIVIDER MET TEXTUUR - Start 60% boven, Eind 40% onder */}
       <div className="flagship-divider" />
 
       <button
@@ -111,8 +109,9 @@ export default function HomeHeroSlider() {
         <ArrowRight size={22} />
       </button>
 
-      <div className="relative mx-auto grid min-h-[620px] max-w-[1500px] items-center px-5 py-18 md:min-h-[680px] lg:grid-cols-[1fr_1fr] lg:px-10">
+      <div className="relative mx-auto grid min-h-[620px] max-w-[1500px] items-center px-5 py-18 md:min-h-[680px] lg:grid-cols-[.88fr_1.12fr] lg:px-10">
         <div className="flagship-copy z-10 max-w-[570px] lg:pl-8">
+<<<<<<< HEAD
 <<<<<<< HEAD
           {/* Categorie labels toegevoegd */}
           <p className="mb-2 text-[10px] font-black uppercase tracking-[.45em] text-white/40">
@@ -123,12 +122,14 @@ export default function HomeHeroSlider() {
           <h1 className="asorta-metal-title">AS<span className="open-o">O</span>RTA</h1>
 =======
           {/* Titel exact zoals in de afbeelding */}
+=======
+>>>>>>> 4144b0f (Tune ASORTA hero visual balance)
           <h1 className="asorta-metal-title">ASORTA</h1>
 >>>>>>> d1ece6f (Upgrade ASORTA to v5.6 cinematic flagship polish)
           <p className="mt-4 text-sm font-black uppercase tracking-[.34em] text-white/48 md:text-base">Just what you need.</p>
 
           <p className="mt-7 max-w-lg text-base leading-7 text-white/68 md:text-lg">
-            {slide.text}
+            Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
@@ -142,10 +143,10 @@ export default function HomeHeroSlider() {
         </div>
 
         <div className="relative z-10 hidden h-full lg:block">
-          {/* USP Badge rechtsonder */}
-          <div className="absolute bottom-[8%] right-[5.4rem] bg-black/40 border border-white/10 p-4 backdrop-blur-md">
-            <p className="text-[11px] font-black uppercase tracking-[.25em] text-white/90 text-right">PREMIUM GEAR.</p>
-            <p className="text-[9px] font-bold uppercase tracking-[.20em] text-white/40 text-right">BUILT TO PERFORM.</p>
+          <div className="flagship-slide-card">
+            <p className="text-xs font-black uppercase tracking-[.34em] text-white/58">{slide.kicker}</p>
+            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
+            <p className="text-lg font-bold uppercase tracking-[.14em] text-white/58">{slide.subtitle}</p>
           </div>
 
           <div className="flagship-dots">
@@ -167,6 +168,18 @@ export default function HomeHeroSlider() {
             <div className="h-[1px] w-12 bg-orange-500 mb-3 ml-auto" />
             <p className="text-[11px] font-black uppercase tracking-[.25em] text-white/90">Premium Gear.</p>
             <p className="text-[9px] font-bold uppercase tracking-[.20em] text-white/40">Built to perform.</p>
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-10 rounded-[2rem] border border-white/10 bg-black/42 p-4 shadow-[0_30px_100px_rgba(0,0,0,.5)] backdrop-blur-xl lg:hidden">
+          <img src={slide.image} alt={slide.title} className="h-[300px] w-full rounded-[1.4rem] object-cover opacity-80" style={{ objectPosition: slide.position || 'center center' }} />
+          <div className="mt-4">
+            <p className="text-xs font-black uppercase tracking-[.28em] text-white/45">{slide.kicker}</p>
+            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-white/58">{slide.text}</p>
+            <Link href={slide.href} className="mt-4 inline-flex items-center gap-2 text-sm font-black text-white/75 transition hover:text-white">
+              {slide.cta} <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </div>

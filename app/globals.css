@@ -1,46 +1,164 @@
 @import "tailwindcss";
 
-:root {
-  --bg: #050505;
-  --panel: #0d0d0d;
-  --panel2: #151515;
-  --line: rgba(255, 255, 255, .10);
-  --line2: rgba(214, 214, 214, .22);
-  --text: #f4f4f4;
-  --muted: rgba(255, 255, 255, .62);
-  --olive: #5B6653;
-  --silver: #D6D6D6;
-  --accent-orange: #ff5f00; /* Subtiele tactical accent kleur */
+:root{
+  --bg:#050505;
+  --panel:#0d0d0d;
+  --panel2:#151515;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(214,214,214,.22);
+  --text:#f4f4f4;
+  --muted:rgba(255,255,255,.62);
+  --olive:#5B6653;
+  --silver:#D6D6D6;
 }
-
-* { box-sizing: border-box }
-html { scroll-behavior: smooth }
-
-body {
-  margin: 0;
-  background: 
-    radial-gradient(circle at 74% 0%, rgba(91, 102, 83, .22), transparent 30%), 
-    radial-gradient(circle at 18% 20%, rgba(214, 214, 214, .07), transparent 24%), 
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 74% 0%,rgba(91,102,83,.22),transparent 30%),
+    radial-gradient(circle at 18% 20%,rgba(214,214,214,.07),transparent 24%),
     var(--bg);
-  color: var(--text);
-  font-family: Inter, Arial, sans-serif;
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::selection{background:rgba(91,102,83,.65);color:white}
+.text-balance{text-wrap:balance}
+.noise:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E")}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.027));border:1px solid var(--line);box-shadow:0 24px 90px rgba(0,0,0,.36)}
+.glass{background:rgba(8,8,8,.68);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
+.metal{background:linear-gradient(135deg,#050505,#111 44%,#080b07 100%)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:white;color:black;font-weight:900;padding:.9rem 1.35rem;transition:.25s ease;box-shadow:0 18px 50px rgba(255,255,255,.1)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 60px rgba(255,255,255,.2)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:900;padding:.9rem 1.35rem;color:rgba(255,255,255,.82);transition:.25s ease}
+.btn-secondary:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);transform:translateY(-2px)}
+.kicker{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.32em;color:rgba(255,255,255,.43)}
+.product-img{height:190px;width:100%;object-fit:cover}
+.product-detail-img{height:320px;width:100%;object-fit:cover}
+@media(min-width:640px){.product-img{height:210px}}
+@media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
+
+@keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ASORTA v5.2 premium homepage */
+.hero-shell{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.58) 42%,rgba(0,0,0,.18) 100%),
+    radial-gradient(circle at 82% 24%,rgba(99,138,152,.20),transparent 31%),
+    radial-gradient(circle at 26% 42%,rgba(255,255,255,.055),transparent 26%),
+    linear-gradient(135deg,#030303,#101410 58%,#030303);
+}
+.hero-arrow{
+  position:absolute;
+  top:50%;
+  z-index:20;
+  display:none;
+  height:3.25rem;
+  width:3.25rem;
+  transform:translateY(-50%);
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.30);
+  color:rgba(255,255,255,.78);
+  backdrop-filter:blur(14px);
+  transition:.25s ease;
+}
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
+@media(min-width:1024px){.hero-arrow{display:grid}}
+.asorta-hero-title{
+  font-size:clamp(4.5rem,10vw,8.8rem);
+  line-height:.78;
+  font-weight:950;
+  letter-spacing:-.075em;
+  color:#fff;
+  text-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.category-tile{
+  position:relative;
+  min-height:11rem;
+  overflow:hidden;
+  border-radius:1.35rem;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.035);
+  box-shadow:0 20px 90px rgba(0,0,0,.28);
+  transition:.28s ease;
+}
+.category-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(91,102,83,.14)}
+.brandmark-glow{filter:drop-shadow(0 10px 30px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(183,200,173,.08))}
+
+/* ASORTA v5.3 cinematic homepage */
+.cinematic-hero{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
+    radial-gradient(circle at 78% 18%,rgba(91,130,150,.18),transparent 32%),
+    #050505;
+}
+.asorta-metal-title{
+  font-size:clamp(4rem,9vw,9.5rem);
+  line-height:.78;
+  letter-spacing:-.075em;
+  font-weight:1000;
+  color:#fff;
+  text-shadow:0 5px 24px rgba(255,255,255,.08),0 22px 90px rgba(0,0,0,.65);
+}
+@supports((-webkit-background-clip:text) or (background-clip:text)){
+  .asorta-metal-title{
+    background:linear-gradient(180deg,#fff 0%,#f3f3f3 36%,#aeb4b4 56%,#fff 72%,#6e7474 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+}
+.hero-trust-card{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:1.15rem;
+  background:rgba(255,255,255,.045);
+  padding:1rem;
+  box-shadow:0 18px 60px rgba(0,0,0,.24);
+  backdrop-filter:blur(18px);
+  transition:.25s ease;
+}
+.hero-trust-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07)}
+.hero-shell{min-height:auto}
+.category-tile{position:relative;min-height:140px;overflow:hidden;border-radius:1.15rem;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.hero-arrow{position:absolute;top:50%;z-index:20;display:grid;height:3rem;width:3rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.42);color:rgba(255,255,255,.78);backdrop-filter:blur(16px);transition:.22s ease;transform:translateY(-50%)}
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
+
+/* ASORTA v5.4 support + hero trust polish */
+.hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
+.hero-trust-inline:hover{opacity:1;transform:translateY(-1px)}
+.support-float{position:fixed;right:1.15rem;bottom:1.15rem;z-index:80;display:grid;height:3.6rem;width:3.6rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.055));color:white;box-shadow:0 18px 70px rgba(0,0,0,.52),0 0 32px rgba(111,125,100,.24);backdrop-filter:blur(18px);transition:.24s ease}
+.support-float:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(255,255,255,.30);box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 38px rgba(122,166,184,.22)}
+.support-float-pulse{position:absolute;right:.55rem;top:.55rem;height:.62rem;width:.62rem;border-radius:999px;background:#9fb194;box-shadow:0 0 0 0 rgba(159,177,148,.64);animation:supportPulse 1.8s infinite}
+@keyframes supportPulse{70%{box-shadow:0 0 0 10px rgba(159,177,148,0)}100%{box-shadow:0 0 0 0 rgba(159,177,148,0)}}
+.support-overlay{position:fixed;inset:0;z-index:100;pointer-events:none;background:rgba(0,0,0,0);transition:.25s ease}
+.support-overlay-open{pointer-events:auto;background:rgba(0,0,0,.56);backdrop-filter:blur(6px)}
+.support-panel{position:absolute;right:1rem;bottom:1rem;width:calc(100vw - 2rem);max-width:430px;overflow:hidden;border-radius:1.8rem;border:1px solid rgba(255,255,255,.12);background:rgba(7,7,7,.94);box-shadow:0 34px 120px rgba(0,0,0,.72);backdrop-filter:blur(24px);transition:.26s ease}
+.support-input{width:100%;border-radius:1.1rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.34);padding:.95rem 1rem;color:white;outline:none;transition:.2s ease}
+.support-input::placeholder{color:rgba(255,255,255,.36)}
+.support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
+@media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
+
+
+/* ASORTA v5.6.1 controlled flagship hero */
+.asorta-flagship-hero{
+  min-height:680px;
+  background:#050505;
+  isolation:isolate;
 }
 
-a { color: inherit; text-decoration: none }
-img { display: block; max-width: 100% }
-::selection { background: rgba(91, 102, 83, .65); color: white }
-
-.text-balance { text-wrap: balance }
-
-.noise:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .08;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E");
+.flagship-bg-glow{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 78% 18%,rgba(74,116,136,.13),transparent 34%),
+    radial-gradient(circle at 20% 48%,rgba(255,255,255,.03),transparent 24%);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* ASORTA v5.4 support + hero trust polish */
 .hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
@@ -176,146 +294,136 @@ img { display: block; max-width: 100% }
   padding: .9rem 1.35rem;
   transition: .25s ease;
   box-shadow: 0 18px 50px rgba(255, 255, 255, .1);
+=======
+.flagship-visual{
+  position:absolute;
+  inset:0 0 0 48%;
+  overflow:hidden;
+  background:#060606;
+>>>>>>> 4144b0f (Tune ASORTA hero visual balance)
 }
 
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 60px rgba(255, 255, 255, .2) }
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  font-weight: 900;
-  padding: .9rem 1.35rem;
-  color: rgba(255, 255, 255, .82);
-  transition: .25s ease;
+.flagship-slide-image{
+  position:absolute;
+  inset:0;
+  height:100%;
+  width:100%;
+  object-fit:cover;
+  opacity:0;
+  transform:scale(1.005);
+  transition:opacity .75s ease,transform 1s ease;
+  filter:saturate(.9) contrast(1.03) brightness(.72);
 }
 
-.btn-secondary:hover { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .28); transform: translateY(-2px) }
-
-/* ASORTA v5.9 - ULTIMATE FLAGSHIP CINEMATIC HERO */
-.asorta-flagship-hero {
-  min-height: 720px;
-  background: #050505;
-  isolation: isolate;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.flagship-slide-image.is-active{
+  opacity:.94;
+  transform:scale(1);
 }
 
-/* De Geëtste Tactical Divider */
-.flagship-divider {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  background: #050505; /* De massieve zwarte kant links */
-  
-  /* Masker met de schuine crackle textuur uit image_8.png */
-  -webkit-mask-image: url('/tactical-divider.png');
-  mask-image: url('/tactical-divider.png');
-  -webkit-mask-size: cover;
-  mask-size: cover;
-  -webkit-mask-position: center center;
-  mask-position: center center;
-  -webkit-mask-repeat: no-repeat;
+.flagship-image-grade{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(5,5,5,.50) 0%,rgba(5,5,5,.18) 20%,rgba(5,5,5,.06) 55%,rgba(5,5,5,.16) 100%),
+    radial-gradient(circle at 76% 70%,rgba(63,104,130,.14),transparent 38%);
 }
 
-/* Metallic Typografie */
-.asorta-metal-title {
-  font-size: clamp(4.5rem, 8.5vw, 9rem);
-  line-height: 0.78;
-  letter-spacing: -0.065em;
-  font-weight: 1000;
-  text-transform: uppercase;
-  background: linear-gradient(180deg, #ffffff 0%, #f3f3f3 35%, #8b8b8b 50%, #ffffff 65%, #333333 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.8));
+.flagship-divider{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:47.25%;
+  z-index:3;
+  width:1px;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.22),rgba(255,255,255,.03));
+  box-shadow:0 0 24px rgba(255,255,255,.04);
+  transform:skewX(-9deg);
+  transform-origin:center;
 }
 
-.flagship-visual {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+.flagship-divider:before{
+  content:"";
+  position:absolute;
+  inset:0 -10px;
+  background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0));
+  pointer-events:none;
 }
 
-.flagship-slide-image {
-  position: absolute;
-  right: 0;
-  width: 65%; /* Neemt het rechterdeel in beslag zoals op foto */
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.8s ease, transform 1.2s ease;
-  filter: brightness(0.65) contrast(1.1) saturate(0.9);
-  transform: scale(1.02);
+.flagship-copy{
+  padding-top:.5rem;
 }
 
-.flagship-slide-image.is-active {
-  opacity: 1;
-  transform: scale(1);
+.flagship-slide-card{
+  position:absolute;
+  right:4.8rem;
+  bottom:9%;
+  width:285px;
+  border-radius:.9rem;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(8,9,10,.64);
+  padding:1.25rem 1.35rem;
+  box-shadow:0 24px 82px rgba(0,0,0,.42);
+  backdrop-filter:blur(12px);
 }
 
-.flagship-image-grade {
-  position: absolute;
-  inset: 0;
-  /* Blend de foto schuin in het zwart van de divider */
-  background: linear-gradient(105deg, #050505 40%, transparent 60%);
-  z-index: 2;
+.flagship-dots{
+  position:absolute;
+  bottom:6%;
+  left:8%;
+  display:flex;
+  gap:.85rem;
 }
 
-.flagship-copy {
-  position: relative;
-  z-index: 10;
+.flagship-counter{
+  position:absolute;
+  right:4.9rem;
+  top:26%;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.44);
+  padding:.32rem .75rem;
+  font-size:11px;
+  font-weight:900;
+  color:rgba(255,255,255,.62);
+  backdrop-filter:blur(12px);
 }
 
-/* Navigatie Logo */
-.brandmark-glow {
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15)) brightness(1.2);
+.asorta-flagship-hero .asorta-metal-title{
+  font-size:clamp(4.5rem,7.8vw,8.2rem);
+  letter-spacing:-.068em;
+  line-height:.82;
 }
 
-/* Mobile & Tablet Optimalisatie */
-@media(max-width: 1023px) {
-  .flagship-visual, .flagship-divider { display: none }
-  .asorta-flagship-hero { min-height: auto; background: #050505; }
-  .asorta-flagship-hero .asorta-metal-title { font-size: clamp(3.5rem, 14vw, 6rem) }
+.asorta-flagship-hero .hero-arrow{
+  background:rgba(0,0,0,.34);
+  border-color:rgba(255,255,255,.13);
 }
 
-@media(min-width: 1400px) {
-  .flagship-slide-image { width: 60% }
-  .flagship-divider { -webkit-mask-position: 55% center; mask-position: 55% center; }
+@media(max-width:1023px){
+  .flagship-visual,
+  .flagship-divider{
+    display:none;
+  }
+
+  .asorta-flagship-hero{
+    min-height:auto;
+  }
+
+  .asorta-flagship-hero .asorta-metal-title{
+    font-size:clamp(3.8rem,16vw,6.4rem);
+  }
 }
 
-/* Overige UI elementen behouden */
-.hero-arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 20;
-  display: grid;
-  height: 3.25rem;
-  width: 3.25rem;
-  transform: translateY(-50%);
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: rgba(0, 0, 0, .30);
-  color: rgba(255, 255, 255, .78);
-  backdrop-filter: blur(14px);
-  transition: .25s ease;
-}
-.hero-arrow:hover { background: rgba(255, 255, 255, .08); color: white; transform: translateY(-50%) scale(1.04) }
+@media(min-width:1400px){
+  .flagship-visual{
+    left:48.5%;
+  }
 
-.flagship-dots {
-  position: absolute;
-  bottom: 7%;
-  left: 10%;
-  display: flex;
-  gap: .9rem;
-  z-index: 20;
-}
+  .flagship-divider{
+    left:47.8%;
+  }
 
+<<<<<<< HEAD
 .flagship-counter {
   position: absolute;
   right: 5rem;
@@ -331,3 +439,13 @@ img { display: block; max-width: 100% }
   z-index: 20;
 }
 >>>>>>> d1ece6f (Upgrade ASORTA to v5.6 cinematic flagship polish)
+=======
+  .flagship-slide-card{
+    right:5.2rem;
+  }
+
+  .flagship-dots{
+    left:8%;
+  }
+}
+>>>>>>> 4144b0f (Tune ASORTA hero visual balance)
