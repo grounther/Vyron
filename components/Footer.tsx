@@ -1,27 +1,26 @@
 import Link from 'next/link'
-import { categories } from '@/lib/products'
 import { BadgeCheck, Headphones, Lock, Truck } from 'lucide-react'
+import { categories } from '@/lib/products'
 
-const trust = [
-  { icon: Lock, title: 'Secure checkout', text: 'Encrypted checkout flow zodra payments live gaan.' },
-  { icon: BadgeCheck, title: 'Curated gear', text: 'Producten geselecteerd op bruikbaarheid, uitstraling en kwaliteit.' },
-  { icon: Truck, title: 'Tracked shipping', text: 'Tracked shipping met duidelijke levertijdcommunicatie.' },
-  { icon: Headphones, title: 'Support', text: 'Support via chat/ticketflow en later support@asorta.nl.' },
+const trustInfo = [
+  { icon: Lock, title: 'Secure checkout', text: 'Safe & encrypted' },
+  { icon: BadgeCheck, title: 'Curated gear', text: 'Quality selected' },
+  { icon: Truck, title: 'Tracked shipping', text: 'Fast & reliable' },
+  { icon: Headphones, title: 'Support', text: "We're here" },
 ]
 
 export default function Footer(){return <footer className="mt-16 border-t border-white/10 bg-black/35">
-  <div className="mx-auto max-w-7xl px-5 pt-12">
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {trust.map(({icon:Icon,title,text})=><div key={title} className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
-        <Icon className="text-white/68" size={20}/>
-        <h4 className="mt-3 text-sm font-black">{title}</h4>
-        <p className="mt-1 text-xs leading-5 text-white/43">{text}</p>
+  <div className="mx-auto max-w-7xl px-5 pt-10">
+    <div className="grid gap-3 rounded-[1.5rem] border border-white/10 bg-white/[.035] p-4 sm:grid-cols-2 lg:grid-cols-4">
+      {trustInfo.map(({icon:Icon,title,text})=><div key={title} className="flex items-center gap-3 rounded-2xl px-3 py-3">
+        <Icon size={20} className="text-white/72"/>
+        <span><b className="block text-xs font-black text-white/82">{title}</b><small className="block text-xs text-white/40">{text}</small></span>
       </div>)}
     </div>
   </div>
   <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
     <div>
-      <div className="flex items-center gap-2 font-black tracking-[.45em] text-white"><img src="/asorta-icon.png" alt="" className="h-8 w-8 object-contain"/>ASORTA</div>
+      <div className="font-black tracking-[.45em] text-white">ASORTA</div>
       <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">Just what you need. Premium modern utility producten voor dagelijks gebruik, setup upgrades, automotive comfort en smart essentials.</p>
     </div>
     <div><h4 className="font-black">Shop</h4><div className="mt-4 grid gap-2 text-sm text-white/55">{categories.slice(0,5).map(c=><Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-white">{c.name}</Link>)}</div></div>
