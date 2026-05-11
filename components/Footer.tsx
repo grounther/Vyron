@@ -2,19 +2,20 @@ import Link from 'next/link'
 import { BadgeCheck, Headphones, Lock, Truck } from 'lucide-react'
 import { categories } from '@/lib/products'
 
-const trustInfo = [
-  { icon: Lock, title: 'Secure checkout', text: 'Safe & encrypted' },
-  { icon: BadgeCheck, title: 'Curated gear', text: 'Quality selected' },
-  { icon: Truck, title: 'Tracked shipping', text: 'Fast & reliable' },
-  { icon: Headphones, title: 'Support', text: "We're here" },
+const trust = [
+  { icon: Lock, title: 'Secure checkout', text: 'Safe & encrypted checkout zodra payments live gaan.' },
+  { icon: BadgeCheck, title: 'Curated gear', text: 'Alle producten geselecteerd op utility, uitstraling en bruikbaarheid.' },
+  { icon: Truck, title: 'Tracked shipping', text: 'Tracking wordt gekoppeld zodra fulfilment actief is.' },
+  { icon: Headphones, title: 'Support', text: 'Support widget actief. Live chat en tickets worden verder uitgebreid.' },
 ]
 
 export default function Footer(){return <footer className="mt-16 border-t border-white/10 bg-black/35">
-  <div className="mx-auto max-w-7xl px-5 pt-10">
-    <div className="grid gap-3 rounded-[1.5rem] border border-white/10 bg-white/[.035] p-4 sm:grid-cols-2 lg:grid-cols-4">
-      {trustInfo.map(({icon:Icon,title,text})=><div key={title} className="flex items-center gap-3 rounded-2xl px-3 py-3">
-        <Icon size={20} className="text-white/72"/>
-        <span><b className="block text-xs font-black text-white/82">{title}</b><small className="block text-xs text-white/40">{text}</small></span>
+  <div className="mx-auto max-w-7xl px-5 pt-12">
+    <div className="grid gap-4 md:grid-cols-4">
+      {trust.map(({icon:Icon,title,text})=><div key={title} className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
+        <Icon size={20} className="text-white/70"/>
+        <h4 className="mt-3 text-sm font-black">{title}</h4>
+        <p className="mt-1 text-xs leading-5 text-white/45">{text}</p>
       </div>)}
     </div>
   </div>

@@ -142,116 +142,25 @@ img{display:block;max-width:100%}
 .support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
 @media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
 
-/* ASORTA v5.5.1 precision hero polish */
-.asorta-flagship-hero{
-  min-height:680px;
-  background:#050505;
-}
-.asorta-hero-base{
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 72% 12%,rgba(86,126,150,.16),transparent 28%),
-    radial-gradient(circle at 18% 38%,rgba(255,255,255,.045),transparent 22%),
-    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)),
-    #050505;
-}
-.asorta-hero-media{
-  position:absolute;
-  inset-block:0;
-  right:0;
-  width:56%;
-  overflow:hidden;
-  background:#070707;
-}
-.asorta-hero-slide{
-  position:absolute;
-  inset:0;
-  height:100%;
-  width:100%;
-  object-fit:cover;
-  opacity:0;
-  transform:scale(1.035);
-  filter:saturate(.88) contrast(1.05) brightness(.62);
-  transition:opacity .75s ease, transform 1.25s ease;
-}
-.asorta-hero-slide.is-active{
-  opacity:.92;
-  transform:scale(1.005);
-}
-.asorta-hero-media-vignette{
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(90deg,rgba(5,5,5,.24) 0%,rgba(5,5,5,.08) 22%,rgba(5,5,5,.04) 58%,rgba(5,5,5,.22) 100%),
-    linear-gradient(180deg,rgba(0,0,0,.22),transparent 25%,rgba(0,0,0,.32));
-}
-.asorta-hero-divider{
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:44.6%;
-  width:2px;
-  z-index:3;
-  transform:skewX(-13deg);
-  transform-origin:center;
-  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.22),rgba(255,255,255,.04));
-  box-shadow:16px 0 70px rgba(0,0,0,.62),-8px 0 52px rgba(0,0,0,.55);
-}
-.asorta-hero-content{
-  position:relative;
-  z-index:5;
-}
-.asorta-hero-content:before{
-  content:"";
-  position:absolute;
-  inset:-70px -80px -80px -120px;
-  z-index:-1;
-  background:radial-gradient(circle at 34% 42%,rgba(0,0,0,.62),rgba(0,0,0,.22) 42%,transparent 70%);
-  pointer-events:none;
-}
-.asorta-hero-slogan{
-  margin-top:.75rem;
-  font-size:clamp(.85rem,1vw,1.05rem);
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.34em;
-  color:rgba(255,255,255,.46);
-}
-.asorta-slide-card{
-  position:absolute;
-  right:5.5rem;
-  bottom:17%;
-  width:min(330px,36vw);
-  border-radius:1rem;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(8,9,10,.66);
-  padding:1.25rem;
-  box-shadow:0 26px 80px rgba(0,0,0,.55);
-  backdrop-filter:blur(18px);
-}
-.asorta-slide-dots{
-  position:absolute;
-  bottom:8%;
-  left:18%;
-  display:flex;
-  gap:.75rem;
-}
-.asorta-slide-counter{
-  position:absolute;
-  right:7.75rem;
-  top:30%;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(0,0,0,.46);
-  padding:.25rem .7rem;
-  font-size:11px;
-  font-weight:900;
-  color:rgba(255,255,255,.56);
-  backdrop-filter:blur(14px);
-}
 
-@media(max-width:1023px){
-  .asorta-flagship-hero{min-height:auto}
-  .asorta-hero-media,.asorta-hero-divider{display:none}
+/* ASORTA v5.5.2 precision flagship hero */
+.asorta-flagship-hero{
+  min-height:620px;
+  background:#050505;
+  isolation:isolate;
 }
+.flagship-bg-glow{position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(74,116,136,.16),transparent 34%),radial-gradient(circle at 20% 48%,rgba(255,255,255,.035),transparent 24%)}
+.flagship-visual{position:absolute;inset:0 0 0 47.5%;overflow:hidden;background:#060606}
+.flagship-slide-image{position:absolute;inset:0;height:100%;width:100%;object-fit:cover;opacity:0;transform:scale(1.02);transition:opacity .72s ease,transform 1s ease;filter:saturate(.92) contrast(1.04) brightness(.78)}
+.flagship-slide-image.is-active{opacity:.92;transform:scale(1)}
+.flagship-image-grade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,5,.55) 0%,rgba(5,5,5,.18) 18%,rgba(5,5,5,.08) 52%,rgba(5,5,5,.18) 100%),radial-gradient(circle at 76% 70%,rgba(63,104,130,.18),transparent 38%)}
+.flagship-divider{position:absolute;top:0;bottom:0;left:46.4%;z-index:3;width:1px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.30),rgba(255,255,255,.04));box-shadow:0 0 32px rgba(255,255,255,.06);transform:skewX(-11deg);transform-origin:center}
+.flagship-divider:before{content:"";position:absolute;inset:0 -18px;background:linear-gradient(90deg,rgba(0,0,0,.20),rgba(0,0,0,0));pointer-events:none}
+.flagship-copy{padding-top:1rem}
+.flagship-slide-card{position:absolute;right:4.6rem;bottom:16%;width:280px;border-radius:.85rem;border:1px solid rgba(255,255,255,.10);background:rgba(8,9,10,.68);padding:1.35rem 1.45rem;box-shadow:0 24px 82px rgba(0,0,0,.46);backdrop-filter:blur(12px)}
+.flagship-dots{position:absolute;bottom:7%;left:10%;display:flex;gap:.9rem}
+.flagship-counter{position:absolute;right:4.8rem;top:28%;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.48);padding:.32rem .75rem;font-size:11px;font-weight:900;color:rgba(255,255,255,.62);backdrop-filter:blur(12px)}
+.asorta-flagship-hero .asorta-metal-title{font-size:clamp(4.2rem,7.4vw,7.7rem);letter-spacing:-.065em;line-height:.82}
+.asorta-flagship-hero .hero-arrow{background:rgba(0,0,0,.36);border-color:rgba(255,255,255,.13)}
+@media(max-width:1023px){.flagship-visual,.flagship-divider{display:none}.asorta-flagship-hero{min-height:auto}.asorta-flagship-hero .asorta-metal-title{font-size:clamp(3.8rem,16vw,6.4rem)}}
+@media(min-width:1400px){.flagship-visual{left:48%}.flagship-divider{left:46.8%}.flagship-slide-card{right:5.2rem}.flagship-dots{left:9%}}

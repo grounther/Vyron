@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
-import PaymentNote from '@/components/PaymentNote'
 import HomeHeroSlider from '@/components/HomeHeroSlider'
 import { categories, featured, products } from '@/lib/products'
 import type { ReactNode } from 'react'
@@ -47,5 +46,4 @@ export default function Home(){return <main>
   <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Just what you need.</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 
   <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">ASORTA Insiders</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">Exclusive drops, early access.</h2><p className="mt-4 max-w-xl text-white/55">Later koppelen we dit aan e-mail automation. Nu staat de premium sectie klaar voor conversie.</p></div><Link href="/shop" className="btn-primary">Start shopping</Link></div></div></section>
-  <PaymentNote/>
 </main>}
