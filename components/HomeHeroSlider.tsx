@@ -103,7 +103,7 @@ export default function HomeHeroSlider() {
       <button
         type="button"
         onClick={() => go(1)}
-        className="hero-arrow right-4 md:right-8"
+        className="hero-arrow right-4 md:left-8" /* Fixed position in original but moved to right 8 */
         aria-label="Next promo slide"
       >
         <ArrowRight size={22} />
@@ -111,7 +111,13 @@ export default function HomeHeroSlider() {
 
       <div className="relative mx-auto grid min-h-[620px] max-w-[1500px] items-center px-5 py-18 md:min-h-[680px] lg:grid-cols-[.88fr_1.12fr] lg:px-10">
         <div className="flagship-copy z-10 max-w-[570px] lg:pl-8">
-          <h1 className="asorta-metal-title">ASORTA</h1>
+          {/* Categorie labels toegevoegd */}
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[.45em] text-white/40">
+            Tactical • Automotive • Gaming • Utility
+          </p>
+          
+          {/* Titel met Open O */}
+          <h1 className="asorta-metal-title">AS<span className="open-o">O</span>RTA</h1>
           <p className="mt-4 text-sm font-black uppercase tracking-[.34em] text-white/48 md:text-base">Just what you need.</p>
 
           <p className="mt-7 max-w-lg text-base leading-7 text-white/68 md:text-lg">
@@ -148,6 +154,13 @@ export default function HomeHeroSlider() {
           </div>
 
           <div className="flagship-counter">{slideLabel}</div>
+
+          {/* USP Badge toegevoegd */}
+          <div className="absolute bottom-[8%] right-[5.4rem] hidden lg:block text-right">
+            <div className="h-[1px] w-12 bg-orange-500 mb-3 ml-auto" />
+            <p className="text-[11px] font-black uppercase tracking-[.25em] text-white/90">Premium Gear.</p>
+            <p className="text-[9px] font-bold uppercase tracking-[.20em] text-white/40">Built to perform.</p>
+          </div>
         </div>
 
         <div className="relative z-10 mt-10 rounded-[2rem] border border-white/10 bg-black/42 p-4 shadow-[0_30px_100px_rgba(0,0,0,.5)] backdrop-blur-xl lg:hidden">
