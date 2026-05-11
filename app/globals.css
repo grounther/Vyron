@@ -1,278 +1,409 @@
-/* ASORTA v5.6 cinematic flagship hero */
-.asorta-flagship-hero {
-  position: relative;
-  min-height: 820px;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  background: #030303;
-  display: grid;
-  grid-template-columns: 44% 56%;
-}
+@import "tailwindcss";
 
-.asorta-hero-left {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  align-items: center;
+:root{
+  --bg:#050505;
+  --panel:#0d0d0d;
+  --panel2:#151515;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(214,214,214,.22);
+  --text:#f4f4f4;
+  --muted:rgba(255,255,255,.62);
+  --olive:#5B6653;
+  --silver:#D6D6D6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
   background:
-    radial-gradient(circle at 22% 32%, rgba(255,255,255,.045), transparent 28%),
-    linear-gradient(90deg, #030303 0%, #050505 72%, rgba(5,5,5,.78) 100%);
+    radial-gradient(circle at 74% 0%,rgba(91,102,83,.22),transparent 30%),
+    radial-gradient(circle at 18% 20%,rgba(214,214,214,.07),transparent 24%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
 }
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::selection{background:rgba(91,102,83,.65);color:white}
+.text-balance{text-wrap:balance}
+.noise:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E")}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.027));border:1px solid var(--line);box-shadow:0 24px 90px rgba(0,0,0,.36)}
+.glass{background:rgba(8,8,8,.68);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
+.metal{background:linear-gradient(135deg,#050505,#111 44%,#080b07 100%)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:white;color:black;font-weight:900;padding:.9rem 1.35rem;transition:.25s ease;box-shadow:0 18px 50px rgba(255,255,255,.1)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 60px rgba(255,255,255,.2)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:900;padding:.9rem 1.35rem;color:rgba(255,255,255,.82);transition:.25s ease}
+.btn-secondary:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);transform:translateY(-2px)}
+.kicker{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.32em;color:rgba(255,255,255,.43)}
+.product-img{height:190px;width:100%;object-fit:cover}
+.product-detail-img{height:320px;width:100%;object-fit:cover}
+@media(min-width:640px){.product-img{height:210px}}
+@media(min-width:1024px){.product-img{height:225px}.product-detail-img{height:560px}}
 
-.asorta-hero-content {
-  width: 100%;
-  max-width: 620px;
-  padding-left: clamp(2rem, 6vw, 6rem);
-  padding-right: 2rem;
+@keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ASORTA v5.2 premium homepage */
+.hero-shell{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.58) 42%,rgba(0,0,0,.18) 100%),
+    radial-gradient(circle at 82% 24%,rgba(99,138,152,.20),transparent 31%),
+    radial-gradient(circle at 26% 42%,rgba(255,255,255,.055),transparent 26%),
+    linear-gradient(135deg,#030303,#101410 58%,#030303);
 }
-
-.asorta-metal-title {
-  font-size: clamp(5rem, 8.4vw, 9rem);
-  line-height: .78;
-  letter-spacing: -.075em;
-  font-weight: 1000;
-  color: #fff;
-  text-shadow:
-    0 8px 30px rgba(255,255,255,.08),
-    0 26px 90px rgba(0,0,0,.72);
+.hero-arrow{
+  position:absolute;
+  top:50%;
+  z-index:20;
+  display:none;
+  height:3.25rem;
+  width:3.25rem;
+  transform:translateY(-50%);
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.30);
+  color:rgba(255,255,255,.78);
+  backdrop-filter:blur(14px);
+  transition:.25s ease;
 }
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
+@media(min-width:1024px){.hero-arrow{display:grid}}
+.asorta-hero-title{
+  font-size:clamp(4.5rem,10vw,8.8rem);
+  line-height:.78;
+  font-weight:950;
+  letter-spacing:-.075em;
+  color:#fff;
+  text-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.category-tile{
+  position:relative;
+  min-height:11rem;
+  overflow:hidden;
+  border-radius:1.35rem;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.035);
+  box-shadow:0 20px 90px rgba(0,0,0,.28);
+  transition:.28s ease;
+}
+.category-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(91,102,83,.14)}
+.brandmark-glow{filter:drop-shadow(0 10px 30px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(183,200,173,.08))}
 
+/* ASORTA v5.3 cinematic homepage */
+.cinematic-hero{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
+    radial-gradient(circle at 78% 18%,rgba(91,130,150,.18),transparent 32%),
+    #050505;
+}
+.asorta-metal-title{
+  font-size:clamp(4rem,9vw,9.5rem);
+  line-height:.78;
+  letter-spacing:-.075em;
+  font-weight:1000;
+  color:#fff;
+  text-shadow:0 5px 24px rgba(255,255,255,.08),0 22px 90px rgba(0,0,0,.65);
+}
 @supports((-webkit-background-clip:text) or (background-clip:text)){
-  .asorta-metal-title {
-    background: linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #f4f4f4 32%,
-      #9fa6a8 54%,
-      #ffffff 70%,
-      #62686a 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .asorta-metal-title{
+    background:linear-gradient(180deg,#fff 0%,#f3f3f3 36%,#aeb4b4 56%,#fff 72%,#6e7474 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
   }
 }
+.hero-trust-card{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:1.15rem;
+  background:rgba(255,255,255,.045);
+  padding:1rem;
+  box-shadow:0 18px 60px rgba(0,0,0,.24);
+  backdrop-filter:blur(18px);
+  transition:.25s ease;
+}
+.hero-trust-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07)}
+.hero-shell{min-height:auto}
+.category-tile{position:relative;min-height:140px;overflow:hidden;border-radius:1.15rem;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.hero-arrow{position:absolute;top:50%;z-index:20;display:grid;height:3rem;width:3rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.42);color:rgba(255,255,255,.78);backdrop-filter:blur(16px);transition:.22s ease;transform:translateY(-50%)}
+.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
 
-.asorta-hero-slogan {
-  margin-top: 1.25rem;
-  font-size: clamp(.95rem, 1.15vw, 1.25rem);
-  font-weight: 900;
-  letter-spacing: .32em;
-  color: rgba(255,255,255,.55);
+/* ASORTA v5.4 support + hero trust polish */
+.hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
+.hero-trust-inline:hover{opacity:1;transform:translateY(-1px)}
+.support-float{position:fixed;right:1.15rem;bottom:1.15rem;z-index:80;display:grid;height:3.6rem;width:3.6rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.055));color:white;box-shadow:0 18px 70px rgba(0,0,0,.52),0 0 32px rgba(111,125,100,.24);backdrop-filter:blur(18px);transition:.24s ease}
+.support-float:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(255,255,255,.30);box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 38px rgba(122,166,184,.22)}
+.support-float-pulse{position:absolute;right:.55rem;top:.55rem;height:.62rem;width:.62rem;border-radius:999px;background:#9fb194;box-shadow:0 0 0 0 rgba(159,177,148,.64);animation:supportPulse 1.8s infinite}
+@keyframes supportPulse{70%{box-shadow:0 0 0 10px rgba(159,177,148,0)}100%{box-shadow:0 0 0 0 rgba(159,177,148,0)}}
+.support-overlay{position:fixed;inset:0;z-index:100;pointer-events:none;background:rgba(0,0,0,0);transition:.25s ease}
+.support-overlay-open{pointer-events:auto;background:rgba(0,0,0,.56);backdrop-filter:blur(6px)}
+.support-panel{position:absolute;right:1rem;bottom:1rem;width:calc(100vw - 2rem);max-width:430px;overflow:hidden;border-radius:1.8rem;border:1px solid rgba(255,255,255,.12);background:rgba(7,7,7,.94);box-shadow:0 34px 120px rgba(0,0,0,.72);backdrop-filter:blur(24px);transition:.26s ease}
+.support-input{width:100%;border-radius:1.1rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.34);padding:.95rem 1rem;color:white;outline:none;transition:.2s ease}
+.support-input::placeholder{color:rgba(255,255,255,.36)}
+.support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
+@media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
+
+
+/* ASORTA v5.6 flagship cinematic hero */
+.asorta-flagship-hero{
+  min-height:720px;
+  background:#050505;
+  isolation:isolate;
+  overflow:hidden;
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.asorta-hero-description {
-  margin-top: 2rem;
-  max-width: 580px;
-  color: rgba(255,255,255,.72);
-  font-size: clamp(1rem, 1.2vw, 1.18rem);
-  line-height: 1.75;
-}
-
-.asorta-hero-actions {
-  margin-top: 2.35rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.asorta-hero-divider {
-  position: absolute;
-  z-index: 7;
-  top: 0;
-  bottom: 0;
-  left: 44%;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(255,255,255,.28),
-    rgba(255,255,255,.08),
-    transparent
-  );
-  transform: skewX(-12deg);
-  transform-origin: center;
-  box-shadow: 0 0 22px rgba(255,255,255,.08);
-}
-
-.asorta-hero-right {
-  position: relative;
-  min-height: 820px;
-  overflow: hidden;
-  background: #050505;
-}
-
-.asorta-hero-image {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transform: scale(1.025);
-  transition: opacity .9s ease, transform 1.2s ease;
-}
-
-.asorta-hero-image.active {
-  opacity: .92;
-  transform: scale(1);
-}
-
-.asorta-hero-right-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+.flagship-bg-glow{
+  position:absolute;
+  inset:0;
   background:
-    linear-gradient(90deg, rgba(0,0,0,.58) 0%, rgba(0,0,0,.18) 24%, rgba(0,0,0,.05) 56%, rgba(0,0,0,.25) 100%),
-    linear-gradient(0deg, rgba(0,0,0,.56) 0%, transparent 34%, rgba(0,0,0,.2) 100%);
+    radial-gradient(circle at 78% 18%,rgba(58,102,128,.18),transparent 34%),
+    radial-gradient(circle at 18% 48%,rgba(255,255,255,.035),transparent 24%),
+    linear-gradient(180deg,rgba(255,255,255,.02),transparent 35%);
+  z-index:1;
 }
 
-.asorta-premium-card {
-  position: absolute;
-  z-index: 5;
-  right: clamp(2rem, 5vw, 5.5rem);
-  bottom: clamp(2.3rem, 6vw, 5.2rem);
-  width: min(330px, 80%);
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(5,5,5,.72);
-  backdrop-filter: blur(16px);
-  border-radius: 1rem;
-  padding: 1.35rem 1.55rem;
-  box-shadow: 0 28px 90px rgba(0,0,0,.55);
+.flagship-visual{
+  position:absolute;
+  inset:0 0 0 45%;
+  overflow:hidden;
+  background:#050505;
+  z-index:1;
 }
 
-.asorta-premium-card p {
-  margin: 0;
-  font-size: .72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .36em;
-  color: rgba(255,255,255,.58);
+.flagship-slide-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+
+  /* HUGE FIX */
+  object-position:center center;
+
+  opacity:0;
+  transform:scale(1.01);
+
+  transition:
+    opacity .9s ease,
+    transform 1.4s ease;
+
+  filter:
+    saturate(.92)
+    contrast(1.02)
+    brightness(.62);
 }
 
-.asorta-premium-card h2 {
-  margin: .75rem 0 .25rem;
-  font-size: clamp(1.45rem, 1.7vw, 2rem);
-  line-height: 1.05;
-  font-weight: 1000;
-  color: #fff;
+.flagship-slide-image.is-active{
+  opacity:.96;
+  transform:scale(1);
 }
 
-.asorta-premium-card span {
-  display: block;
-  font-size: clamp(1rem, 1.15vw, 1.25rem);
-  font-weight: 900;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.62);
+.flagship-image-grade{
+  position:absolute;
+  inset:0;
+
+  /* MUCH BETTER CINEMATIC BLEND */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5,5,5,.78) 0%,
+      rgba(5,5,5,.34) 14%,
+      rgba(5,5,5,.08) 36%,
+      rgba(5,5,5,.12) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.10),
+      rgba(0,0,0,.38)
+    ),
+    radial-gradient(
+      circle at 78% 74%,
+      rgba(60,98,122,.18),
+      transparent 42%
+    );
+
+  z-index:2;
 }
 
-.asorta-slide-count {
-  position: absolute;
-  z-index: 5;
-  top: 34%;
-  right: clamp(2rem, 5vw, 5rem);
-  border-radius: 999px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(255,255,255,.08);
-  padding: .32rem .75rem;
-  font-size: .75rem;
-  font-weight: 900;
-  letter-spacing: .12em;
-  color: rgba(255,255,255,.68);
-  backdrop-filter: blur(12px);
+.flagship-divider{
+  position:absolute;
+  top:0;
+  bottom:0;
+
+  left:44.7%;
+
+  z-index:4;
+
+  width:1px;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255,255,255,.24),
+      rgba(255,255,255,.08),
+      transparent
+    );
+
+  transform:skewX(-10deg);
+
+  box-shadow:
+    0 0 24px rgba(255,255,255,.05);
 }
 
-.asorta-slide-dots {
-  position: absolute;
-  z-index: 6;
-  left: 10%;
-  bottom: 7%;
-  display: flex;
-  align-items: center;
-  gap: .65rem;
+.flagship-divider::before{
+  content:"";
+
+  position:absolute;
+  inset:0 -14px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,.22),
+      transparent
+    );
+
+  pointer-events:none;
 }
 
-.asorta-slide-dots button {
-  width: .55rem;
-  height: .55rem;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255,255,255,.35);
-  cursor: pointer;
-  transition: .22s ease;
+.flagship-copy{
+  position:relative;
+  z-index:10;
+
+  padding-top:0;
 }
 
-.asorta-slide-dots button.active {
-  width: 2rem;
-  background: #fff;
-  box-shadow: 0 0 24px rgba(255,255,255,.45);
+.asorta-flagship-hero .asorta-metal-title{
+  font-size:clamp(4.8rem,8vw,8.6rem);
+
+  line-height:.78;
+
+  letter-spacing:-.072em;
 }
 
-.hero-arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 20;
-  display: grid;
-  height: 3.25rem;
-  width: 3.25rem;
-  transform: translateY(-50%);
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(0,0,0,.34);
-  color: rgba(255,255,255,.82);
-  backdrop-filter: blur(14px);
-  transition: .25s ease;
+.flagship-slide-card{
+  position:absolute;
+
+  right:5.2rem;
+
+  bottom:8%;
+
+  width:300px;
+
+  border-radius:1rem;
+
+  border:1px solid rgba(255,255,255,.10);
+
+  background:rgba(8,9,10,.60);
+
+  backdrop-filter:blur(16px);
+
+  padding:1.45rem 1.55rem;
+
+  box-shadow:
+    0 28px 100px rgba(0,0,0,.56);
+
+  z-index:8;
 }
 
-.hero-arrow:hover {
-  background: rgba(255,255,255,.08);
-  color: #fff;
-  transform: translateY(-50%) scale(1.04);
+.flagship-slide-card p{
+  color:rgba(255,255,255,.58);
 }
 
-@media(max-width: 1024px) {
-  .asorta-flagship-hero {
-    display: block;
-    min-height: auto;
+.flagship-slide-card h2{
+  margin-top:.55rem;
+
+  font-size:2rem;
+
+  line-height:1.05;
+
+  font-weight:1000;
+}
+
+.flagship-slide-card .subtitle{
+  color:rgba(255,255,255,.62);
+}
+
+.flagship-dots{
+  position:absolute;
+
+  left:8.5%;
+
+  bottom:6.5%;
+
+  display:flex;
+
+  gap:.85rem;
+
+  z-index:8;
+}
+
+.flagship-counter{
+  position:absolute;
+
+  right:5.4rem;
+
+  top:24%;
+
+  border-radius:999px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+  background:rgba(0,0,0,.48);
+
+  padding:.36rem .78rem;
+
+  font-size:11px;
+
+  font-weight:900;
+
+  color:rgba(255,255,255,.62);
+
+  backdrop-filter:blur(12px);
+
+  z-index:8;
+}
+
+.asorta-flagship-hero .hero-arrow{
+  background:rgba(0,0,0,.34);
+
+  border-color:rgba(255,255,255,.13);
+}
+
+/* WIDESCREEN IMPROVEMENTS */
+@media(min-width:1600px){
+
+  .flagship-visual{
+    left:46%;
   }
 
-  .asorta-hero-left {
-    min-height: 560px;
-    background:
-      linear-gradient(90deg, rgba(0,0,0,.92), rgba(0,0,0,.72)),
-      #050505;
+  .flagship-divider{
+    left:45.4%;
   }
 
-  .asorta-hero-content {
-    padding: 7rem 1.5rem 3rem;
-  }
-
-  .asorta-hero-right {
-    min-height: 460px;
-  }
-
-  .asorta-hero-divider {
-    display: none;
+  .flagship-slide-card{
+    right:6rem;
   }
 }
 
-@media(max-width: 640px) {
-  .asorta-metal-title {
-    font-size: clamp(4rem, 22vw, 6rem);
+/* MOBILE */
+@media(max-width:1023px){
+
+  .flagship-visual,
+  .flagship-divider{
+    display:none;
   }
 
-  .asorta-hero-slogan {
-    letter-spacing: .22em;
+  .asorta-flagship-hero{
+    min-height:auto;
   }
 
-  .asorta-premium-card {
-    right: 1rem;
-    bottom: 1rem;
+  .asorta-flagship-hero .asorta-metal-title{
+    font-size:clamp(4rem,16vw,6.5rem);
   }
 
-  .hero-arrow {
-    height: 2.8rem;
-    width: 2.8rem;
+  .flagship-copy{
+    padding-top:1rem;
   }
 }

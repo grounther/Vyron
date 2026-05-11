@@ -4,33 +4,56 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
-const slides = [
+type HeroSlide = {
+  kicker: string
+  title: string
+  subtitle: string
+  text: string
+  image: string
+  href: string
+  cta: string
+  position?: string
+}
+
+const slides: HeroSlide[] = [
   {
     kicker: 'Premium gear',
     title: 'Premium gear.',
     subtitle: 'Built to perform.',
+    text: 'Tactical carry, automotive utility en smart everyday upgrades — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.',
     image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg',
+    href: '/product/asorta-urban-sling-pro',
+    cta: 'View Urban Sling Pro',
     position: 'center center',
   },
   {
-    kicker: 'Opening actie',
+    kicker: 'Openingsactie',
     title: '10% korting.',
     subtitle: 'Op de gehele bestelling.',
-    image: '/products/urban-sling/1_396fbdc2-a8a9-4493-95fc-327e15a1a82a.jpg',
+    text: 'Vier de ASORTA launch met 10% korting op je complete bestelling. Actie tijdelijk beschikbaar tijdens de openingsfase.',
+    image: '/products/drivecharge/13_99d408a4-2bbd-41f4-a3e8-0fc05e190202.jpg',
+    href: '/shop',
+    cta: 'Shop met korting',
     position: 'center center',
   },
   {
-    kicker: 'Automotive utility',
+    kicker: 'Automotive drop',
     title: 'Upgrade your drive.',
     subtitle: 'Clean cockpit utility.',
-    image: '/products/drivecharge/13_99d408a4-2bbd-41f4-a3e8-0fc05e190202.jpg',
+    text: 'Wireless charging, interior ambiance en practical car accessories voor moderne bestuurders.',
+    image: '/products/drivecharge/1_1c3d32e3-9eb6-47f9-b217-e2911571c64a.jpg',
+    href: '/category/automotive',
+    cta: 'Explore automotive',
     position: 'center center',
   },
   {
     kicker: 'Creator setup',
     title: 'Sharper setups.',
     subtitle: 'Better utility.',
+    text: 'Desk, gaming en creator accessoires geselecteerd voor functie, stijl en content potential.',
     image: '/products/wavemic/1_a09d4f0d-2641-4a83-9da9-58e22e5d8d55.jpg',
+    href: '/category/gaming',
+    cta: 'Explore setup gear',
     position: 'center top',
   },
 ]
@@ -40,97 +63,103 @@ export default function HomeHeroSlider() {
   const slide = slides[active]
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActive((current) => (current + 1) % slides.length)
-    }, 7000)
-
+    const timer = setInterval(() => setActive((v) => (v + 1) % slides.length), 6500)
     return () => clearInterval(timer)
   }, [])
 
-  const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
-
   const go = (direction: number) => {
-    setActive((current) => (current + direction + slides.length) % slides.length)
+    setActive((v) => (v + direction + slides.length) % slides.length)
   }
 
+  const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
+
   return (
-    <section className="asorta-flagship-hero">
+    <section className="asorta-flagship-hero noise relative overflow-hidden border-b border-white/10">
+      <div className="flagship-bg-glow" />
+
+      <div className="flagship-visual" aria-hidden="true">
+        {slides.map((s, idx) => (
+          <img
+            key={s.title}
+            src={s.image}
+            alt=""
+            style={{ objectPosition: s.position || 'center center' }}
+            className={`flagship-slide-image ${idx === active ? 'is-active' : ''}`}
+          />
+        ))}
+        <div className="flagship-image-grade" />
+      </div>
+
+      <div className="flagship-divider" />
+
       <button
         type="button"
         onClick={() => go(-1)}
-        className="hero-arrow left-5 md:left-8"
-        aria-label="Vorige slide"
+        className="hero-arrow left-4 md:left-8"
+        aria-label="Previous promo slide"
       >
         <ArrowLeft size={22} />
       </button>
-
       <button
         type="button"
         onClick={() => go(1)}
-        className="hero-arrow right-5 md:right-8"
-        aria-label="Volgende slide"
+        className="hero-arrow right-4 md:right-8"
+        aria-label="Next promo slide"
       >
         <ArrowRight size={22} />
       </button>
 
-      <div className="asorta-hero-left">
-        <div className="asorta-hero-content">
+      <div className="relative mx-auto grid min-h-[620px] max-w-[1500px] items-center px-5 py-18 md:min-h-[680px] lg:grid-cols-[.88fr_1.12fr] lg:px-10">
+        <div className="flagship-copy z-10 max-w-[570px] lg:pl-8">
           <h1 className="asorta-metal-title">ASORTA</h1>
+          <p className="mt-4 text-sm font-black uppercase tracking-[.34em] text-white/48 md:text-base">Just what you need.</p>
 
-          <p className="asorta-hero-slogan">JUST WHAT YOU NEED.</p>
-
-          <p className="asorta-hero-description">
-            Premium gear voor modern carry, automotive upgrades, gaming setups,
-            desk organization en smart daily utility — geselecteerd op kwaliteit,
-            uitstraling en echte bruikbaarheid.
+          <p className="mt-7 max-w-lg text-base leading-7 text-white/68 md:text-lg">
+            Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.
           </p>
 
-          <div className="asorta-hero-actions">
+          <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/shop" className="btn-primary">
               Explore Collection <ArrowRight className="ml-2" size={18} />
             </Link>
-
             <Link href="#featured" className="btn-secondary">
               Best Sellers
             </Link>
           </div>
         </div>
-      </div>
 
-      <div className="asorta-hero-divider" />
+        <div className="relative z-10 hidden h-full lg:block">
+          <div className="flagship-slide-card">
+            <p className="text-xs font-black uppercase tracking-[.34em] text-white/58">{slide.kicker}</p>
+            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
+            <p className="text-lg font-bold uppercase tracking-[.14em] text-white/58">{slide.subtitle}</p>
+          </div>
 
-      <div className="asorta-hero-right">
-        {slides.map((item, index) => (
-          <div
-            key={item.kicker}
-            className={`asorta-hero-image ${index === active ? 'active' : ''}`}
-            style={{
-              backgroundImage: `url(${item.image})`,
-              backgroundPosition: item.position,
-            }}
-          />
-        ))}
+          <div className="flagship-dots">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActive(idx)}
+                className={`h-2 rounded-full transition-all ${idx === active ? 'w-8 bg-white shadow-[0_0_20px_rgba(255,255,255,.45)]' : 'w-2 bg-white/35 hover:bg-white/65'}`}
+                aria-label={`Go to promo slide ${idx + 1}`}
+              />
+            ))}
+          </div>
 
-        <div className="asorta-hero-right-overlay" />
-
-        <div className="asorta-slide-count">{slideLabel}</div>
-
-        <div className="asorta-premium-card">
-          <p>{slide.kicker}</p>
-          <h2>{slide.title}</h2>
-          <span>{slide.subtitle}</span>
+          <div className="flagship-counter">{slideLabel}</div>
         </div>
 
-        <div className="asorta-slide-dots">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setActive(index)}
-              className={index === active ? 'active' : ''}
-              aria-label={`Ga naar slide ${index + 1}`}
-            />
-          ))}
+        <div className="relative z-10 mt-10 rounded-[2rem] border border-white/10 bg-black/42 p-4 shadow-[0_30px_100px_rgba(0,0,0,.5)] backdrop-blur-xl lg:hidden">
+          <img src={slide.image} alt={slide.title} className="h-[300px] w-full rounded-[1.4rem] object-cover opacity-80" style={{ objectPosition: slide.position || 'center center' }} />
+          <div className="mt-4">
+            <p className="text-xs font-black uppercase tracking-[.28em] text-white/45">{slide.kicker}</p>
+            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-white/58">{slide.text}</p>
+            <Link href={slide.href} className="mt-4 inline-flex items-center gap-2 text-sm font-black text-white/75 transition hover:text-white">
+              {slide.cta} <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
