@@ -4,14 +4,7 @@ import PaymentNote from '@/components/PaymentNote'
 import HomeHeroSlider from '@/components/HomeHeroSlider'
 import { categories, featured, products } from '@/lib/products'
 import type { ReactNode } from 'react'
-import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles, Truck, Zap } from 'lucide-react'
-
-const trust = [
-  {i:<ShieldCheck/>,t:'Premium Selection',d:'Alleen producten met utility, marktvraag en premium fit.'},
-  {i:<Truck/>,t:'Supplier Filter',d:'Geselecteerd voor betrouwbare fulfillment, tracking en kwaliteit.'},
-  {i:<Sparkles/>,t:'Low Refund Focus',d:'Eerlijke specs, duidelijke content en praktische producten.'},
-  {i:<Zap/>,t:'Content Ready',d:'Gekozen voor TikTok, Reels en hoge visuele conversie.'}
-]
+import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react'
 
 const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNode}> = {
   tactical: { image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg', line: 'Built for performance', icon: <ShieldCheck size={22}/> },
@@ -50,8 +43,6 @@ export default function Home(){return <main>
     </div>
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
   </section>
-
-  <section className="mx-auto max-w-7xl px-5 py-12"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{trust.map(x=><div key={x.t} className="card rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/20"><div className="text-white/70">{x.i}</div><h3 className="mt-4 font-black">{x.t}</h3><p className="mt-2 text-sm leading-6 text-white/55">{x.d}</p></div>)}</div></section>
 
   <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Just what you need.</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 

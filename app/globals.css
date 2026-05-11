@@ -141,3 +141,31 @@ img{display:block;max-width:100%}
 .support-input::placeholder{color:rgba(255,255,255,.36)}
 .support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
 @media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
+
+/* ASORTA v5.5.1 clean split hero polish */
+.clean-split-hero .asorta-metal-title{
+  max-width:min(92vw, 560px);
+}
+.hero-left-panel{
+  background:
+    linear-gradient(90deg,#050505 0%,#050505 72%,rgba(5,5,5,.96) 100%),
+    radial-gradient(circle at 20% 42%,rgba(255,255,255,.045),transparent 28%);
+  box-shadow:80px 0 120px rgba(0,0,0,.55);
+}
+.hero-divider{
+  width:2px;
+  transform:skewX(-16deg);
+  transform-origin:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(214,214,214,.38) 20%,rgba(91,102,83,.34) 50%,rgba(214,214,214,.34) 80%,rgba(255,255,255,.02));
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.045),
+    0 0 36px rgba(183,200,173,.16),
+    12px 0 44px rgba(0,0,0,.55),
+    -12px 0 44px rgba(0,0,0,.45);
+}
+.clean-brand-lockup{
+  filter:drop-shadow(0 28px 80px rgba(0,0,0,.58));
+}
+@media(max-width:1023px){
+  .clean-split-hero .asorta-metal-title{font-size:clamp(4rem,19vw,7rem)}
+}

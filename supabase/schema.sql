@@ -130,3 +130,29 @@ alter table support_tickets enable row level security;
 
 -- Support tickets are inserted server-side with the service role.
 -- Admin viewing/editing will be added to Atlas in a later build.
+
+-- ASORTA v5.5.1 promotions foundation
+create table if not exists promotions (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  subtitle text,
+  description text,
+  code text,
+  discount_percent numeric(5,2),
+  placement text default 'homepage_hero',
+  active boolean not null default false,
+  starts_at timestamptz,
+  ends_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table promotions enable row level security;
+
+drop policy if exists "Public can read active promotions" on promotions;
+create policy "Public can read active promotions" on promotions
+for select using (active = true);
+
+insert into promotions (title, subtitle, description, code, discount_percent, placement, active)
+values ('Openingsactie: 10% korting', 'Op de gehele bestelling', 'Tijdelijke launchactie voor de eerste ASORTA klanten.', 'ASORTA10', 10, 'homepage_hero', true)
+on conflict do nothing;

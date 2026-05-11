@@ -2,9 +2,18 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, BadgeCheck, Lock, ShieldCheck, Truck } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 const slides = [
+  {
+    kicker: 'Openingsactie',
+    title: '10% korting.',
+    subtitle: 'Op de gehele bestelling.',
+    text: 'Tijdelijke launch deal voor de eerste ASORTA klanten. De kortingscode en voorwaarden worden straks beheerd vanuit Atlas.',
+    image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg',
+    href: '/shop',
+    cta: 'Shop met launch voordeel',
+  },
   {
     kicker: 'Premium gear',
     title: 'Premium gear.',
@@ -32,21 +41,6 @@ const slides = [
     href: '/shop',
     cta: 'Shop launch catalog',
   },
-  {
-    kicker: 'Creator setup',
-    title: 'Sharper setups.',
-    subtitle: 'Better utility.',
-    text: 'Desk, gaming en creator accessoires geselecteerd voor functie, stijl en content potential.',
-    image: '/products/wavemic/1_a09d4f0d-2641-4a83-9da9-58e22e5d8d55.jpg',
-    href: '/category/gaming',
-    cta: 'Explore setup gear',
-  },
-]
-
-const trust = [
-  { icon: Lock, title: 'Secure checkout', text: 'Safe & encrypted' },
-  { icon: BadgeCheck, title: 'Curated gear', text: 'Quality selected' },
-  { icon: Truck, title: 'Tracked shipping', text: 'Fast & reliable' },
 ]
 
 export default function HomeHeroSlider() {
@@ -65,47 +59,35 @@ export default function HomeHeroSlider() {
   const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
 
   return (
-    <section className="cinematic-hero noise relative overflow-hidden border-b border-white/10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_14%,rgba(76,112,129,.22),transparent_30%),radial-gradient(circle_at_18%_40%,rgba(255,255,255,.045),transparent_24%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,#050505_0%,rgba(5,5,5,.94)_30%,rgba(5,5,5,.68)_47%,rgba(5,5,5,.08)_70%,rgba(5,5,5,.18)_100%)]" />
-      <div className="absolute inset-y-0 right-0 w-[64%] overflow-hidden">
+    <section className="cinematic-hero clean-split-hero noise relative overflow-hidden border-b border-white/10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,rgba(76,112,129,.18),transparent_34%),radial-gradient(circle_at_18%_42%,rgba(255,255,255,.035),transparent_24%)]" />
+
+      <div className="absolute inset-y-0 right-0 w-full overflow-hidden lg:w-[65%]">
         {slides.map((s, idx) => (
           <img
-            key={s.title}
+            key={s.title + idx}
             src={s.image}
             alt={s.title}
             className={`absolute inset-0 h-full w-full object-cover transition duration-700 ease-out ${idx === active ? 'scale-100 opacity-70' : 'scale-105 opacity-0'}`}
           />
         ))}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,#050505_0%,rgba(5,5,5,.72)_20%,rgba(5,5,5,.22)_48%,rgba(5,5,5,.1)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_60%,rgba(80,145,180,.18),transparent_35%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.52)_24%,rgba(5,5,5,.16)_56%,rgba(5,5,5,.18)_100%)] lg:bg-[linear-gradient(90deg,rgba(5,5,5,.55)_0%,rgba(5,5,5,.13)_42%,rgba(5,5,5,.08)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_58%,rgba(88,145,170,.13),transparent_34%)]" />
       </div>
-      <div className="absolute inset-y-0 left-[43%] hidden w-52 -skew-x-[16deg] bg-black/50 blur-[1px] lg:block" />
 
-      <button
-        type="button"
-        onClick={() => go(-1)}
-        className="hero-arrow left-4 md:left-8"
-        aria-label="Previous promo slide"
-      >
+      <div className="hero-left-panel absolute inset-y-0 left-0 hidden w-[38%] lg:block" />
+      <div className="hero-divider absolute inset-y-0 left-[37.5%] hidden lg:block" />
+
+      <button type="button" onClick={() => go(-1)} className="hero-arrow left-4 md:left-8" aria-label="Previous promo slide">
         <ArrowLeft size={22} />
       </button>
-      <button
-        type="button"
-        onClick={() => go(1)}
-        className="hero-arrow right-4 md:right-8"
-        aria-label="Next promo slide"
-      >
+      <button type="button" onClick={() => go(1)} className="hero-arrow right-4 md:right-8" aria-label="Next promo slide">
         <ArrowRight size={22} />
       </button>
 
-      <div className="relative mx-auto grid min-h-[680px] max-w-[1440px] items-center px-5 py-20 md:min-h-[760px] lg:grid-cols-[.95fr_1.05fr] lg:px-8 lg:py-24">
+      <div className="relative mx-auto grid min-h-[650px] max-w-[1440px] items-center px-5 py-20 md:min-h-[720px] lg:grid-cols-[.58fr_1fr] lg:px-8 lg:py-24">
         <div className="z-10 max-w-xl lg:pl-10">
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[.045] px-4 py-2 text-xs font-black uppercase tracking-[.24em] text-white/62 shadow-[0_16px_55px_rgba(0,0,0,.35)] backdrop-blur-xl">
-            <ShieldCheck size={14} /> Tactical • Automotive • Gaming • Utility
-          </div>
-
-          <div>
+          <div className="clean-brand-lockup">
             <h1 className="asorta-metal-title">ASORTA</h1>
             <p className="mt-3 text-sm font-black uppercase tracking-[.32em] text-white/46 md:text-base">Just what you need.</p>
           </div>
@@ -122,27 +104,15 @@ export default function HomeHeroSlider() {
               Best Sellers
             </Link>
           </div>
-
-          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/52">
-            {trust.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="hero-trust-inline">
-                <Icon className="text-white/82" size={21} />
-                <span>
-                  <b className="block text-xs font-black text-white/86">{title}</b>
-                  <small className="block text-xs text-white/42">{text}</small>
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="relative z-10 hidden h-full lg:block">
-          <div className="absolute bottom-[18%] right-10 w-[310px] rounded-xl border border-white/10 bg-black/50 p-5 shadow-[0_24px_80px_rgba(0,0,0,.5)] backdrop-blur-xl">
+          <div className="absolute bottom-[17%] right-10 w-[320px] rounded-xl border border-white/10 bg-black/58 p-5 shadow-[0_24px_80px_rgba(0,0,0,.52)] backdrop-blur-xl">
             <p className="text-xs font-black uppercase tracking-[.34em] text-white/62">{slide.kicker}</p>
             <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
             <p className="text-lg font-bold uppercase tracking-[.14em] text-white/56">{slide.subtitle}</p>
           </div>
-          <div className="absolute bottom-[7%] left-[22%] flex gap-3">
+          <div className="absolute bottom-[7%] left-[20%] flex gap-3">
             {slides.map((_, idx) => (
               <button
                 key={idx}

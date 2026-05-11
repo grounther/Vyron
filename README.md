@@ -9,10 +9,15 @@ npm install
 npm run dev
 ```
 
+## Version
+
+Current handoff: v5.5.1
+
 ## Notes
 
-- v4.4 adds a separate internal Atlas login route: `/atlas-access`.
-- Customer auth stays on `/login` and `/register`.
-- Atlas remains protected by Supabase Auth + `admin_users` allowlist.
-- Next.js middleware file has been replaced with `proxy.ts` to match the newer Next.js convention.
+- v5.5.1 builds on the current v5.4/v5.5 repo state.
+- Hero is cleaned into a split premium layout.
+- Homepage trust info moved to footer.
+- Opening promotion added to the homepage slider.
+- Atlas promotions foundation added at `/atlas/promotions`.
 - Keep `.env.local` private and never commit Supabase service role keys or CJ API tokens.
