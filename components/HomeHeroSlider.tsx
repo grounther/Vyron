@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
@@ -74,80 +74,76 @@ export default function HomeHeroSlider() {
     setActive((current) => (current + direction + slides.length) % slides.length)
   }
 
+  const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
+
   return (
-    <section className="asorta-flagship noise">
-      <div className="asorta-flagship-orb asorta-flagship-orb-blue" />
-      <div className="asorta-flagship-orb asorta-flagship-orb-red" />
-      <div className="asorta-flagship-lines" />
+    <section className="asorta-campaign-hero noise">
+      <div className="asorta-campaign-left">
+        <div className="asorta-campaign-copy">
+          <h1 className="asorta-metal-title">ASORTA</h1>
 
-      <div className="asorta-flagship-copy">
-        <p className="asorta-flagship-kicker">
-          Tactical • Automotive • Gaming • Utility
-        </p>
+          <p className="asorta-campaign-slogan">JUST WHAT YOU NEED.</p>
 
-        <h1 className="asorta-hero-title-image-wrap">
-          <img
-            src="/asorta-hero-title.png"
-            alt="ASORTA - Just what you need."
-            className="asorta-hero-title-image"
-          />
-        </h1>
+          <p className="asorta-campaign-text">
+            Premium gear voor modern carry, automotive upgrades, gaming setups,
+            desk organization en smart daily utility — geselecteerd op kwaliteit,
+            uitstraling en echte bruikbaarheid.
+          </p>
 
-        <p className="asorta-flagship-text">
-          Premium gear voor modern carry, automotive upgrades, gaming setups,
-          desk organization en smart daily utility — geselecteerd op kwaliteit,
-          uitstraling en echte bruikbaarheid.
-        </p>
+          <div className="asorta-campaign-actions">
+            <Link href="/shop" className="btn-primary">
+              Explore Collection <ArrowRight className="ml-2" size={18} />
+            </Link>
 
-        <div className="asorta-flagship-actions">
-          <Link href="/shop" className="btn-primary">
-            Explore Collection <ArrowRight className="ml-2" size={18} />
-          </Link>
-
-          <Link href="#featured" className="btn-secondary">
-            Best Sellers
-          </Link>
+            <Link href="#featured" className="btn-secondary">
+              Best Sellers
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="asorta-flagship-scene">
+      <div className="asorta-campaign-divider" />
+
+      <div className="asorta-campaign-right">
         {slides.map((item, index) => (
           <img
             key={item.title}
             src={item.image}
             alt=""
-            className={`asorta-flagship-image ${index === active ? 'active' : ''}`}
+            className={`asorta-campaign-image ${index === active ? 'active' : ''}`}
             style={{ objectPosition: item.position || 'center center' }}
           />
         ))}
 
-        <div className="asorta-flagship-grade" />
+        <div className="asorta-campaign-grade" />
 
         <button
           type="button"
           onClick={() => go(-1)}
-          className="asorta-flagship-arrow asorta-flagship-arrow-left"
+          className="asorta-campaign-arrow asorta-campaign-arrow-left"
           aria-label="Vorige slide"
         >
-          <ArrowLeft size={22} />
+          <ArrowLeft size={21} />
         </button>
 
         <button
           type="button"
           onClick={() => go(1)}
-          className="asorta-flagship-arrow asorta-flagship-arrow-right"
+          className="asorta-campaign-arrow asorta-campaign-arrow-right"
           aria-label="Volgende slide"
         >
-          <ArrowRight size={22} />
+          <ArrowRight size={21} />
         </button>
 
-        <div className="asorta-flagship-card">
+        <div className="asorta-campaign-counter">{slideLabel}</div>
+
+        <div className="asorta-campaign-card">
           <p>{slide.kicker}</p>
           <h2>{slide.title}</h2>
           <span>{slide.subtitle}</span>
         </div>
 
-        <div className="asorta-flagship-dots">
+        <div className="asorta-campaign-dots">
           {slides.map((_, index) => (
             <button
               key={index}
@@ -160,7 +156,7 @@ export default function HomeHeroSlider() {
         </div>
       </div>
 
-      <div className="asorta-mobile-flagship-card">
+      <div className="asorta-mobile-slide-card">
         <img
           src={slide.image}
           alt={slide.title}
