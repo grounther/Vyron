@@ -448,4 +448,322 @@ img{display:block;max-width:100%}
     left:8%;
   }
 }
+<<<<<<< HEAD
 >>>>>>> 4144b0f (Tune ASORTA hero visual balance)
+=======
+/* ASORTA v5.6.2 campaign hero rebuild */
+.asorta-campaign-hero{
+  position:relative;
+  display:grid;
+  grid-template-columns:44% 56%;
+  min-height:720px;
+  overflow:hidden;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:#050505;
+  isolation:isolate;
+}
+
+.asorta-campaign-left{
+  position:relative;
+  z-index:6;
+  display:flex;
+  align-items:center;
+  background:
+    radial-gradient(circle at 20% 35%,rgba(255,255,255,.045),transparent 26%),
+    linear-gradient(90deg,#050505 0%,#050505 76%,rgba(5,5,5,.72) 100%);
+}
+
+.asorta-campaign-copy{
+  max-width:610px;
+  padding-left:clamp(2rem,6vw,6rem);
+  padding-right:2rem;
+}
+
+.asorta-campaign-slogan{
+  margin-top:1.15rem;
+  font-size:clamp(.92rem,1vw,1.15rem);
+  font-weight:1000;
+  letter-spacing:.34em;
+  color:rgba(255,255,255,.52);
+}
+
+.asorta-campaign-text{
+  margin-top:2rem;
+  max-width:560px;
+  color:rgba(255,255,255,.68);
+  font-size:clamp(1rem,1.12vw,1.16rem);
+  line-height:1.75;
+}
+
+.asorta-campaign-actions{
+  margin-top:2.25rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+
+.asorta-campaign-divider{
+  position:absolute;
+  z-index:8;
+  top:0;
+  bottom:0;
+  left:44%;
+  width:1px;
+  background:linear-gradient(
+    180deg,
+    transparent,
+    rgba(255,255,255,.26),
+    rgba(255,255,255,.08),
+    transparent
+  );
+  transform:skewX(-10deg);
+  box-shadow:0 0 26px rgba(255,255,255,.06);
+}
+
+.asorta-campaign-divider::before{
+  content:"";
+  position:absolute;
+  inset:0 -12px;
+  background:linear-gradient(90deg,rgba(0,0,0,.22),transparent);
+  pointer-events:none;
+}
+
+.asorta-campaign-right{
+  position:relative;
+  min-height:720px;
+  overflow:hidden;
+  background:#060606;
+}
+
+.asorta-campaign-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transform:scale(1.015);
+  filter:saturate(.92) contrast(1.04) brightness(.70);
+  transition:opacity .85s ease,transform 1.2s ease;
+}
+
+.asorta-campaign-image.active{
+  opacity:.95;
+  transform:scale(1);
+}
+
+.asorta-campaign-grade{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:
+    linear-gradient(90deg,rgba(5,5,5,.60) 0%,rgba(5,5,5,.25) 18%,rgba(5,5,5,.07) 52%,rgba(5,5,5,.16) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.42)),
+    radial-gradient(circle at 78% 70%,rgba(64,112,140,.18),transparent 40%);
+}
+
+.asorta-campaign-card{
+  position:absolute;
+  z-index:5;
+  right:clamp(2rem,5vw,5.5rem);
+  bottom:7.5%;
+  width:min(310px,80%);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:1rem;
+  background:rgba(6,7,8,.62);
+  backdrop-filter:blur(16px);
+  box-shadow:0 26px 90px rgba(0,0,0,.52);
+  padding:1.35rem 1.5rem;
+}
+
+.asorta-campaign-card p{
+  margin:0;
+  font-size:.72rem;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.34em;
+  color:rgba(255,255,255,.58);
+}
+
+.asorta-campaign-card h2{
+  margin:.65rem 0 .2rem;
+  font-size:clamp(1.55rem,1.7vw,2.05rem);
+  line-height:1.05;
+  font-weight:1000;
+  color:#fff;
+}
+
+.asorta-campaign-card span{
+  display:block;
+  font-size:clamp(.95rem,1vw,1.18rem);
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:rgba(255,255,255,.58);
+}
+
+.asorta-campaign-dots{
+  position:absolute;
+  z-index:6;
+  left:8%;
+  bottom:6%;
+  display:flex;
+  gap:.85rem;
+}
+
+.asorta-campaign-dots button{
+  width:.52rem;
+  height:.52rem;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.34);
+  cursor:pointer;
+  transition:.22s ease;
+}
+
+.asorta-campaign-dots button.active{
+  width:2rem;
+  background:#fff;
+  box-shadow:0 0 22px rgba(255,255,255,.42);
+}
+
+.asorta-campaign-counter{
+  position:absolute;
+  z-index:6;
+  right:clamp(2rem,5vw,5.5rem);
+  top:25%;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  background:rgba(0,0,0,.46);
+  backdrop-filter:blur(14px);
+  padding:.34rem .75rem;
+  color:rgba(255,255,255,.62);
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+
+.asorta-campaign-arrow{
+  position:absolute;
+  z-index:7;
+  top:50%;
+  display:grid;
+  width:3rem;
+  height:3rem;
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(0,0,0,.36);
+  color:rgba(255,255,255,.8);
+  backdrop-filter:blur(14px);
+  transform:translateY(-50%);
+  transition:.22s ease;
+}
+
+.asorta-campaign-arrow:hover{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  transform:translateY(-50%) scale(1.04);
+}
+
+.asorta-campaign-arrow-left{
+  left:1.5rem;
+}
+
+.asorta-campaign-arrow-right{
+  right:1.5rem;
+}
+
+.asorta-mobile-slide-card{
+  display:none;
+}
+
+.asorta-campaign-hero .asorta-metal-title{
+  font-size:clamp(4.5rem,7.9vw,8.35rem);
+  line-height:.78;
+  letter-spacing:-.07em;
+}
+
+@media(max-width:1023px){
+  .asorta-campaign-hero{
+    display:block;
+    min-height:auto;
+  }
+
+  .asorta-campaign-left{
+    min-height:540px;
+    background:
+      linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.80)),
+      #050505;
+  }
+
+  .asorta-campaign-copy{
+    padding:7rem 1.35rem 3rem;
+  }
+
+  .asorta-campaign-right,
+  .asorta-campaign-divider,
+  .asorta-campaign-arrow,
+  .asorta-campaign-counter,
+  .asorta-campaign-card,
+  .asorta-campaign-dots{
+    display:none;
+  }
+
+  .asorta-mobile-slide-card{
+    display:block;
+    margin:0 1rem 2rem;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:1.6rem;
+    background:rgba(0,0,0,.42);
+    padding:1rem;
+    box-shadow:0 24px 80px rgba(0,0,0,.42);
+    backdrop-filter:blur(18px);
+  }
+
+  .asorta-mobile-slide-card img{
+    width:100%;
+    height:300px;
+    border-radius:1.15rem;
+    object-fit:cover;
+    opacity:.82;
+  }
+
+  .asorta-mobile-slide-card div{
+    padding:.95rem .25rem .2rem;
+  }
+
+  .asorta-mobile-slide-card p{
+    margin:0;
+    color:rgba(255,255,255,.45);
+    font-size:.72rem;
+    font-weight:1000;
+    text-transform:uppercase;
+    letter-spacing:.28em;
+  }
+
+  .asorta-mobile-slide-card h2{
+    margin:.55rem 0 .35rem;
+    font-size:1.65rem;
+    line-height:1.1;
+    font-weight:1000;
+  }
+
+  .asorta-mobile-slide-card span{
+    display:block;
+    color:rgba(255,255,255,.58);
+    font-size:.94rem;
+    line-height:1.6;
+  }
+
+  .asorta-mobile-slide-card a{
+    margin-top:1rem;
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+    color:rgba(255,255,255,.78);
+    font-weight:900;
+    font-size:.9rem;
+  }
+}
+>>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)

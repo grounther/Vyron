@@ -63,17 +63,21 @@ export default function HomeHeroSlider() {
   const slide = slides[active]
 
   useEffect(() => {
-    const timer = setInterval(() => setActive((v) => (v + 1) % slides.length), 6500)
+    const timer = setInterval(() => {
+      setActive((current) => (current + 1) % slides.length)
+    }, 6500)
+
     return () => clearInterval(timer)
   }, [])
 
   const go = (direction: number) => {
-    setActive((v) => (v + direction + slides.length) % slides.length)
+    setActive((current) => (current + direction + slides.length) % slides.length)
   }
 
   const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
 
   return (
+<<<<<<< HEAD
     <section className="asorta-flagship-hero noise relative overflow-hidden border-b border-white/10">
       <div className="flagship-bg-glow" />
 
@@ -127,40 +131,47 @@ export default function HomeHeroSlider() {
           <h1 className="asorta-metal-title">ASORTA</h1>
 >>>>>>> d1ece6f (Upgrade ASORTA to v5.6 cinematic flagship polish)
           <p className="mt-4 text-sm font-black uppercase tracking-[.34em] text-white/48 md:text-base">Just what you need.</p>
+=======
+    <section className="asorta-campaign-hero noise">
+      <div className="asorta-campaign-left">
+        <div className="asorta-campaign-copy">
+          <h1 className="asorta-metal-title">ASORTA</h1>
+>>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)
 
-          <p className="mt-7 max-w-lg text-base leading-7 text-white/68 md:text-lg">
-            Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.
+          <p className="asorta-campaign-slogan">JUST WHAT YOU NEED.</p>
+
+          <p className="asorta-campaign-text">
+            Premium gear voor modern carry, automotive upgrades, gaming setups,
+            desk organization en smart daily utility — geselecteerd op kwaliteit,
+            uitstraling en echte bruikbaarheid.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="asorta-campaign-actions">
             <Link href="/shop" className="btn-primary">
               Explore Collection <ArrowRight className="ml-2" size={18} />
             </Link>
+
             <Link href="#featured" className="btn-secondary">
               Best Sellers
             </Link>
           </div>
         </div>
+      </div>
 
-        <div className="relative z-10 hidden h-full lg:block">
-          <div className="flagship-slide-card">
-            <p className="text-xs font-black uppercase tracking-[.34em] text-white/58">{slide.kicker}</p>
-            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
-            <p className="text-lg font-bold uppercase tracking-[.14em] text-white/58">{slide.subtitle}</p>
-          </div>
+      <div className="asorta-campaign-divider" />
 
-          <div className="flagship-dots">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActive(idx)}
-                className={`h-2 rounded-full transition-all ${idx === active ? 'w-8 bg-white shadow-[0_0_20px_rgba(255,255,255,.45)]' : 'w-2 bg-white/35 hover:bg-white/65'}`}
-                aria-label={`Go to promo slide ${idx + 1}`}
-              />
-            ))}
-          </div>
+      <div className="asorta-campaign-right">
+        {slides.map((item, index) => (
+          <img
+            key={item.title}
+            src={item.image}
+            alt=""
+            className={`asorta-campaign-image ${index === active ? 'active' : ''}`}
+            style={{ objectPosition: item.position || 'center center' }}
+          />
+        ))}
 
+<<<<<<< HEAD
           <div className="flagship-counter">{slideLabel}</div>
 
           {/* USP Badge toegevoegd */}
@@ -169,18 +180,64 @@ export default function HomeHeroSlider() {
             <p className="text-[11px] font-black uppercase tracking-[.25em] text-white/90">Premium Gear.</p>
             <p className="text-[9px] font-bold uppercase tracking-[.20em] text-white/40">Built to perform.</p>
           </div>
+=======
+        <div className="asorta-campaign-grade" />
+
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          className="asorta-campaign-arrow asorta-campaign-arrow-left"
+          aria-label="Vorige slide"
+        >
+          <ArrowLeft size={21} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => go(1)}
+          className="asorta-campaign-arrow asorta-campaign-arrow-right"
+          aria-label="Volgende slide"
+        >
+          <ArrowRight size={21} />
+        </button>
+
+        <div className="asorta-campaign-counter">{slideLabel}</div>
+
+        <div className="asorta-campaign-card">
+          <p>{slide.kicker}</p>
+          <h2>{slide.title}</h2>
+          <span>{slide.subtitle}</span>
+>>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)
         </div>
 
-        <div className="relative z-10 mt-10 rounded-[2rem] border border-white/10 bg-black/42 p-4 shadow-[0_30px_100px_rgba(0,0,0,.5)] backdrop-blur-xl lg:hidden">
-          <img src={slide.image} alt={slide.title} className="h-[300px] w-full rounded-[1.4rem] object-cover opacity-80" style={{ objectPosition: slide.position || 'center center' }} />
-          <div className="mt-4">
-            <p className="text-xs font-black uppercase tracking-[.28em] text-white/45">{slide.kicker}</p>
-            <h2 className="mt-2 text-2xl font-black leading-tight">{slide.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-white/58">{slide.text}</p>
-            <Link href={slide.href} className="mt-4 inline-flex items-center gap-2 text-sm font-black text-white/75 transition hover:text-white">
-              {slide.cta} <ArrowRight size={16} />
-            </Link>
-          </div>
+        <div className="asorta-campaign-dots">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setActive(index)}
+              className={index === active ? 'active' : ''}
+              aria-label={`Ga naar slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="asorta-mobile-slide-card">
+        <img
+          src={slide.image}
+          alt={slide.title}
+          style={{ objectPosition: slide.position || 'center center' }}
+        />
+
+        <div>
+          <p>{slide.kicker}</p>
+          <h2>{slide.title}</h2>
+          <span>{slide.text}</span>
+
+          <Link href={slide.href}>
+            {slide.cta} <ArrowRight size={16} />
+          </Link>
         </div>
       </div>
     </section>
