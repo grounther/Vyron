@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
@@ -74,172 +74,80 @@ export default function HomeHeroSlider() {
     setActive((current) => (current + direction + slides.length) % slides.length)
   }
 
-<<<<<<< HEAD
   return (
-<<<<<<< HEAD
-<<<<<<< HEAD
-    <section className="asorta-flagship-hero noise relative overflow-hidden border-b border-white/10">
-      <div className="flagship-bg-glow" />
-
-      <div className="flagship-visual" aria-hidden="true">
-        {slides.map((s, idx) => (
-          <img
-            key={s.title}
-            src={s.image}
-            alt=""
-            style={{ objectPosition: s.position || 'center center' }}
-            className={`flagship-slide-image ${idx === active ? 'is-active' : ''}`}
-          />
-        ))}
-        <div className="flagship-image-grade" />
-      </div>
-
-      <div className="flagship-divider" />
-
-      <button
-        type="button"
-        onClick={() => go(-1)}
-        className="hero-arrow left-4 md:left-8"
-        aria-label="Previous promo slide"
-      >
-        <ArrowLeft size={22} />
-      </button>
-      <button
-        type="button"
-        onClick={() => go(1)}
-        className="hero-arrow right-4 md:left-8" /* Fixed position in original but moved to right 8 */
-        aria-label="Next promo slide"
-      >
-        <ArrowRight size={22} />
-      </button>
-
-      <div className="relative mx-auto grid min-h-[620px] max-w-[1500px] items-center px-5 py-18 md:min-h-[680px] lg:grid-cols-[.88fr_1.12fr] lg:px-10">
-        <div className="flagship-copy z-10 max-w-[570px] lg:pl-8">
-<<<<<<< HEAD
-<<<<<<< HEAD
-          {/* Categorie labels toegevoegd */}
-          <p className="mb-2 text-[10px] font-black uppercase tracking-[.45em] text-white/40">
-            Tactical • Automotive • Gaming • Utility
-          </p>
-          
-          {/* Titel met Open O */}
-          <h1 className="asorta-metal-title">AS<span className="open-o">O</span>RTA</h1>
-=======
-          {/* Titel exact zoals in de afbeelding */}
-=======
->>>>>>> 4144b0f (Tune ASORTA hero visual balance)
-          <h1 className="asorta-metal-title">ASORTA</h1>
->>>>>>> d1ece6f (Upgrade ASORTA to v5.6 cinematic flagship polish)
-          <p className="mt-4 text-sm font-black uppercase tracking-[.34em] text-white/48 md:text-base">Just what you need.</p>
-=======
-    <section className="asorta-campaign-hero noise">
-      <div className="asorta-campaign-left">
-        <div className="asorta-campaign-copy">
-          <h1 className="asorta-metal-title">ASORTA</h1>
->>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)
-=======
     <section className="asorta-flagship noise">
       <div className="asorta-flagship-orb asorta-flagship-orb-blue" />
       <div className="asorta-flagship-orb asorta-flagship-orb-red" />
       <div className="asorta-flagship-lines" />
->>>>>>> 4128d8e (rebuild asorta v5.7)
-=======
-  const slideLabel = useMemo(() => `${active + 1} / ${slides.length}`, [active])
->>>>>>> 652ddaf (ASORTA v5.7 flagship rebuild)
 
-  return (
-    <section className="asorta-campaign-hero noise">
-      <div className="asorta-campaign-left">
-        <div className="asorta-campaign-copy">
-          <h1 className="asorta-metal-title">ASORTA</h1>
+      <div className="asorta-flagship-copy">
+        <p className="asorta-flagship-kicker">
+          Tactical • Automotive • Gaming • Utility
+        </p>
 
-          <p className="asorta-campaign-slogan">JUST WHAT YOU NEED.</p>
+        <h1 className="asorta-hero-title-image-wrap">
+          <img
+            src="/asorta-hero-title.png"
+            alt="ASORTA - Just what you need."
+            className="asorta-hero-title-image"
+          />
+        </h1>
 
-          <p className="asorta-campaign-text">
-            Premium gear voor modern carry, automotive upgrades, gaming setups,
-            desk organization en smart daily utility — geselecteerd op kwaliteit,
-            uitstraling en echte bruikbaarheid.
-          </p>
+        <p className="asorta-flagship-text">
+          Premium gear voor modern carry, automotive upgrades, gaming setups,
+          desk organization en smart daily utility — geselecteerd op kwaliteit,
+          uitstraling en echte bruikbaarheid.
+        </p>
 
-          <div className="asorta-campaign-actions">
-            <Link href="/shop" className="btn-primary">
-              Explore Collection <ArrowRight className="ml-2" size={18} />
-            </Link>
+        <div className="asorta-flagship-actions">
+          <Link href="/shop" className="btn-primary">
+            Explore Collection <ArrowRight className="ml-2" size={18} />
+          </Link>
 
-            <Link href="#featured" className="btn-secondary">
-              Best Sellers
-            </Link>
-          </div>
+          <Link href="#featured" className="btn-secondary">
+            Best Sellers
+          </Link>
         </div>
       </div>
 
-      <div className="asorta-campaign-divider" />
-
-      <div className="asorta-campaign-right">
+      <div className="asorta-flagship-scene">
         {slides.map((item, index) => (
           <img
             key={item.title}
             src={item.image}
             alt=""
-            className={`asorta-campaign-image ${index === active ? 'active' : ''}`}
+            className={`asorta-flagship-image ${index === active ? 'active' : ''}`}
             style={{ objectPosition: item.position || 'center center' }}
           />
         ))}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-          <div className="flagship-counter">{slideLabel}</div>
-
-          {/* USP Badge toegevoegd */}
-          <div className="absolute bottom-[8%] right-[5.4rem] hidden lg:block text-right">
-            <div className="h-[1px] w-12 bg-orange-500 mb-3 ml-auto" />
-            <p className="text-[11px] font-black uppercase tracking-[.25em] text-white/90">Premium Gear.</p>
-            <p className="text-[9px] font-bold uppercase tracking-[.20em] text-white/40">Built to perform.</p>
-          </div>
-=======
-=======
->>>>>>> 652ddaf (ASORTA v5.7 flagship rebuild)
-        <div className="asorta-campaign-grade" />
+        <div className="asorta-flagship-grade" />
 
         <button
           type="button"
           onClick={() => go(-1)}
-          className="asorta-campaign-arrow asorta-campaign-arrow-left"
+          className="asorta-flagship-arrow asorta-flagship-arrow-left"
           aria-label="Vorige slide"
         >
-          <ArrowLeft size={21} />
-<<<<<<< HEAD
-=======
-        <button type="button" onClick={() => go(-1)} className="asorta-flagship-arrow asorta-flagship-arrow-left" aria-label="Vorige slide">
           <ArrowLeft size={22} />
-        </button>
-        <button type="button" onClick={() => go(1)} className="asorta-flagship-arrow asorta-flagship-arrow-right" aria-label="Volgende slide">
-          <ArrowRight size={22} />
->>>>>>> 4128d8e (rebuild asorta v5.7)
-=======
->>>>>>> 652ddaf (ASORTA v5.7 flagship rebuild)
         </button>
 
         <button
           type="button"
           onClick={() => go(1)}
-          className="asorta-campaign-arrow asorta-campaign-arrow-right"
+          className="asorta-flagship-arrow asorta-flagship-arrow-right"
           aria-label="Volgende slide"
         >
-          <ArrowRight size={21} />
+          <ArrowRight size={22} />
         </button>
 
-        <div className="asorta-campaign-counter">{slideLabel}</div>
-
-        <div className="asorta-campaign-card">
+        <div className="asorta-flagship-card">
           <p>{slide.kicker}</p>
           <h2>{slide.title}</h2>
           <span>{slide.subtitle}</span>
->>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)
         </div>
 
-        <div className="asorta-campaign-dots">
+        <div className="asorta-flagship-dots">
           {slides.map((_, index) => (
             <button
               key={index}
@@ -252,7 +160,7 @@ export default function HomeHeroSlider() {
         </div>
       </div>
 
-      <div className="asorta-mobile-slide-card">
+      <div className="asorta-mobile-flagship-card">
         <img
           src={slide.image}
           alt={slide.title}

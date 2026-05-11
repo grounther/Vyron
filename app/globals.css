@@ -11,14 +11,15 @@
   --olive:#5B6653;
   --silver:#D6D6D6;
 }
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
   margin:0;
   background:
-    radial-gradient(circle at 74% 0%,rgba(91,102,83,.22),transparent 30%),
-    radial-gradient(circle at 18% 20%,rgba(214,214,214,.07),transparent 24%),
-    var(--bg);
+    radial-gradient(circle at 80% -10%,rgba(70,130,160,.12),transparent 34%),
+    radial-gradient(circle at 18% 20%,rgba(255,255,255,.04),transparent 26%),
+    #040404;
   color:var(--text);
   font-family:Inter,Arial,sans-serif;
 }
@@ -26,15 +27,69 @@ a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 ::selection{background:rgba(91,102,83,.65);color:white}
 .text-balance{text-wrap:balance}
-.noise:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E")}
-.card{background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.027));border:1px solid var(--line);box-shadow:0 24px 90px rgba(0,0,0,.36)}
-.glass{background:rgba(8,8,8,.68);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
+
+.noise:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.08;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E");
+}
+
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.027));
+  border:1px solid var(--line);
+  box-shadow:0 24px 90px rgba(0,0,0,.36);
+}
+.glass{
+  background:rgba(3,3,3,.78);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
 .metal{background:linear-gradient(135deg,#050505,#111 44%,#080b07 100%)}
-.btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:white;color:black;font-weight:900;padding:.9rem 1.35rem;transition:.25s ease;box-shadow:0 18px 50px rgba(255,255,255,.1)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 60px rgba(255,255,255,.2)}
-.btn-secondary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:900;padding:.9rem 1.35rem;color:rgba(255,255,255,.82);transition:.25s ease}
-.btn-secondary:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);transform:translateY(-2px)}
-.kicker{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.32em;color:rgba(255,255,255,.43)}
+
+.btn-primary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:white;
+  color:black;
+  font-weight:900;
+  padding:.9rem 1.35rem;
+  transition:.25s ease;
+  box-shadow:0 18px 50px rgba(255,255,255,.1);
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 60px rgba(255,255,255,.2);
+}
+.btn-secondary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  font-weight:900;
+  padding:.9rem 1.35rem;
+  color:rgba(255,255,255,.82);
+  transition:.25s ease;
+}
+.btn-secondary:hover{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.28);
+  transform:translateY(-2px);
+}
+
+.kicker{
+  font-size:.72rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.32em;
+  color:rgba(255,255,255,.43);
+}
+
 .product-img{height:190px;width:100%;object-fit:cover}
 .product-detail-img{height:320px;width:100%;object-fit:cover}
 @media(min-width:640px){.product-img{height:210px}}
@@ -42,801 +97,192 @@ img{display:block;max-width:100%}
 
 @keyframes asortaToast{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
-/* ASORTA v5.2 premium homepage */
-.hero-shell{
-  background:
-    linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.58) 42%,rgba(0,0,0,.18) 100%),
-    radial-gradient(circle at 82% 24%,rgba(99,138,152,.20),transparent 31%),
-    radial-gradient(circle at 26% 42%,rgba(255,255,255,.055),transparent 26%),
-    linear-gradient(135deg,#030303,#101410 58%,#030303);
-}
-.hero-arrow{
-  position:absolute;
-  top:50%;
-  z-index:20;
-  display:none;
-  height:3.25rem;
-  width:3.25rem;
-  transform:translateY(-50%);
+/* Support widget */
+.hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
+.hero-trust-inline:hover{opacity:1;transform:translateY(-1px)}
+.support-float{
+  position:fixed;
+  right:1.15rem;
+  bottom:1.15rem;
+  z-index:80;
+  display:grid;
+  height:3.6rem;
+  width:3.6rem;
   place-items:center;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.16);
-  background:rgba(0,0,0,.30);
-  color:rgba(255,255,255,.78);
-  backdrop-filter:blur(14px);
-  transition:.25s ease;
-}
-.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
-@media(min-width:1024px){.hero-arrow{display:grid}}
-.asorta-hero-title{
-  font-size:clamp(4.5rem,10vw,8.8rem);
-  line-height:.78;
-  font-weight:950;
-  letter-spacing:-.075em;
-  color:#fff;
-  text-shadow:0 24px 80px rgba(0,0,0,.5);
-}
-.category-tile{
-  position:relative;
-  min-height:11rem;
-  overflow:hidden;
-  border-radius:1.35rem;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.035);
-  box-shadow:0 20px 90px rgba(0,0,0,.28);
-  transition:.28s ease;
-}
-.category-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(91,102,83,.14)}
-.brandmark-glow{filter:drop-shadow(0 10px 30px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(183,200,173,.08))}
-
-/* ASORTA v5.3 cinematic homepage */
-.cinematic-hero{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
-    radial-gradient(circle at 78% 18%,rgba(91,130,150,.18),transparent 32%),
-    #050505;
-}
-.asorta-metal-title{
-  font-size:clamp(4rem,9vw,9.5rem);
-  line-height:.78;
-  letter-spacing:-.075em;
-  font-weight:1000;
-  color:#fff;
-  text-shadow:0 5px 24px rgba(255,255,255,.08),0 22px 90px rgba(0,0,0,.65);
-}
-@supports((-webkit-background-clip:text) or (background-clip:text)){
-  .asorta-metal-title{
-    background:linear-gradient(180deg,#fff 0%,#f3f3f3 36%,#aeb4b4 56%,#fff 72%,#6e7474 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-  }
-}
-.hero-trust-card{
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:1.15rem;
-  background:rgba(255,255,255,.045);
-  padding:1rem;
-  box-shadow:0 18px 60px rgba(0,0,0,.24);
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.055));
+  color:white;
+  box-shadow:0 18px 70px rgba(0,0,0,.52),0 0 32px rgba(111,125,100,.24);
   backdrop-filter:blur(18px);
+  transition:.24s ease;
+}
+.support-float:hover{
+  transform:translateY(-3px) scale(1.03);
+  border-color:rgba(255,255,255,.30);
+  box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 38px rgba(122,166,184,.22);
+}
+.support-float-pulse{
+  position:absolute;
+  right:.55rem;
+  top:.55rem;
+  height:.62rem;
+  width:.62rem;
+  border-radius:999px;
+  background:#9fb194;
+  box-shadow:0 0 0 0 rgba(159,177,148,.64);
+  animation:supportPulse 1.8s infinite;
+}
+@keyframes supportPulse{
+  70%{box-shadow:0 0 0 10px rgba(159,177,148,0)}
+  100%{box-shadow:0 0 0 0 rgba(159,177,148,0)}
+}
+.support-overlay{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  pointer-events:none;
+  background:rgba(0,0,0,0);
   transition:.25s ease;
 }
-.hero-trust-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07)}
-.hero-shell{min-height:auto}
-.category-tile{position:relative;min-height:140px;overflow:hidden;border-radius:1.15rem;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);box-shadow:0 24px 80px rgba(0,0,0,.28)}
-.hero-arrow{position:absolute;top:50%;z-index:20;display:grid;height:3rem;width:3rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.42);color:rgba(255,255,255,.78);backdrop-filter:blur(16px);transition:.22s ease;transform:translateY(-50%)}
-.hero-arrow:hover{background:rgba(255,255,255,.08);color:white;transform:translateY(-50%) scale(1.04)}
-
-/* ASORTA v5.4 support + hero trust polish */
-.hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
-.hero-trust-inline:hover{opacity:1;transform:translateY(-1px)}
-.support-float{position:fixed;right:1.15rem;bottom:1.15rem;z-index:80;display:grid;height:3.6rem;width:3.6rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.055));color:white;box-shadow:0 18px 70px rgba(0,0,0,.52),0 0 32px rgba(111,125,100,.24);backdrop-filter:blur(18px);transition:.24s ease}
-.support-float:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(255,255,255,.30);box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 38px rgba(122,166,184,.22)}
-.support-float-pulse{position:absolute;right:.55rem;top:.55rem;height:.62rem;width:.62rem;border-radius:999px;background:#9fb194;box-shadow:0 0 0 0 rgba(159,177,148,.64);animation:supportPulse 1.8s infinite}
-@keyframes supportPulse{70%{box-shadow:0 0 0 10px rgba(159,177,148,0)}100%{box-shadow:0 0 0 0 rgba(159,177,148,0)}}
-.support-overlay{position:fixed;inset:0;z-index:100;pointer-events:none;background:rgba(0,0,0,0);transition:.25s ease}
-.support-overlay-open{pointer-events:auto;background:rgba(0,0,0,.56);backdrop-filter:blur(6px)}
-.support-panel{position:absolute;right:1rem;bottom:1rem;width:calc(100vw - 2rem);max-width:430px;overflow:hidden;border-radius:1.8rem;border:1px solid rgba(255,255,255,.12);background:rgba(7,7,7,.94);box-shadow:0 34px 120px rgba(0,0,0,.72);backdrop-filter:blur(24px);transition:.26s ease}
-.support-input{width:100%;border-radius:1.1rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.34);padding:.95rem 1rem;color:white;outline:none;transition:.2s ease}
-.support-input::placeholder{color:rgba(255,255,255,.36)}
-.support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
-@media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
-
-
-/* ASORTA v5.6.1 controlled flagship hero */
-.asorta-flagship-hero{
-  min-height:680px;
-  background:#050505;
-  isolation:isolate;
+.support-overlay-open{
+  pointer-events:auto;
+  background:rgba(0,0,0,.56);
+  backdrop-filter:blur(6px);
 }
-
-.flagship-bg-glow{
+.support-panel{
   position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 78% 18%,rgba(74,116,136,.13),transparent 34%),
-    radial-gradient(circle at 20% 48%,rgba(255,255,255,.03),transparent 24%);
-}
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* ASORTA v5.4 support + hero trust polish */
-.hero-trust-inline{display:inline-flex;align-items:center;gap:.7rem;opacity:.92;transition:.22s ease}
-.hero-trust-inline:hover{opacity:1;transform:translateY(-1px)}
-.support-float{position:fixed;right:1.15rem;bottom:1.15rem;z-index:80;display:grid;height:3.6rem;width:3.6rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.055));color:white;box-shadow:0 18px 70px rgba(0,0,0,.52),0 0 32px rgba(111,125,100,.24);backdrop-filter:blur(18px);transition:.24s ease}
-.support-float:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(255,255,255,.30);box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 38px rgba(122,166,184,.22)}
-.support-float-pulse{position:absolute;right:.55rem;top:.55rem;height:.62rem;width:.62rem;border-radius:999px;background:#9fb194;box-shadow:0 0 0 0 rgba(159,177,148,.64);animation:supportPulse 1.8s infinite}
-@keyframes supportPulse{70%{box-shadow:0 0 0 10px rgba(159,177,148,0)}100%{box-shadow:0 0 0 0 rgba(159,177,148,0)}}
-.support-overlay{position:fixed;inset:0;z-index:100;pointer-events:none;background:rgba(0,0,0,0);transition:.25s ease}
-.support-overlay-open{pointer-events:auto;background:rgba(0,0,0,.56);backdrop-filter:blur(6px)}
-.support-panel{position:absolute;right:1rem;bottom:1rem;width:calc(100vw - 2rem);max-width:430px;overflow:hidden;border-radius:1.8rem;border:1px solid rgba(255,255,255,.12);background:rgba(7,7,7,.94);box-shadow:0 34px 120px rgba(0,0,0,.72);backdrop-filter:blur(24px);transition:.26s ease}
-.support-input{width:100%;border-radius:1.1rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.34);padding:.95rem 1rem;color:white;outline:none;transition:.2s ease}
-.support-input::placeholder{color:rgba(255,255,255,.36)}
-.support-input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
-@media(max-width:640px){.support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}.support-float{right:.9rem;bottom:.9rem}}
-
-/* ASORTA v5.7 flagship cinematic tactical hero */
-.asorta-flagship-hero {
-  min-height: 720px;
-  background: #050505;
-  isolation: isolate;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-/* De metallic tactische titel */
-.asorta-flagship-hero .asorta-metal-title {
-  font-family: 'Inter', sans-serif; /* Voor optimale breedte kun je 'Syncopate' toevoegen aan je project */
-  font-size: clamp(4.8rem, 8vw, 8.6rem);
-  line-height: 0.78;
-  letter-spacing: -0.06em;
-  font-weight: 1000;
-  text-transform: uppercase;
-  background: linear-gradient(
-    180deg, 
-    #ffffff 0%, 
-    #f3f3f3 35%, 
-    #aeb4b4 50%, 
-    #ffffff 65%, 
-    #6e7474 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 12px 30px rgba(0,0,0,0.65));
-}
-
-/* De Open O effect logica */
-.asorta-metal-title .open-o {
-  display: inline-block;
-  position: relative;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 42%, transparent 42%, transparent 58%, black 58%, black 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 42%, transparent 42%, transparent 58%, black 58%, black 100%);
-}
-
-.flagship-bg-glow {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(58,102,128,0.18), transparent 34%),
-    radial-gradient(circle at 18% 48%, rgba(255,255,255,0.035), transparent 24%),
-    linear-gradient(180deg, rgba(255,255,255,0.02), transparent 35%);
-  z-index: 1;
-}
-
-.flagship-visual {
-  position: absolute;
-  inset: 0 0 0 45%;
-  overflow: hidden;
-  background: #050505;
-  z-index: 1;
-}
-
-.flagship-slide-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  opacity: 0;
-  transform: scale(1.01);
-  transition: opacity 0.9s ease, transform 1.4s ease;
-  filter: saturate(0.92) contrast(1.02) brightness(0.62);
-}
-
-.flagship-slide-image.is-active {
-  opacity: 0.96;
-  transform: scale(1);
-}
-
-.flagship-image-grade {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(5,5,5,0.78) 0%, rgba(5,5,5,0.34) 14%, rgba(5,5,5,0.08) 36%, rgba(5,5,5,0.12) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.38)),
-    radial-gradient(circle at 78% 74%, rgba(60,98,122,0.18), transparent 42%);
-  z-index: 2;
-}
-
-.flagship-divider {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 44.7%;
-  z-index: 4;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.24), rgba(255,255,255,0.08), transparent);
-  transform: skewX(-10deg);
-  box-shadow: 0 0 24px rgba(255,255,255,0.05);
-}
-
-/* WIDESCREEN & MOBILE FIXES */
-@media(min-width:1600px){
-  .flagship-visual { left: 46%; }
-  .flagship-divider { left: 45.4%; }
-}
-
-@media(max-width:1023px){
-  .flagship-visual, .flagship-divider { display: none; }
-  .asorta-flagship-hero { min-height: auto; }
-}
-=======
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: white;
-  color: black;
-  font-weight: 900;
-  padding: .9rem 1.35rem;
-  transition: .25s ease;
-  box-shadow: 0 18px 50px rgba(255, 255, 255, .1);
-=======
-.flagship-visual{
-  position:absolute;
-  inset:0 0 0 48%;
+  right:1rem;
+  bottom:1rem;
+  width:calc(100vw - 2rem);
+  max-width:430px;
   overflow:hidden;
-  background:#060606;
->>>>>>> 4144b0f (Tune ASORTA hero visual balance)
+  border-radius:1.8rem;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(7,7,7,.94);
+  box-shadow:0 34px 120px rgba(0,0,0,.72);
+  backdrop-filter:blur(24px);
+  transition:.26s ease;
 }
-
-.flagship-slide-image{
-  position:absolute;
-  inset:0;
-  height:100%;
+.support-input{
   width:100%;
-  object-fit:cover;
-  opacity:0;
-  transform:scale(1.005);
-  transition:opacity .75s ease,transform 1s ease;
-  filter:saturate(.9) contrast(1.03) brightness(.72);
-}
-
-.flagship-slide-image.is-active{
-  opacity:.94;
-  transform:scale(1);
-}
-
-.flagship-image-grade{
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(90deg,rgba(5,5,5,.50) 0%,rgba(5,5,5,.18) 20%,rgba(5,5,5,.06) 55%,rgba(5,5,5,.16) 100%),
-    radial-gradient(circle at 76% 70%,rgba(63,104,130,.14),transparent 38%);
-}
-
-.flagship-divider{
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:47.25%;
-  z-index:3;
-  width:1px;
-  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.22),rgba(255,255,255,.03));
-  box-shadow:0 0 24px rgba(255,255,255,.04);
-  transform:skewX(-9deg);
-  transform-origin:center;
-}
-
-.flagship-divider:before{
-  content:"";
-  position:absolute;
-  inset:0 -10px;
-  background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0));
-  pointer-events:none;
-}
-
-.flagship-copy{
-  padding-top:.5rem;
-}
-
-.flagship-slide-card{
-  position:absolute;
-  right:4.8rem;
-  bottom:9%;
-  width:285px;
-  border-radius:.9rem;
+  border-radius:1.1rem;
   border:1px solid rgba(255,255,255,.10);
-  background:rgba(8,9,10,.64);
-  padding:1.25rem 1.35rem;
-  box-shadow:0 24px 82px rgba(0,0,0,.42);
-  backdrop-filter:blur(12px);
-}
-
-.flagship-dots{
-  position:absolute;
-  bottom:6%;
-  left:8%;
-  display:flex;
-  gap:.85rem;
-}
-
-.flagship-counter{
-  position:absolute;
-  right:4.9rem;
-  top:26%;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(0,0,0,.44);
-  padding:.32rem .75rem;
-  font-size:11px;
-  font-weight:900;
-  color:rgba(255,255,255,.62);
-  backdrop-filter:blur(12px);
-}
-
-.asorta-flagship-hero .asorta-metal-title{
-  font-size:clamp(4.5rem,7.8vw,8.2rem);
-  letter-spacing:-.068em;
-  line-height:.82;
-}
-
-.asorta-flagship-hero .hero-arrow{
   background:rgba(0,0,0,.34);
-  border-color:rgba(255,255,255,.13);
+  padding:.95rem 1rem;
+  color:white;
+  outline:none;
+  transition:.2s ease;
+}
+.support-input::placeholder{color:rgba(255,255,255,.36)}
+.support-input:focus{
+  border-color:rgba(255,255,255,.28);
+  box-shadow:0 0 0 3px rgba(255,255,255,.045);
+}
+@media(max-width:640px){
+  .support-panel{right:.75rem;bottom:.75rem;width:calc(100vw - 1.5rem)}
+  .support-float{right:.9rem;bottom:.9rem}
 }
 
-@media(max-width:1023px){
-  .flagship-visual,
-  .flagship-divider{
-    display:none;
-  }
-
-  .asorta-flagship-hero{
-    min-height:auto;
-  }
-
-  .asorta-flagship-hero .asorta-metal-title{
-    font-size:clamp(3.8rem,16vw,6.4rem);
-  }
-}
-
-@media(min-width:1400px){
-  .flagship-visual{
-    left:48.5%;
-  }
-
-  .flagship-divider{
-    left:47.8%;
-  }
-
-<<<<<<< HEAD
-.flagship-counter {
-  position: absolute;
-  right: 5rem;
-  top: 25%;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .08);
-  background: rgba(0, 0, 0, .48);
-  padding: .32rem .75rem;
-  font-size: 11px;
-  font-weight: 900;
-  color: rgba(255, 255, 255, .62);
-  backdrop-filter: blur(12px);
-  z-index: 20;
-}
->>>>>>> d1ece6f (Upgrade ASORTA to v5.6 cinematic flagship polish)
-=======
-  .flagship-slide-card{
-    right:5.2rem;
-  }
-
-  .flagship-dots{
-    left:8%;
-  }
-}
-<<<<<<< HEAD
->>>>>>> 4144b0f (Tune ASORTA hero visual balance)
-=======
-/* ASORTA v5.6.2 campaign hero rebuild */
-.asorta-campaign-hero{
-  position:relative;
-  display:grid;
-  grid-template-columns:44% 56%;
-  min-height:720px;
-  overflow:hidden;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  background:#050505;
-  isolation:isolate;
-}
-
-.asorta-campaign-left{
-  position:relative;
-  z-index:6;
-  display:flex;
-  align-items:center;
-  background:
-    radial-gradient(circle at 20% 35%,rgba(255,255,255,.045),transparent 26%),
-    linear-gradient(90deg,#050505 0%,#050505 76%,rgba(5,5,5,.72) 100%);
-}
-
-.asorta-campaign-copy{
-  max-width:610px;
-  padding-left:clamp(2rem,6vw,6rem);
-  padding-right:2rem;
-}
-
-.asorta-campaign-slogan{
-  margin-top:1.15rem;
-  font-size:clamp(.92rem,1vw,1.15rem);
+/* ASORTA branding */
+.asorta-nav-wordmark{
   font-weight:1000;
-  letter-spacing:.34em;
-  color:rgba(255,255,255,.52);
+  letter-spacing:.08em;
+  font-size:1.45rem;
+  line-height:1;
+  background:linear-gradient(180deg,#fff,#9fa4a5 54%,#fff 70%,#5f6264);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 0 24px rgba(255,255,255,.08);
+}
+.asorta-nav-wordmark span{
+  display:inline-block;
+  width:.86em;
+  text-align:center;
+  border:.12em solid rgba(230,235,238,.9);
+  border-top-color:rgba(255,255,255,.45);
+  border-radius:.18em;
+  line-height:.73;
+  margin:0 .02em;
+  transform:skewX(-8deg);
+  color:transparent;
+  background:none;
+  box-shadow:inset 0 0 14px rgba(255,255,255,.18),0 0 14px rgba(125,179,207,.08);
 }
 
-.asorta-campaign-text{
-  margin-top:2rem;
-  max-width:560px;
-  color:rgba(255,255,255,.68);
-  font-size:clamp(1rem,1.12vw,1.16rem);
-  line-height:1.75;
-}
-
-.asorta-campaign-actions{
-  margin-top:2.25rem;
-  display:flex;
-  flex-wrap:wrap;
-  gap:1rem;
-}
-
-.asorta-campaign-divider{
-  position:absolute;
-  z-index:8;
-  top:0;
-  bottom:0;
-  left:44%;
-  width:1px;
-  background:linear-gradient(
-    180deg,
-    transparent,
-    rgba(255,255,255,.26),
-    rgba(255,255,255,.08),
-    transparent
-  );
-  transform:skewX(-10deg);
-  box-shadow:0 0 26px rgba(255,255,255,.06);
-}
-
-.asorta-campaign-divider::before{
-  content:"";
-  position:absolute;
-  inset:0 -12px;
-  background:linear-gradient(90deg,rgba(0,0,0,.22),transparent);
-  pointer-events:none;
-}
-
-.asorta-campaign-right{
-  position:relative;
-  min-height:720px;
-  overflow:hidden;
-  background:#060606;
-}
-
-.asorta-campaign-image{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  opacity:0;
-  transform:scale(1.015);
-  filter:saturate(.92) contrast(1.04) brightness(.70);
-  transition:opacity .85s ease,transform 1.2s ease;
-}
-
-.asorta-campaign-image.active{
-  opacity:.95;
-  transform:scale(1);
-}
-
-.asorta-campaign-grade{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  background:
-    linear-gradient(90deg,rgba(5,5,5,.60) 0%,rgba(5,5,5,.25) 18%,rgba(5,5,5,.07) 52%,rgba(5,5,5,.16) 100%),
-    linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.42)),
-    radial-gradient(circle at 78% 70%,rgba(64,112,140,.18),transparent 40%);
-}
-
-.asorta-campaign-card{
-  position:absolute;
-  z-index:5;
-  right:clamp(2rem,5vw,5.5rem);
-  bottom:7.5%;
-  width:min(310px,80%);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:1rem;
-  background:rgba(6,7,8,.62);
-  backdrop-filter:blur(16px);
-  box-shadow:0 26px 90px rgba(0,0,0,.52);
-  padding:1.35rem 1.5rem;
-}
-
-.asorta-campaign-card p{
-  margin:0;
-  font-size:.72rem;
-  font-weight:1000;
-  text-transform:uppercase;
-  letter-spacing:.34em;
-  color:rgba(255,255,255,.58);
-}
-
-.asorta-campaign-card h2{
-  margin:.65rem 0 .2rem;
-  font-size:clamp(1.55rem,1.7vw,2.05rem);
-  line-height:1.05;
-  font-weight:1000;
-  color:#fff;
-}
-
-.asorta-campaign-card span{
-  display:block;
-  font-size:clamp(.95rem,1vw,1.18rem);
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.15em;
-  color:rgba(255,255,255,.58);
-}
-
-.asorta-campaign-dots{
-  position:absolute;
-  z-index:6;
-  left:8%;
-  bottom:6%;
-  display:flex;
-  gap:.85rem;
-}
-
-.asorta-campaign-dots button{
-  width:.52rem;
-  height:.52rem;
-  border:0;
-  border-radius:999px;
-  background:rgba(255,255,255,.34);
-  cursor:pointer;
-  transition:.22s ease;
-}
-
-.asorta-campaign-dots button.active{
-  width:2rem;
-  background:#fff;
-  box-shadow:0 0 22px rgba(255,255,255,.42);
-}
-
-.asorta-campaign-counter{
-  position:absolute;
-  z-index:6;
-  right:clamp(2rem,5vw,5.5rem);
-  top:25%;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:999px;
-  background:rgba(0,0,0,.46);
-  backdrop-filter:blur(14px);
-  padding:.34rem .75rem;
-  color:rgba(255,255,255,.62);
-  font-size:11px;
-  font-weight:1000;
-  letter-spacing:.12em;
-}
-
-.asorta-campaign-arrow{
-  position:absolute;
-  z-index:7;
-  top:50%;
-  display:grid;
-  width:3rem;
-  height:3rem;
-  place-items:center;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.13);
-  background:rgba(0,0,0,.36);
-  color:rgba(255,255,255,.8);
-  backdrop-filter:blur(14px);
-  transform:translateY(-50%);
-  transition:.22s ease;
-}
-
-.asorta-campaign-arrow:hover{
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  transform:translateY(-50%) scale(1.04);
-}
-
-.asorta-campaign-arrow-left{
-  left:1.5rem;
-}
-
-.asorta-campaign-arrow-right{
-  right:1.5rem;
-}
-
-.asorta-mobile-slide-card{
-  display:none;
-}
-
-.asorta-campaign-hero .asorta-metal-title{
-  font-size:clamp(4.5rem,7.9vw,8.35rem);
-  line-height:.78;
-  letter-spacing:-.07em;
-}
-
-@media(max-width:1023px){
-  .asorta-campaign-hero{
-    display:block;
-    min-height:auto;
-  }
-
-  .asorta-campaign-left{
-    min-height:540px;
-    background:
-      linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.80)),
-      #050505;
-  }
-
-  .asorta-campaign-copy{
-    padding:7rem 1.35rem 3rem;
-  }
-
-  .asorta-campaign-right,
-  .asorta-campaign-divider,
-  .asorta-campaign-arrow,
-  .asorta-campaign-counter,
-  .asorta-campaign-card,
-  .asorta-campaign-dots{
-    display:none;
-  }
-
-  .asorta-mobile-slide-card{
-    display:block;
-    margin:0 1rem 2rem;
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:1.6rem;
-    background:rgba(0,0,0,.42);
-    padding:1rem;
-    box-shadow:0 24px 80px rgba(0,0,0,.42);
-    backdrop-filter:blur(18px);
-  }
-
-  .asorta-mobile-slide-card img{
-    width:100%;
-    height:300px;
-    border-radius:1.15rem;
-    object-fit:cover;
-    opacity:.82;
-  }
-
-  .asorta-mobile-slide-card div{
-    padding:.95rem .25rem .2rem;
-  }
-
-  .asorta-mobile-slide-card p{
-    margin:0;
-    color:rgba(255,255,255,.45);
-    font-size:.72rem;
-    font-weight:1000;
-    text-transform:uppercase;
-    letter-spacing:.28em;
-  }
-
-  .asorta-mobile-slide-card h2{
-    margin:.55rem 0 .35rem;
-    font-size:1.65rem;
-    line-height:1.1;
-    font-weight:1000;
-  }
-
-  .asorta-mobile-slide-card span{
-    display:block;
-    color:rgba(255,255,255,.58);
-    font-size:.94rem;
-    line-height:1.6;
-  }
-
-  .asorta-mobile-slide-card a{
-    margin-top:1rem;
-    display:inline-flex;
-    align-items:center;
-    gap:.45rem;
-    color:rgba(255,255,255,.78);
-    font-weight:900;
-    font-size:.9rem;
-  }
-<<<<<<< HEAD
-}
-<<<<<<< HEAD
->>>>>>> 8ad6c8d (Rebuild ASORTA campaign hero)
-=======
-/* ASORTA v5.7 rebuilt from scratch — cinematic flagship homepage */
-body{
-  background:
-    radial-gradient(circle at 80% -10%,rgba(70,130,160,.12),transparent 34%),
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.04),transparent 26%),
-    #040404;
-}
-.glass{background:rgba(3,3,3,.78);backdrop-filter:blur(22px);border-bottom:1px solid rgba(255,255,255,.10)}
-.asorta-nav-wordmark{font-weight:1000;letter-spacing:.08em;font-size:1.45rem;line-height:1;background:linear-gradient(180deg,#fff,#9fa4a5 54%,#fff 70%,#5f6264);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 24px rgba(255,255,255,.08)}
-.asorta-nav-wordmark span{display:inline-block;width:.86em;text-align:center;border:.12em solid rgba(230,235,238,.9);border-top-color:rgba(255,255,255,.45);border-radius:.18em;line-height:.73;margin:0 .02em;transform:skewX(-8deg);color:transparent;background:none;-webkit-background-clip:border-box;background-clip:border-box;box-shadow:inset 0 0 14px rgba(255,255,255,.18),0 0 14px rgba(125,179,207,.08)}
-
-.asorta-home{background:linear-gradient(180deg,#050505 0%,#070707 42%,#050505 100%)}
-.asorta-flagship{position:relative;display:grid;grid-template-columns:44% 56%;min-height:720px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.10);background:#040404;isolation:isolate}
-.asorta-flagship:after{content:"";position:absolute;inset:auto 0 0;height:190px;background:linear-gradient(180deg,transparent,#050505 78%);z-index:4;pointer-events:none}
-.asorta-flagship-orb{position:absolute;z-index:1;width:38vw;height:38vw;border-radius:999px;filter:blur(34px);opacity:.30;pointer-events:none}
-.asorta-flagship-orb-blue{right:12%;top:-18%;background:radial-gradient(circle,rgba(87,158,198,.38),transparent 62%)}
-.asorta-flagship-orb-red{right:-8%;top:26%;background:radial-gradient(circle,rgba(190,36,67,.24),transparent 62%)}
-.asorta-flagship-lines{position:absolute;inset:0;z-index:2;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:78px 78px;mask-image:linear-gradient(90deg,black,transparent 62%)}
-.asorta-flagship-copy{position:relative;z-index:8;display:flex;flex-direction:column;justify-content:center;padding:7.5rem 2rem 5.5rem clamp(1.5rem,6.5vw,6.2rem);background:linear-gradient(90deg,#050505 0%,rgba(5,5,5,.98) 74%,rgba(5,5,5,.56) 100%)}
-.asorta-flagship-kicker{margin:0 0 1.5rem;font-size:.78rem;font-weight:1000;letter-spacing:.36em;color:rgba(219,231,237,.78)}
-.asorta-wordmark{margin:0;font-size:clamp(4.4rem,7.8vw,8.35rem);line-height:.78;font-weight:1000;letter-spacing:-.055em;background:linear-gradient(180deg,#fff 0%,#f3f3f3 34%,#9da3a5 56%,#fff 74%,#65686a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 26px 100px rgba(0,0,0,.75);filter:drop-shadow(0 2px 0 rgba(255,255,255,.08))}
-.asorta-wordmark span{display:inline-grid;place-items:center;width:.78em;height:.72em;margin:0 .015em;border:.095em solid rgba(235,239,241,.92);border-top-color:rgba(255,255,255,.50);border-radius:.105em;transform:skewX(-9deg) translateY(.035em);box-shadow:inset 0 0 24px rgba(255,255,255,.20),0 0 34px rgba(125,179,207,.08);color:transparent;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,0))}
-.asorta-flagship-slogan{margin:1.2rem 0 0;font-size:clamp(1rem,1.15vw,1.2rem);font-weight:1000;letter-spacing:.33em;color:rgba(255,255,255,.52)}
-.asorta-flagship-text{margin:1.7rem 0 0;max-width:560px;color:rgba(255,255,255,.70);font-size:clamp(1rem,1.1vw,1.16rem);line-height:1.72;text-shadow:0 8px 40px rgba(0,0,0,.55)}
-.asorta-flagship-actions{margin-top:2.15rem;display:flex;flex-wrap:wrap;gap:1rem}.asorta-flagship-split{position:absolute;z-index:9;top:0;bottom:0;left:44%;width:1px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.24),rgba(125,179,207,.16),transparent);transform:skewX(-10deg);box-shadow:0 0 28px rgba(125,179,207,.12)}
-.asorta-flagship-split:before{content:"";position:absolute;inset:0 -26px;background:linear-gradient(90deg,rgba(0,0,0,.38),transparent);pointer-events:none}.asorta-flagship-scene{position:relative;z-index:3;min-height:720px;overflow:hidden;background:radial-gradient(circle at 68% 34%,rgba(72,130,158,.12),transparent 30%),#070707}.asorta-flagship-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.035);filter:saturate(.86) contrast(1.08) brightness(.58);transition:opacity .9s ease,transform 1.35s ease}.asorta-flagship-image.active{opacity:.55;transform:scale(1)}
-.asorta-flagship-grade{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,5,5,.64) 0%,rgba(5,5,5,.25) 18%,rgba(5,5,5,.08) 50%,rgba(5,5,5,.18) 100%),linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.48)),radial-gradient(circle at 34% 23%,rgba(94,164,202,.26),transparent 30%),radial-gradient(circle at 91% 43%,rgba(210,32,66,.26),transparent 28%)}
-.asorta-flagship-props{position:absolute;z-index:4;inset:0;pointer-events:none}.prop{position:absolute;border-radius:1.1rem;background-size:cover;background-position:center;filter:drop-shadow(0 24px 42px rgba(0,0,0,.75)) saturate(.72) contrast(1.08) brightness(.70);opacity:.98}.prop-bag{left:18%;top:18%;width:32%;height:47%;background-image:url('/products/asorta-urban-sling-pro/2.jpg');border-radius:2rem}.prop-light{left:17%;bottom:17%;width:22%;height:15%;background-image:url('/products/edc-flashlight-titan.svg');transform:rotate(-8deg)}.prop-tool{left:39%;bottom:15%;width:28%;height:20%;background-image:url('/products/asorta-trailpoint-mini/1.jpg');transform:rotate(-3deg)}.prop-wallet{right:12%;bottom:19%;width:24%;height:22%;background-image:url('/products/minimalist-rfid-wallet.svg');transform:rotate(4deg)}.prop:after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.42));border:1px solid rgba(255,255,255,.05)}
-.asorta-flagship-card{position:absolute;z-index:8;right:clamp(2rem,5vw,5.5rem);bottom:7.5%;width:min(310px,80%);border:1px solid rgba(255,255,255,.10);border-radius:.95rem;background:rgba(8,9,10,.68);backdrop-filter:blur(16px);box-shadow:0 26px 90px rgba(0,0,0,.58);padding:1.3rem 1.45rem}.asorta-flagship-card p{margin:0;font-size:.72rem;font-weight:1000;text-transform:uppercase;letter-spacing:.34em;color:rgba(255,255,255,.58)}.asorta-flagship-card h2{margin:.65rem 0 .2rem;font-size:clamp(1.5rem,1.65vw,2rem);line-height:1.05;font-weight:1000;color:#fff}.asorta-flagship-card span{display:block;font-size:clamp(.95rem,1vw,1.12rem);font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.58)}
-.asorta-flagship-dots{position:absolute;z-index:8;left:8%;bottom:6%;display:flex;gap:.85rem}.asorta-flagship-dots button{width:.52rem;height:.52rem;border:0;border-radius:999px;background:rgba(255,255,255,.34);cursor:pointer;transition:.22s ease}.asorta-flagship-dots button.active{width:2rem;background:#fff;box-shadow:0 0 22px rgba(255,255,255,.42)}.asorta-flagship-counter{position:absolute;z-index:8;right:clamp(2rem,5vw,5.5rem);top:25%;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(0,0,0,.46);backdrop-filter:blur(14px);padding:.34rem .75rem;color:rgba(255,255,255,.62);font-size:11px;font-weight:1000;letter-spacing:.12em}.asorta-flagship-arrow{position:absolute;z-index:9;top:50%;display:grid;width:3.25rem;height:3.25rem;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.36);color:rgba(255,255,255,.82);backdrop-filter:blur(14px);transform:translateY(-50%);transition:.22s ease}.asorta-flagship-arrow:hover{background:rgba(255,255,255,.08);color:#fff;transform:translateY(-50%) scale(1.04)}.asorta-flagship-arrow-left{left:1.5rem}.asorta-flagship-arrow-right{right:1.5rem}
-.asorta-category{position:relative;min-height:8.9rem;overflow:hidden;border-radius:.65rem;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.035);box-shadow:0 20px 80px rgba(0,0,0,.32);transition:.28s ease}.asorta-category:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.25);box-shadow:0 30px 110px rgba(69,120,150,.12)}.asorta-section-title{margin-top:.25rem;font-size:clamp(2.25rem,4.6vw,4.9rem);font-weight:1000;letter-spacing:-.055em;line-height:.9;background:linear-gradient(180deg,#fff,#aeb4b4 70%,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}.asorta-editorial-card{position:relative;overflow:hidden;display:grid;gap:2rem;align-items:end;border:1px solid rgba(255,255,255,.11);border-radius:2rem;background:linear-gradient(120deg,rgba(255,255,255,.07),rgba(255,255,255,.025)),radial-gradient(circle at 82% 20%,rgba(80,144,178,.16),transparent 32%);padding:2rem;box-shadow:0 30px 120px rgba(0,0,0,.42)}.asorta-editorial-card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.24),transparent),url('/products/asorta-urban-sling-pro/10.jpg') right center/contain no-repeat;opacity:.18}.asorta-editorial-card>*{position:relative}.asorta-editorial-card h2{max-width:800px;font-size:clamp(2.2rem,5vw,5.4rem);line-height:.88;font-weight:1000;letter-spacing:-.06em}.asorta-editorial-card p:not(.kicker){margin-top:1rem;max-width:650px;color:rgba(255,255,255,.62);line-height:1.75}@media(min-width:900px){.asorta-editorial-card{grid-template-columns:1fr auto;padding:3rem 3.2rem}}
-
-@media(max-width:1023px){
-  .asorta-flagship{display:block;min-height:auto}.asorta-flagship-copy{min-height:540px;padding:7rem 1.35rem 3rem;background:linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.82)),#050505}.asorta-wordmark{font-size:clamp(3.7rem,16vw,6.35rem)}.asorta-flagship-kicker{font-size:.68rem;letter-spacing:.24em}.asorta-flagship-scene,.asorta-flagship-split,.asorta-flagship-arrow,.asorta-flagship-counter,.asorta-flagship-card,.asorta-flagship-dots{display:none}.asorta-mobile-flagship-card{display:block}.asorta-category{min-height:10rem}.asorta-editorial-card:before{background:url('/products/asorta-urban-sling-pro/10.jpg') center/cover no-repeat;opacity:.10}
-}
-<<<<<<< HEAD
->>>>>>> 4128d8e (rebuild asorta v5.7)
-=======
-
-/* ASORTA v5.7.2 cinematic divider architecture */
 .asorta-header-logo{
   height:42px;
   width:auto;
   object-fit:contain;
   filter:drop-shadow(0 10px 26px rgba(255,255,255,.10)) drop-shadow(0 0 22px rgba(110,170,205,.08));
 }
-.asorta-hero-title-image-wrap{
-  margin:0;
-  max-width:min(720px,92vw);
+
+.asorta-home{
+  background:linear-gradient(180deg,#050505 0%,#070707 42%,#050505 100%);
 }
-.asorta-hero-title-image{
-  width:min(720px,100%);
-  height:auto;
-  object-fit:contain;
-  filter:drop-shadow(0 22px 80px rgba(0,0,0,.78)) drop-shadow(0 2px 0 rgba(255,255,255,.05));
-}
+
+/* ASORTA v5.7.3 dual panel reversed slice hero */
 .asorta-flagship{
+  position:relative;
+  display:grid;
   grid-template-columns:minmax(420px,44.5%) minmax(0,55.5%);
+  min-height:720px;
+  overflow:hidden;
+  border-bottom:1px solid rgba(255,255,255,.10);
   background:#050505;
+  isolation:isolate;
 }
+.asorta-flagship:after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:190px;
+  background:linear-gradient(180deg,transparent,#050505 78%);
+  z-index:4;
+  pointer-events:none;
+}
+.asorta-flagship-orb{
+  position:absolute;
+  z-index:1;
+  width:38vw;
+  height:38vw;
+  border-radius:999px;
+  filter:blur(34px);
+  opacity:.30;
+  pointer-events:none;
+}
+.asorta-flagship-orb-blue{
+  right:12%;
+  top:-18%;
+  background:radial-gradient(circle,rgba(87,158,198,.38),transparent 62%);
+}
+.asorta-flagship-orb-red{
+  right:-8%;
+  top:26%;
+  background:radial-gradient(circle,rgba(190,36,67,.24),transparent 62%);
+}
+.asorta-flagship-lines{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  opacity:.12;
+  background-image:
+    linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:78px 78px;
+  mask-image:linear-gradient(90deg,black,transparent 62%);
+}
+
 .asorta-flagship-copy{
+  position:relative;
   z-index:12;
   min-height:720px;
-  padding-top:6.7rem;
-  padding-bottom:5.2rem;
-  padding-right:clamp(4.2rem,7.2vw,8.5rem);
-  clip-path:polygon(0 0,100% 0,82% 100%,0 100%);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:6.7rem clamp(4.2rem,7.2vw,8.5rem) 5.2rem clamp(1.5rem,6.5vw,6.2rem);
+  clip-path:polygon(0 0,82% 0,100% 100%,0 100%);
   background:
     linear-gradient(100deg,#050505 0%,rgba(5,5,5,.985) 47%,rgba(5,5,5,.92) 71%,rgba(5,5,5,.72) 100%),
     radial-gradient(circle at 18% 10%,rgba(255,255,255,.055),transparent 34%),
@@ -848,13 +294,79 @@ body{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(112deg,transparent 0 76%,rgba(255,255,255,.055) 76.35%,rgba(125,179,207,.12) 76.7%,rgba(0,0,0,.50) 77.2%,transparent 78.2%),
+    linear-gradient(68deg,transparent 0 76%,rgba(255,255,255,.055) 76.35%,rgba(125,179,207,.12) 76.7%,rgba(0,0,0,.50) 77.2%,transparent 78.2%),
     linear-gradient(90deg,rgba(255,255,255,.018),transparent 35%);
   pointer-events:none;
 }
+.asorta-flagship-kicker{
+  margin:0 0 1.5rem;
+  font-size:.78rem;
+  font-weight:1000;
+  letter-spacing:.36em;
+  color:rgba(219,231,237,.78);
+}
+.asorta-hero-title-image-wrap{
+  margin:0;
+  max-width:min(720px,92vw);
+}
+.asorta-hero-title-image{
+  width:min(720px,100%);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 22px 80px rgba(0,0,0,.78)) drop-shadow(0 2px 0 rgba(255,255,255,.05));
+}
+.asorta-wordmark{
+  margin:0;
+  font-size:clamp(4.4rem,7.8vw,8.35rem);
+  line-height:.78;
+  font-weight:1000;
+  letter-spacing:-.055em;
+  background:linear-gradient(180deg,#fff 0%,#f3f3f3 34%,#9da3a5 56%,#fff 74%,#65686a 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 26px 100px rgba(0,0,0,.75);
+  filter:drop-shadow(0 2px 0 rgba(255,255,255,.08));
+}
+.asorta-wordmark span{
+  display:inline-grid;
+  place-items:center;
+  width:.78em;
+  height:.72em;
+  margin:0 .015em;
+  border:.095em solid rgba(235,239,241,.92);
+  border-top-color:rgba(255,255,255,.50);
+  border-radius:.105em;
+  transform:skewX(-9deg) translateY(.035em);
+  box-shadow:inset 0 0 24px rgba(255,255,255,.20),0 0 34px rgba(125,179,207,.08);
+  color:transparent;
+  background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,0));
+}
+.asorta-flagship-slogan{
+  margin:1.2rem 0 0;
+  font-size:clamp(1rem,1.15vw,1.2rem);
+  font-weight:1000;
+  letter-spacing:.33em;
+  color:rgba(255,255,255,.52);
+}
+.asorta-flagship-text{
+  margin:1.7rem 0 0;
+  max-width:560px;
+  color:rgba(255,255,255,.70);
+  font-size:clamp(1rem,1.1vw,1.16rem);
+  line-height:1.72;
+  text-shadow:0 8px 40px rgba(0,0,0,.55);
+}
+.asorta-flagship-actions{
+  margin-top:2.15rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+
 .asorta-flagship-scene{
   position:relative;
-  z-index:2;
+  z-index:3;
   min-height:720px;
   overflow:hidden;
   margin-left:clamp(-8.5rem,-8vw,-4.2rem);
@@ -867,14 +379,12 @@ body{
   z-index:4;
   inset:-1px auto -1px 0;
   width:clamp(170px,18vw,330px);
-  transform:skewX(-11deg);
+  transform:skewX(11deg);
   transform-origin:left center;
   background:
     linear-gradient(100deg,#050505 0%,rgba(5,5,5,.99) 25%,rgba(5,5,5,.82) 48%,rgba(5,5,5,.38) 70%,transparent 92%);
   border-right:1px solid rgba(255,255,255,.10);
-  box-shadow:
-    26px 0 80px rgba(0,0,0,.68),
-    0 0 44px rgba(125,179,207,.10);
+  box-shadow:26px 0 80px rgba(0,0,0,.68),0 0 44px rgba(125,179,207,.10);
   pointer-events:none;
 }
 .asorta-flagship-scene:after{
@@ -885,12 +395,13 @@ body{
   bottom:-8%;
   left:clamp(82px,8.6vw,170px);
   width:2px;
-  transform:skewX(-11deg);
+  transform:skewX(11deg);
   background:linear-gradient(180deg,transparent 2%,rgba(255,255,255,.18),rgba(125,179,207,.16),rgba(255,255,255,.06),transparent 98%);
   box-shadow:0 0 34px rgba(125,179,207,.13),-18px 0 58px rgba(0,0,0,.58);
   pointer-events:none;
 }
 .asorta-flagship-split{display:none}
+
 .asorta-flagship-image{
   position:absolute;
   inset:0;
@@ -908,6 +419,8 @@ body{
   transform:scale(1.028);
 }
 .asorta-flagship-grade{
+  position:absolute;
+  inset:0;
   z-index:3;
   background:
     linear-gradient(90deg,rgba(5,5,5,.22) 0%,rgba(5,5,5,.09) 21%,rgba(5,5,5,.035) 55%,rgba(5,5,5,.23) 100%),
@@ -915,29 +428,201 @@ body{
     radial-gradient(circle at 28% 22%,rgba(94,164,202,.31),transparent 31%),
     radial-gradient(circle at 94% 43%,rgba(210,32,66,.29),transparent 29%);
 }
-.asorta-flagship-props,.asorta-flagship-counter{display:none!important}
-.asorta-flagship-card{
-  bottom:6.5%;
-  right:clamp(1.8rem,4.2vw,4.8rem);
+.asorta-flagship-props,
+.asorta-flagship-counter{
+  display:none!important;
 }
+
+.asorta-flagship-card{
+  position:absolute;
+  z-index:8;
+  right:clamp(1.8rem,4.2vw,4.8rem);
+  bottom:6.5%;
+  width:min(310px,80%);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:.95rem;
+  background:rgba(8,9,10,.68);
+  backdrop-filter:blur(16px);
+  box-shadow:0 26px 90px rgba(0,0,0,.58);
+  padding:1.3rem 1.45rem;
+}
+.asorta-flagship-card p{
+  margin:0;
+  font-size:.72rem;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.34em;
+  color:rgba(255,255,255,.58);
+}
+.asorta-flagship-card h2{
+  margin:.65rem 0 .2rem;
+  font-size:clamp(1.5rem,1.65vw,2rem);
+  line-height:1.05;
+  font-weight:1000;
+  color:#fff;
+}
+.asorta-flagship-card span{
+  display:block;
+  font-size:clamp(.95rem,1vw,1.12rem);
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:rgba(255,255,255,.58);
+}
+
 .asorta-flagship-dots{
+  position:absolute;
+  z-index:8;
   left:clamp(6.8rem,10.4vw,12rem);
+  bottom:6%;
+  display:flex;
+  gap:.85rem;
+}
+.asorta-flagship-dots button{
+  width:.52rem;
+  height:.52rem;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.34);
+  cursor:pointer;
+  transition:.22s ease;
+}
+.asorta-flagship-dots button.active{
+  width:2rem;
+  background:#fff;
+  box-shadow:0 0 22px rgba(255,255,255,.42);
+}
+
+.asorta-flagship-arrow{
+  position:absolute;
+  z-index:9;
+  top:50%;
+  display:grid;
+  width:3.25rem;
+  height:3.25rem;
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.36);
+  color:rgba(255,255,255,.82);
+  backdrop-filter:blur(14px);
+  transform:translateY(-50%);
+  transition:.22s ease;
+}
+.asorta-flagship-arrow:hover{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  transform:translateY(-50%) scale(1.04);
 }
 .asorta-flagship-arrow-left{left:clamp(5rem,8.2vw,9.4rem)}
+.asorta-flagship-arrow-right{right:1.5rem}
+
+/* Homepage modules */
+.asorta-category{
+  position:relative;
+  min-height:8.9rem;
+  overflow:hidden;
+  border-radius:.65rem;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.035);
+  box-shadow:0 20px 80px rgba(0,0,0,.32);
+  transition:.28s ease;
+}
+.asorta-category:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,255,255,.25);
+  box-shadow:0 30px 110px rgba(69,120,150,.12);
+}
+.asorta-section-title{
+  margin-top:.25rem;
+  font-size:clamp(2.25rem,4.6vw,4.9rem);
+  font-weight:1000;
+  letter-spacing:-.055em;
+  line-height:.9;
+  background:linear-gradient(180deg,#fff,#aeb4b4 70%,#fff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.asorta-editorial-card{
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  gap:2rem;
+  align-items:end;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:2rem;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.07),rgba(255,255,255,.025)),
+    radial-gradient(circle at 82% 20%,rgba(80,144,178,.16),transparent 32%);
+  padding:2rem;
+  box-shadow:0 30px 120px rgba(0,0,0,.42);
+}
+.asorta-editorial-card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.24),transparent),
+    url('/products/asorta-urban-sling-pro/10.jpg') right center/contain no-repeat;
+  opacity:.18;
+}
+.asorta-editorial-card>*{position:relative}
+.asorta-editorial-card h2{
+  max-width:800px;
+  font-size:clamp(2.2rem,5vw,5.4rem);
+  line-height:.88;
+  font-weight:1000;
+  letter-spacing:-.06em;
+}
+.asorta-editorial-card p:not(.kicker){
+  margin-top:1rem;
+  max-width:650px;
+  color:rgba(255,255,255,.62);
+  line-height:1.75;
+}
+@media(min-width:900px){
+  .asorta-editorial-card{
+    grid-template-columns:1fr auto;
+    padding:3rem 3.2rem;
+  }
+}
+
+/* Mobile */
 @media(max-width:1023px){
   .asorta-header-logo{height:36px}
-  .asorta-flagship{display:block;grid-template-columns:1fr}
+  .asorta-flagship{
+    display:block;
+    grid-template-columns:1fr;
+    min-height:auto;
+  }
   .asorta-hero-title-image-wrap{max-width:min(560px,94vw)}
   .asorta-hero-title-image{width:min(560px,100%)}
-  .asorta-flagship-copy{min-height:520px;padding-top:6.4rem;padding-right:1.35rem;clip-path:none}
+  .asorta-flagship-copy{
+    min-height:520px;
+    padding:6.4rem 1.35rem 3rem;
+    clip-path:none;
+    background:linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.82)),#050505;
+  }
   .asorta-flagship-copy:after{display:none}
-  .asorta-flagship-scene{display:none;margin-left:0;padding-left:0}
+  .asorta-wordmark{font-size:clamp(3.7rem,16vw,6.35rem)}
+  .asorta-flagship-kicker{font-size:.68rem;letter-spacing:.24em}
+  .asorta-flagship-scene,
+  .asorta-flagship-split,
+  .asorta-flagship-arrow,
+  .asorta-flagship-counter,
+  .asorta-flagship-card,
+  .asorta-flagship-dots{
+    display:none;
+  }
+  .asorta-mobile-flagship-card{display:block}
+  .asorta-category{min-height:10rem}
+  .asorta-editorial-card:before{
+    background:url('/products/asorta-urban-sling-pro/10.jpg') center/cover no-repeat;
+    opacity:.10;
+  }
 }
 @media(max-width:640px){
   .asorta-header-logo{height:31px}
   .asorta-hero-title-image-wrap{max-width:96vw}
 }
->>>>>>> 6db8afd (rebuild asorta v5.7.1)
-=======
-}
->>>>>>> 652ddaf (ASORTA v5.7 flagship rebuild)
