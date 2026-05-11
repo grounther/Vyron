@@ -39,9 +39,8 @@ export default function Header(){
   return <>
     <header className="glass sticky top-0 z-50">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link href="/" className="group flex items-center gap-2" onClick={()=>setMenuOpen(false)}>
-          <img src="/asorta-icon.png" alt="" className="brandmark-glow h-9 w-9 object-contain transition group-hover:scale-105"/>
-          <span className="asorta-nav-wordmark hidden sm:inline">AS<span>O</span>RTA</span>
+        <Link href="/" className="group flex items-center" onClick={()=>setMenuOpen(false)} aria-label="ASORTA home">
+          <img src="/asorta-logo-header-metal.png" alt="ASORTA" className="asorta-header-logo transition group-hover:scale-[1.025]"/>
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-bold text-white/60 lg:flex">
           {links.map(([label,href])=><Link key={href} href={href} className="transition hover:text-white">{label}</Link>)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
@@ -73,8 +73,6 @@ export default function HomeHeroSlider() {
     setActive((current) => (current + direction + slides.length) % slides.length)
   }
 
-  const slideLabel = useMemo(() => `${String(active + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`, [active])
-
   return (
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -146,10 +144,9 @@ export default function HomeHeroSlider() {
 
       <div className="asorta-flagship-copy">
         <p className="asorta-flagship-kicker">TACTICAL • AUTOMOTIVE • GAMING • UTILITY</p>
-        <h1 className="asorta-wordmark" aria-label="ASORTA">
-          AS<span>O</span>RTA
+        <h1 className="asorta-hero-title-image-wrap" aria-label="ASORTA — JUST WHAT YOU NEED.">
+          <img src="/asorta-title-metal.png" alt="ASORTA — JUST WHAT YOU NEED." className="asorta-hero-title-image" />
         </h1>
-        <p className="asorta-flagship-slogan">JUST WHAT YOU NEED.</p>
         <p className="asorta-flagship-text">
           Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.
         </p>
@@ -174,12 +171,6 @@ export default function HomeHeroSlider() {
           />
         ))}
         <div className="asorta-flagship-grade" />
-        <div className="asorta-flagship-props">
-          <div className="prop prop-bag" />
-          <div className="prop prop-light" />
-          <div className="prop prop-tool" />
-          <div className="prop prop-wallet" />
-        </div>
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -210,7 +201,6 @@ export default function HomeHeroSlider() {
 >>>>>>> 4128d8e (rebuild asorta v5.7)
         </button>
 
-        <div className="asorta-flagship-counter">{slideLabel}</div>
         <div className="asorta-flagship-card">
           <p>{slide.kicker}</p>
           <h2>{slide.title}</h2>

@@ -804,4 +804,85 @@ body{
 @media(max-width:1023px){
   .asorta-flagship{display:block;min-height:auto}.asorta-flagship-copy{min-height:540px;padding:7rem 1.35rem 3rem;background:linear-gradient(90deg,rgba(5,5,5,.96),rgba(5,5,5,.82)),#050505}.asorta-wordmark{font-size:clamp(3.7rem,16vw,6.35rem)}.asorta-flagship-kicker{font-size:.68rem;letter-spacing:.24em}.asorta-flagship-scene,.asorta-flagship-split,.asorta-flagship-arrow,.asorta-flagship-counter,.asorta-flagship-card,.asorta-flagship-dots{display:none}.asorta-mobile-flagship-card{display:block}.asorta-category{min-height:10rem}.asorta-editorial-card:before{background:url('/products/asorta-urban-sling-pro/10.jpg') center/cover no-repeat;opacity:.10}
 }
+<<<<<<< HEAD
 >>>>>>> 4128d8e (rebuild asorta v5.7)
+=======
+
+/* ASORTA v5.7.1 partner polish: real logo/title image + single hero visual */
+.asorta-header-logo{
+  height:42px;
+  width:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 10px 26px rgba(255,255,255,.10)) drop-shadow(0 0 22px rgba(110,170,205,.08));
+}
+.asorta-hero-title-image-wrap{
+  margin:0;
+  max-width:min(720px,92vw);
+}
+.asorta-hero-title-image{
+  width:min(720px,100%);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 22px 80px rgba(0,0,0,.78)) drop-shadow(0 2px 0 rgba(255,255,255,.05));
+}
+.asorta-flagship-copy{
+  padding-top:6.7rem;
+  padding-bottom:5.2rem;
+}
+.asorta-flagship-scene{
+  overflow:hidden;
+}
+.asorta-flagship-scene:before{
+  content:"";
+  position:absolute;
+  z-index:3;
+  inset:0 auto 0 -7vw;
+  width:18vw;
+  background:linear-gradient(100deg,#050505 0%,rgba(5,5,5,.96) 32%,rgba(5,5,5,.55) 66%,transparent 100%);
+  pointer-events:none;
+}
+.asorta-flagship-split{
+  left:43.15%;
+  width:2px;
+  transform:skewX(-11deg);
+  background:linear-gradient(180deg,transparent 3%,rgba(255,255,255,.17),rgba(125,179,207,.13),transparent 96%);
+  box-shadow:0 0 46px rgba(125,179,207,.10), -34px 0 90px rgba(0,0,0,.32);
+}
+.asorta-flagship-split:before{
+  inset:0 -70px;
+  background:linear-gradient(90deg,rgba(5,5,5,.82),rgba(5,5,5,.36) 42%,transparent 78%);
+}
+.asorta-flagship-image{
+  left:-6.5vw;
+  width:calc(100% + 8vw);
+  object-fit:cover;
+  transform:scale(1.065);
+  filter:saturate(.88) contrast(1.13) brightness(.64);
+}
+.asorta-flagship-image.active{
+  opacity:.86;
+  transform:scale(1.025);
+}
+.asorta-flagship-grade{
+  background:
+    linear-gradient(90deg,rgba(5,5,5,.38) 0%,rgba(5,5,5,.16) 20%,rgba(5,5,5,.04) 54%,rgba(5,5,5,.22) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.58)),
+    radial-gradient(circle at 30% 23%,rgba(94,164,202,.30),transparent 31%),
+    radial-gradient(circle at 94% 43%,rgba(210,32,66,.28),transparent 29%);
+}
+.asorta-flagship-props,.asorta-flagship-counter{display:none!important}
+.asorta-flagship-card{
+  bottom:6.5%;
+  right:clamp(1.8rem,4.2vw,4.8rem);
+}
+@media(max-width:1023px){
+  .asorta-header-logo{height:36px}
+  .asorta-hero-title-image-wrap{max-width:min(560px,94vw)}
+  .asorta-hero-title-image{width:min(560px,100%)}
+  .asorta-flagship-copy{min-height:520px;padding-top:6.4rem}
+}
+@media(max-width:640px){
+  .asorta-header-logo{height:31px}
+  .asorta-hero-title-image-wrap{max-width:96vw}
+}
+>>>>>>> 6db8afd (rebuild asorta v5.7.1)
