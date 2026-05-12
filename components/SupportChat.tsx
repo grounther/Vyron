@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, CheckCircle2, Headphones, Loader2, RotateCcw, Send } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Headphones, Loader2, RotateCcw, Send, Wifi, WifiOff } from 'lucide-react'
 
 type SupportMessage = {
   id: string
@@ -18,6 +18,14 @@ type SupportConversation = {
   customer_email: string | null
   status: string
   subject: string | null
+  last_message_at?: string | null
+  updated_at?: string | null
+}
+
+type SupportSnapshot = {
+  conversation: SupportConversation
+  messages: SupportMessage[]
+  serverTime?: string
 }
 
 type StoredChat = {
@@ -86,11 +94,20 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [liveState, setLiveState] = useState<'idle' | 'connected' | 'reconnecting'>('idle')
   const endRef = useRef<HTMLDivElement | null>(null)
   const lastMessageCount = useRef(0)
 
   const hasChat = Boolean(token && conversation)
   const isClosed = conversation?.status === 'closed'
+
+  function applySnapshot(snapshot: SupportSnapshot) {
+    setConversation(snapshot.conversation)
+    setMessages(snapshot.messages || [])
+    if (snapshot.conversation) storeChat(snapshot.conversation)
+    setError('')
+    setLoading(false)
+  }
 
   async function loadConversation(currentToken: string, silent = false) {
     try {
@@ -105,23 +122,21 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
         setToken(null)
         setConversation(null)
         setMessages([])
+        setLiveState('idle')
         setNotice('Dit supportgesprek is afgerond en gearchiveerd. Start gerust een nieuw gesprek.')
         return
       }
 
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Support chat niet gevonden')
-
-      setConversation(data.conversation)
-      setMessages(data.messages || [])
-      if (data.conversation) storeChat(data.conversation)
-      setError('')
+      applySnapshot(data)
     } catch {
       if (!silent) {
         clearStoredChat()
         setToken(null)
         setConversation(null)
         setMessages([])
+        setLiveState('idle')
         setError('Je vorige chat kon niet worden geladen. Start gerust een nieuw gesprek.')
       }
     } finally {
@@ -137,19 +152,65 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
 
   useEffect(() => {
     if (!token) return
-    let active = true
 
-    const load = async (silent = false) => {
-      if (!active) return
-      await loadConversation(token, silent)
+    let active = true
+    let stream: EventSource | null = null
+    let fallbackInterval: number | undefined
+
+    const startFallback = () => {
+      if (fallbackInterval) return
+      fallbackInterval = window.setInterval(() => {
+        if (active) loadConversation(token, true)
+      }, 3000)
     }
 
-    load(false)
-    const interval = window.setInterval(() => load(true), 2000)
+    const stopFallback = () => {
+      if (!fallbackInterval) return
+      window.clearInterval(fallbackInterval)
+      fallbackInterval = undefined
+    }
 
-    const handleFocus = () => load(true)
+    loadConversation(token, false)
+
+    if ('EventSource' in window) {
+      stream = new EventSource(`/api/support/conversations/${token}/stream`)
+
+      stream.onopen = () => {
+        if (!active) return
+        setLiveState('connected')
+        stopFallback()
+      }
+
+      stream.onmessage = (event) => {
+        if (!active) return
+        const snapshot = JSON.parse(event.data) as SupportSnapshot
+        applySnapshot(snapshot)
+        setLiveState('connected')
+      }
+
+      stream.onerror = () => {
+        if (!active) return
+        setLiveState('reconnecting')
+        startFallback()
+      }
+
+      stream.addEventListener('archived', () => {
+        if (!active) return
+        clearStoredChat()
+        setToken(null)
+        setConversation(null)
+        setMessages([])
+        setLiveState('idle')
+        setNotice('Dit supportgesprek is afgerond en gearchiveerd. Start gerust een nieuw gesprek.')
+      })
+    } else {
+      setLiveState('reconnecting')
+      startFallback()
+    }
+
+    const handleFocus = () => loadConversation(token, true)
     const handleVisibility = () => {
-      if (!document.hidden) load(true)
+      if (!document.hidden) loadConversation(token, true)
     }
     const handleStorage = (event: StorageEvent) => {
       if (event.key === STORAGE_KEY || event.key === LEGACY_STORAGE_KEY) {
@@ -164,7 +225,8 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
 
     return () => {
       active = false
-      window.clearInterval(interval)
+      stream?.close()
+      stopFallback()
       window.removeEventListener('focus', handleFocus)
       window.removeEventListener('storage', handleStorage)
       document.removeEventListener('visibilitychange', handleVisibility)
@@ -183,8 +245,8 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
     if (conversation.status === 'closed') return 'Deze chat is gesloten. Je ontvangt een kopie wanneer support hem archiveert.'
     if (conversation.status === 'answered') return 'ASORTA Support heeft gereageerd · je kunt direct terugtypen.'
     if (conversation.status === 'pending') return 'Je bericht staat klaar voor ASORTA Support.'
-    return 'Live chat actief · berichten worden automatisch bijgewerkt.'
-  }, [conversation])
+    return liveState === 'connected' ? 'Live chat actief · berichten verschijnen direct.' : 'Live chat actief · verbinding wordt bewaakt.'
+  }, [conversation, liveState])
 
   async function startChat(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -249,11 +311,8 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Bericht kon niet worden verzonden')
-      setMessages(data.messages || [])
-      setConversation(data.conversation)
-      if (data.conversation) storeChat(data.conversation)
+      applySnapshot(data)
       form.reset()
-      window.setTimeout(() => loadConversation(token, true), 450)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bericht verzenden lukte niet.')
     } finally {
@@ -268,6 +327,7 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
     setMessages([])
     setError('')
     setNotice('')
+    setLiveState('idle')
     setLoading(false)
   }
 
@@ -286,8 +346,11 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white">
             <Headphones size={20} />
           </div>
-          <div>
-            <p className="text-sm font-black">Live chat</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black">Live chat</p>
+              {liveState === 'connected' ? <Wifi size={14} className="text-[#b7c8ad]" /> : liveState === 'reconnecting' ? <WifiOff size={14} className="text-amber-200" /> : null}
+            </div>
             <p className="text-xs text-white/45">{statusText}</p>
           </div>
         </div>

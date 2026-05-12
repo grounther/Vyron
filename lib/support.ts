@@ -30,9 +30,8 @@ export type SupportMessage = {
   id: string
   conversation_id: string
   sender_type: string
-  sender_name: string | null
-  sender_email: string | null
-  message: string
+  author_name: string | null
+  body: string
   created_at: string
 }
 
@@ -60,7 +59,7 @@ export async function getSupportDashboard() {
       .limit(40),
     supabase
       .from('support_messages')
-      .select('id,conversation_id,sender_type,sender_name,sender_email,message,created_at')
+      .select('id,conversation_id,sender_type,author_name,body,created_at')
       .order('created_at', { ascending: false })
       .limit(120),
   ])

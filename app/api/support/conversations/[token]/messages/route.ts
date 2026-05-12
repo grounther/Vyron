@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { sendResendEmail } from '@/lib/newsletter'
-
-function clean(value: unknown, limit = 3000) {
-  return typeof value === 'string' ? value.trim().slice(0, limit) : ''
-}
+import { cleanText, escapeHtml, getCustomerSupportSnapshot } from '@/lib/support-admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 async function getConversation(token: string) {
   const supabase = createAdminClient()
@@ -12,7 +9,7 @@ async function getConversation(token: string) {
 
   const { data: conversation, error } = await supabase
     .from('support_conversations')
-    .select('id, public_token, customer_name, customer_email, status, subject')
+    .select('id, public_token, customer_name, customer_email, status, subject, last_message_at, updated_at')
     .eq('public_token', token)
     .maybeSingle()
 
@@ -22,24 +19,19 @@ async function getConversation(token: string) {
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const { supabase, conversation, error } = await getConversation(token)
-  if (!supabase || !conversation) return NextResponse.json({ error }, { status: 404 })
+  const supabase = createAdminClient()
+  if (!supabase) return NextResponse.json({ error: 'Support database is niet geconfigureerd.' }, { status: 500 })
 
-  const { data: messages, error: messagesError } = await supabase
-    .from('support_messages')
-    .select('id, sender_type, author_name, body, created_at')
-    .eq('conversation_id', conversation.id)
-    .order('created_at', { ascending: true })
+  const snapshot = await getCustomerSupportSnapshot(supabase, token)
+  if (!snapshot) return NextResponse.json({ error: 'Chat niet gevonden.' }, { status: 404 })
 
-  if (messagesError) return NextResponse.json({ error: 'Berichten konden niet worden geladen.' }, { status: 500 })
-
-  return NextResponse.json({ conversation, messages: messages || [] })
+  return NextResponse.json(snapshot)
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const body = await request.json().catch(() => ({}))
-  const message = clean(body.message)
+  const message = cleanText(body.message)
 
   if (!message) return NextResponse.json({ error: 'Bericht is verplicht.' }, { status: 400 })
 
@@ -59,29 +51,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   if (insertError) return NextResponse.json({ error: 'Bericht kon niet worden verzonden.' }, { status: 500 })
 
+  const now = new Date().toISOString()
   await supabase
     .from('support_conversations')
-    .update({ status: 'open', last_message_at: new Date().toISOString() })
+    .update({ status: 'open', last_message_at: now, updated_at: now })
     .eq('id', conversation.id)
+
+  await supabase
+    .from('support_tickets')
+    .update({ status: 'open', updated_at: now })
+    .eq('conversation_id', conversation.id)
 
   await sendResendEmail({
     to: 'info@asorta.nl',
     subject: `Nieuw bericht in ASORTA chat: ${conversation.subject || 'Support'}`,
-    html: `<p>Nieuw bericht van ${conversation.customer_email || 'customer'}:</p><p>${message.replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char] || char)).replace(/\n/g, '<br/>')}</p><p>Open Atlas Support Center om te antwoorden.</p>`,
+    html: `<p>Nieuw bericht van ${escapeHtml(conversation.customer_email || 'customer')}:</p><p>${escapeHtml(message).replace(/\n/g, '<br/>')}</p><p>Open Atlas Support Center om te antwoorden.</p>`,
     replyTo: conversation.customer_email || 'info@asorta.nl',
   })
 
-  const { data: freshConversation } = await supabase
-    .from('support_conversations')
-    .select('id, public_token, customer_name, customer_email, status, subject')
-    .eq('id', conversation.id)
-    .single()
-
-  const { data: messages } = await supabase
-    .from('support_messages')
-    .select('id, sender_type, author_name, body, created_at')
-    .eq('conversation_id', conversation.id)
-    .order('created_at', { ascending: true })
-
-  return NextResponse.json({ conversation: freshConversation || conversation, messages: messages || [] })
+  return NextResponse.json(await getCustomerSupportSnapshot(supabase, token))
 }
