@@ -4,6 +4,8 @@ import HomeHeroSlider from '@/components/HomeHeroSlider'
 import { categories } from '@/lib/products'
 import { getFeaturedProducts, getProducts } from '@/lib/catalog'
 import { getSiteContent } from '@/lib/site-content'
+import { getActiveActions, getPrimaryAction } from '@/lib/actions'
+import ActionBanner from '@/components/ActionBanner'
 import type { ReactNode } from 'react'
 import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react'
 
@@ -17,7 +19,8 @@ const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNod
 }
 
 export default async function Home(){
-  const [content, products, featured] = await Promise.all([getSiteContent(), getProducts(), getFeaturedProducts()])
+  const [content, products, featured, actions] = await Promise.all([getSiteContent(), getProducts(), getFeaturedProducts(), getActiveActions()])
+  const homeAction = getPrimaryAction(actions, 'homepage')
 
   return <main>
   <HomeHeroSlider
@@ -26,6 +29,8 @@ export default async function Home(){
     primaryCta={content['homepage.hero.primaryCta']}
     secondaryCta={content['homepage.hero.secondaryCta']}
   />
+
+  <ActionBanner action={homeAction} />
 
   <section id="shop" className="mx-auto max-w-7xl px-5 py-14">
     <div className="mb-6"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">{content['homepage.categories.kicker']}</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.categories.title']}</h2></div>

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { products as staticProducts } from '@/lib/products'
 import { getProduct, getProducts } from '@/lib/catalog'
+import { getActiveActions, getProductAction } from '@/lib/actions'
+import ActionBanner from '@/components/ActionBanner'
 import ProductCard from '@/components/ProductCard'
 import ProductMediaGallery from '@/components/ProductMediaGallery'
 import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
@@ -23,7 +25,8 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
   const { slug } = await params
   const p = await getProduct(slug)
   if(!p) return notFound()
-  const allProducts = await getProducts()
+  const [allProducts, actions] = await Promise.all([getProducts(), getActiveActions()])
+  const productAction = getProductAction(actions, p)
   const related = allProducts.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
   return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -31,6 +34,8 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
     })}} />
     <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
     <ProductMediaGallery product={p}/>
+
+    <ActionBanner action={productAction} compact />
 
     <section className="mt-12 grid gap-5 lg:grid-cols-3">
       <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Product Story</p><h2 className="mt-2 text-2xl font-black">Modern utility, premium positioned.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>
