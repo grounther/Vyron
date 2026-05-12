@@ -1,15 +1,16 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { products, getProduct } from '@/lib/products'
+import { products as staticProducts } from '@/lib/products'
+import { getProduct, getProducts } from '@/lib/catalog'
 import ProductCard from '@/components/ProductCard'
 import ProductMediaGallery from '@/components/ProductMediaGallery'
 import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
 
-export function generateStaticParams(){return products.map(p=>({slug:p.slug}))}
+export function generateStaticParams(){return staticProducts.map(p=>({slug:p.slug}))}
 
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}){
   const { slug } = await params
-  const p = getProduct(slug)
+  const p = await getProduct(slug)
   if(!p) return { title: 'Product | ASORTA' }
   return {
     title: `${p.name} | ASORTA`,
@@ -20,9 +21,10 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
 
 export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
   const { slug } = await params
-  const p = getProduct(slug)
+  const p = await getProduct(slug)
   if(!p) return notFound()
-  const related = products.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
+  const allProducts = await getProducts()
+  const related = allProducts.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
   return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
       '@context':'https://schema.org', '@type':'Product', name:p.name, description:p.description, image:[p.hero, ...(p.images || [])], brand:{'@type':'Brand',name:'ASORTA'}, offers:{'@type':'Offer',priceCurrency:'EUR',price:p.price,availability:'https://schema.org/InStock',url:`https://asorta.nl/product/${p.slug}`}

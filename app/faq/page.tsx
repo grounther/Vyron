@@ -1,2 +1,12 @@
-const faqs=[['Wat is ASORTA?','Een premium modern utility brand met tactical, automotive, gaming, desk setup en smart utility producten.'],['Wanneer kan ik betalen?','De betaalfase komt hierna. We koppelen Mollie voor iDEAL | Wero, PayPal, kaarten, Apple Pay en Google Pay.'],['Zijn de producten voorraad of dropship?','ASORTA start supplier-based, maar met streng supplier filter. Later kunnen we private label en voorraad toevoegen.']]
-export default function FAQ(){return <main className="mx-auto max-w-4xl px-5 py-12"><h1 className="text-5xl font-black">FAQ</h1><div className="mt-8 grid gap-4">{faqs.map(([q,a])=><div key={q} className="card rounded-3xl p-6"><h2 className="font-black">{q}</h2><p className="mt-3 text-white/60">{a}</p></div>)}</div></main>}
+import { getSiteContent, parseFaqItems } from '@/lib/site-content'
+
+export default async function FAQ(){
+  const content = await getSiteContent()
+  const faqs = parseFaqItems(content['faq.items'])
+  return <main className="mx-auto max-w-4xl px-5 py-12">
+    <h1 className="text-5xl font-black">{content['faq.title']}</h1>
+    <div className="mt-8 grid gap-4">
+      {faqs.map(({question, answer})=><div key={question} className="card rounded-3xl p-6"><h2 className="font-black">{question}</h2><p className="mt-3 text-white/60">{answer}</p></div>)}
+    </div>
+  </main>
+}

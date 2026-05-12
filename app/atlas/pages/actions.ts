@@ -43,6 +43,7 @@ export async function saveSiteContent(formData: FormData) {
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/')
-  revalidatePath('/atlas/pages')
+  for (const path of ['/', '/shop', '/contact', '/faq', '/shipping', '/returns', '/privacy', '/terms', '/atlas/pages']) {
+    revalidatePath(path)
+  }
 }

@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import HomeHeroSlider from '@/components/HomeHeroSlider'
-import { categories, featured, products } from '@/lib/products'
+import { categories } from '@/lib/products'
+import { getFeaturedProducts, getProducts } from '@/lib/catalog'
 import { getSiteContent } from '@/lib/site-content'
 import type { ReactNode } from 'react'
 import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react'
@@ -16,7 +17,7 @@ const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNod
 }
 
 export default async function Home(){
-  const content = await getSiteContent()
+  const [content, products, featured] = await Promise.all([getSiteContent(), getProducts(), getFeaturedProducts()])
 
   return <main>
   <HomeHeroSlider
