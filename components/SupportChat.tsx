@@ -244,7 +244,7 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
       {hasChat && conversation?.status !== 'closed' && (
         <div className="rounded-3xl border border-[#6f7d64]/35 bg-[#6f7d64]/10 p-4 text-sm leading-6 text-white/60">
           <CheckCircle2 className="mb-2 text-[#c8d6bd]" size={20} />
-          Chat #{conversation.public_token.slice(0, 8)} is actief. Je kunt dit gesprek ook via de contactpagina verder voeren.
+          Chat #{conversation?.public_token?.slice(0, 8) || 'nieuw'} is actief. Je kunt dit gesprek ook via de contactpagina verder voeren.
         </div>
       )}
     </div>
