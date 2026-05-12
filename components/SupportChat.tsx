@@ -1,4 +1,4 @@
-use client'
+'use client'
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, CheckCircle2, Headphones, Loader2, RotateCcw, Send } from 'lucide-react'
