@@ -2,6 +2,7 @@ import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import HomeHeroSlider from '@/components/HomeHeroSlider'
 import { categories, featured, products } from '@/lib/products'
+import { getSiteContent } from '@/lib/site-content'
 import type { ReactNode } from 'react'
 import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react'
 
@@ -14,11 +15,19 @@ const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNod
   outdoor: { image: '/products/gps/1_f6ad23a2-5a67-4fd1-8c98-803f658e6409.jpg', line: 'Ready for travel', icon: <Sparkles size={22}/> },
 }
 
-export default function Home(){return <main>
-  <HomeHeroSlider/>
+export default async function Home(){
+  const content = await getSiteContent()
+
+  return <main>
+  <HomeHeroSlider
+    kicker={content['homepage.hero.kicker']}
+    text={content['homepage.hero.text']}
+    primaryCta={content['homepage.hero.primaryCta']}
+    secondaryCta={content['homepage.hero.secondaryCta']}
+  />
 
   <section id="shop" className="mx-auto max-w-7xl px-5 py-14">
-    <div className="mb-6 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">Browse categories</p></div>
+    <div className="mb-6"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">{content['homepage.categories.kicker']}</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.categories.title']}</h2></div>
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {categories.slice(0,5).map((c)=>{
         const v = categoryVisuals[c.slug]
@@ -37,13 +46,13 @@ export default function Home(){return <main>
 
   <section id="featured" className="mx-auto max-w-7xl px-5 py-12">
     <div className="mb-7 flex items-end justify-between gap-4">
-      <div><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">Best sellers</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">Launch products</h2></div>
+      <div><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">{content['homepage.featured.kicker']}</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.featured.title']}</h2></div>
       <Link href="/shop" className="hidden items-center gap-2 text-sm font-black text-white/58 transition hover:text-white md:inline-flex">View all <ArrowRight size={16}/></Link>
     </div>
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
   </section>
 
-  <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">Full Launch Catalog</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Just what you need.</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
+  <section className="mx-auto max-w-7xl px-5 py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">{content['homepage.catalog.kicker']}</p><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.catalog.title']}</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 
-  <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">ASORTA Insiders</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">Exclusive drops, early access.</h2><p className="mt-4 max-w-xl text-white/55">Later koppelen we dit aan e-mail automation. Nu staat de premium sectie klaar voor conversie.</p></div><Link href="/shop" className="btn-primary">Start shopping</Link></div></div></section>
+  <section className="mx-auto max-w-7xl px-5 py-12"><div className="card overflow-hidden rounded-[2rem] p-8 md:p-12"><p className="kicker">{content['homepage.insiders.kicker']}</p><div className="mt-3 grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><h2 className="text-3xl font-black md:text-5xl">{content['homepage.insiders.title']}</h2><p className="mt-4 max-w-xl text-white/55">{content['homepage.insiders.text']}</p></div><Link href="/shop" className="btn-primary">{content['homepage.insiders.button']}</Link></div></div></section>
 </main>}
