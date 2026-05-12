@@ -3,7 +3,7 @@ import { products } from '@/lib/products'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail } from 'lucide-react'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail, ShoppingCart } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
@@ -54,7 +54,7 @@ export default async function AtlasPage(){
       </div>
     </section>
 
-    <section className="mt-8 grid gap-4 md:grid-cols-4">
+    <section className="mt-8 grid gap-4 md:grid-cols-5">
       <Stat icon={<Package/>} label="Launch products" value={String(products.length)} />
       <Stat icon={<Euro/>} label="Revenue" value={`€${revenue.toFixed(2)}`} />
       <Stat icon={<TrendingUp/>} label="Est. profit" value={`€${profit.toFixed(2)}`} />
@@ -67,6 +67,7 @@ export default async function AtlasPage(){
       <Link href="/atlas/products" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PackageSearch className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Product Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk launchproducten, varianten, CJ SKU's, costs en marge-indicatie.</p></Link>
       <Link href="/atlas/promotions" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Megaphone className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Acties</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer openingsacties, kortingsslides en promo placements.</p></Link>
       <Link href="/atlas/newsletter" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Mail className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Exclusive Drops</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer e-mail inschrijvingen, welcome mails en drop campagnes.</p></Link>
+      <Link href="/atlas/recovery" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><ShoppingCart className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Cart Recovery</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk abandoned carts en verstuur recovery mails.</p></Link>
     </section>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
