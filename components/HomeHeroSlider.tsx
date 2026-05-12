@@ -20,38 +20,38 @@ const slides: HeroSlide[] = [
     kicker: 'Premium gear',
     title: 'Premium gear.',
     subtitle: 'Built to perform.',
-    text: 'Tactical carry, automotive upgrades, gaming setups en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.',
-    image: '/products/asorta-urban-sling-pro/2.jpg',
+    text: 'Tactical carry, automotive utility en smart everyday upgrades — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.',
+    image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg',
     href: '/product/asorta-urban-sling-pro',
     cta: 'View Urban Sling Pro',
+    position: 'center center',
+  },
+  {
+    kicker: 'Openingsactie',
+    title: '10% korting.',
+    subtitle: 'Op de gehele bestelling.',
+    text: 'Vier de ASORTA launch met 10% korting op je complete bestelling. Actie tijdelijk beschikbaar tijdens de openingsfase.',
+    image: '/products/drivecharge/13_99d408a4-2bbd-41f4-a3e8-0fc05e190202.jpg',
+    href: '/shop',
+    cta: 'Shop met korting',
     position: 'center center',
   },
   {
     kicker: 'Automotive drop',
     title: 'Upgrade your drive.',
     subtitle: 'Clean cockpit utility.',
-    text: 'Premium mounts, lighting en daily-drive accessoires voor een strakkere cockpit en betere routine.',
+    text: 'Wireless charging, interior ambiance en practical car accessories voor moderne bestuurders.',
     image: '/products/drivecharge/1_1c3d32e3-9eb6-47f9-b217-e2911571c64a.jpg',
     href: '/category/automotive',
     cta: 'Explore automotive',
     position: 'center center',
   },
   {
-    kicker: 'Openingsactie',
-    title: 'Launch offer.',
-    subtitle: '10% on every order.',
-    text: 'Vier de ASORTA launch met tijdelijke openingskorting op de volledige collectie.',
-    image: '/products/asorta-drivecharge-mount/13.jpg',
-    href: '/shop',
-    cta: 'Shop launch offer',
-    position: 'center center',
-  },
-  {
     kicker: 'Creator setup',
     title: 'Sharper setups.',
     subtitle: 'Better utility.',
-    text: 'Desk, gaming en creator gear voor een strakke setup met premium functionaliteit.',
-    image: '/products/asorta-wavemic-rgb/1.jpg',
+    text: 'Desk, gaming en creator accessoires geselecteerd voor functie, stijl en content potential.',
+    image: '/products/wavemic/1_a09d4f0d-2641-4a83-9da9-58e22e5d8d55.jpg',
     href: '/category/gaming',
     cta: 'Explore setup gear',
     position: 'center top',
@@ -65,7 +65,8 @@ export default function HomeHeroSlider() {
   useEffect(() => {
     const timer = setInterval(() => {
       setActive((current) => (current + 1) % slides.length)
-    }, 6800)
+    }, 6500)
+
     return () => clearInterval(timer)
   }, [])
 
@@ -80,22 +81,34 @@ export default function HomeHeroSlider() {
       <div className="asorta-flagship-lines" />
 
       <div className="asorta-flagship-copy">
-        <p className="asorta-flagship-kicker">TACTICAL • AUTOMOTIVE • GAMING • UTILITY</p>
-        <h1 className="asorta-hero-title-image-wrap" aria-label="ASORTA — JUST WHAT YOU NEED.">
-          <img src="/asorta-title-metal.png" alt="ASORTA — JUST WHAT YOU NEED." className="asorta-hero-title-image" />
-        </h1>
-        <p className="asorta-flagship-text">
-          Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.
+        <p className="asorta-flagship-kicker">
+          Tactical • Automotive • Gaming • Utility
         </p>
+
+        <h1 className="asorta-hero-title-image-wrap">
+          <img
+            src="/asorta-title-metal.png"
+            alt="ASORTA - Just what you need."
+            className="asorta-hero-title-image"
+          />
+        </h1>
+
+        <p className="asorta-flagship-text">
+          Premium gear voor modern carry, automotive upgrades, gaming setups,
+          desk organization en smart daily utility — geselecteerd op kwaliteit,
+          uitstraling en echte bruikbaarheid.
+        </p>
+
         <div className="asorta-flagship-actions">
           <Link href="/shop" className="btn-primary">
             Explore Collection <ArrowRight className="ml-2" size={18} />
           </Link>
-          <Link href="#featured" className="btn-secondary">Best Sellers</Link>
+
+          <Link href="#featured" className="btn-secondary">
+            Best Sellers
+          </Link>
         </div>
       </div>
-
-      <div className="asorta-flagship-split" />
 
       <div className="asorta-flagship-scene">
         {slides.map((item, index) => (
@@ -107,12 +120,24 @@ export default function HomeHeroSlider() {
             style={{ objectPosition: item.position || 'center center' }}
           />
         ))}
+
         <div className="asorta-flagship-grade" />
 
-        <button type="button" onClick={() => go(-1)} className="asorta-flagship-arrow asorta-flagship-arrow-left" aria-label="Vorige slide">
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          className="asorta-flagship-arrow asorta-flagship-arrow-left"
+          aria-label="Vorige slide"
+        >
           <ArrowLeft size={22} />
         </button>
-        <button type="button" onClick={() => go(1)} className="asorta-flagship-arrow asorta-flagship-arrow-right" aria-label="Volgende slide">
+
+        <button
+          type="button"
+          onClick={() => go(1)}
+          className="asorta-flagship-arrow asorta-flagship-arrow-right"
+          aria-label="Volgende slide"
+        >
           <ArrowRight size={22} />
         </button>
 
@@ -121,20 +146,35 @@ export default function HomeHeroSlider() {
           <h2>{slide.title}</h2>
           <span>{slide.subtitle}</span>
         </div>
+
         <div className="asorta-flagship-dots">
           {slides.map((_, index) => (
-            <button key={index} type="button" onClick={() => setActive(index)} className={index === active ? 'active' : ''} aria-label={`Ga naar slide ${index + 1}`} />
+            <button
+              key={index}
+              type="button"
+              onClick={() => setActive(index)}
+              className={index === active ? 'active' : ''}
+              aria-label={`Ga naar slide ${index + 1}`}
+            />
           ))}
         </div>
       </div>
 
-      <div className="asorta-mobile-slide-card asorta-mobile-flagship-card">
-        <img src={slide.image} alt={slide.title} style={{ objectPosition: slide.position || 'center center' }} />
+      <div className="asorta-mobile-flagship-card">
+        <img
+          src={slide.image}
+          alt={slide.title}
+          style={{ objectPosition: slide.position || 'center center' }}
+        />
+
         <div>
           <p>{slide.kicker}</p>
           <h2>{slide.title}</h2>
           <span>{slide.text}</span>
-          <Link href={slide.href}>{slide.cta} <ArrowRight size={16} /></Link>
+
+          <Link href={slide.href}>
+            {slide.cta} <ArrowRight size={16} />
+          </Link>
         </div>
       </div>
     </section>
