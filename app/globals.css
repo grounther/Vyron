@@ -772,3 +772,15 @@ body{
   .asorta-header-logo{height:31px}
   .asorta-hero-title-image-wrap{max-width:96vw}
 }
+
+/* ASORTA v5.13.1 live support polish */
+.support-chat-window{
+  max-height:360px;
+  overflow:auto;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.22) transparent;
+}
+.support-chat-window::-webkit-scrollbar{width:8px}
+.support-chat-window::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
+.support-chat-window::-webkit-scrollbar-track{background:transparent}
+@media(max-width:640px){.support-chat-window{max-height:300px}.support-panel{max-height:calc(100vh - 1.5rem);overflow:auto}}

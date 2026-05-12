@@ -3,7 +3,7 @@ import { products } from '@/lib/products'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail, ShoppingCart, Headphones } from 'lucide-react'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail, ShoppingCart, MessageCircle } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
@@ -62,13 +62,13 @@ export default async function AtlasPage(){
     </section>
 
 
-    <section className="mt-8 grid gap-4 md:grid-cols-4 xl:grid-cols-5">
+    <section className="mt-8 grid gap-4 md:grid-cols-4">
       <Link href="/atlas/pages" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><FileText className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Page Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer homepage teksten, promo slider content en support snippets.</p></Link>
       <Link href="/atlas/products" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PackageSearch className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Product Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk launchproducten, varianten, CJ SKU's, costs en marge-indicatie.</p></Link>
       <Link href="/atlas/promotions" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Megaphone className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Acties</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer openingsacties, kortingsslides en promo placements.</p></Link>
       <Link href="/atlas/newsletter" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Mail className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Exclusive Drops</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer e-mail inschrijvingen, welcome mails en drop campagnes.</p></Link>
       <Link href="/atlas/recovery" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><ShoppingCart className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Cart Recovery</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk abandoned carts en verstuur recovery mails.</p></Link>
-      <Link href="/atlas/support" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Headphones className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Support Center</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer live support, tickets en klantservice mails via info@asorta.nl.</p></Link>
+      <Link href="/atlas/support" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><MessageCircle className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Support Center</h2><p className="mt-2 text-sm leading-6 text-white/55">Live chats, tickets en klantenservice antwoorden beheren.</p></Link>
     </section>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
