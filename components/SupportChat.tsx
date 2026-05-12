@@ -1,7 +1,7 @@
-'use client'
+use client'
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, CheckCircle2, Headphones, Loader2, Send } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Headphones, Loader2, RotateCcw, Send } from 'lucide-react'
 
 type SupportMessage = {
   id: string
@@ -20,12 +20,62 @@ type SupportConversation = {
   subject: string | null
 }
 
+type StoredChat = {
+  token: string
+  email?: string | null
+  savedAt: string
+}
+
 type Props = {
   source?: string
   mode?: 'widget' | 'page'
 }
 
-const STORAGE_KEY = 'asorta_support_token'
+const STORAGE_KEY = 'asorta_support_conversation'
+const LEGACY_STORAGE_KEY = 'asorta_support_token'
+
+function readStoredChat(): StoredChat | null {
+  if (typeof window === 'undefined') return null
+
+  const modern = window.localStorage.getItem(STORAGE_KEY)
+  if (modern) {
+    try {
+      const parsed = JSON.parse(modern) as StoredChat
+      if (parsed?.token) return parsed
+    } catch {
+      window.localStorage.removeItem(STORAGE_KEY)
+    }
+  }
+
+  const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY)
+  if (legacy) {
+    const migrated = { token: legacy, savedAt: new Date().toISOString() }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY)
+    return migrated
+  }
+
+  return null
+}
+
+function storeChat(conversation: SupportConversation) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      token: conversation.public_token,
+      email: conversation.customer_email,
+      savedAt: new Date().toISOString(),
+    }),
+  )
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY)
+}
+
+function clearStoredChat() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(STORAGE_KEY)
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY)
+}
 
 export default function SupportChat({ source = 'support-widget', mode = 'widget' }: Props) {
   const [token, setToken] = useState<string | null>(null)
@@ -35,14 +85,53 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
   const [starting, setStarting] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const endRef = useRef<HTMLDivElement | null>(null)
+  const lastMessageCount = useRef(0)
 
   const hasChat = Boolean(token && conversation)
   const isClosed = conversation?.status === 'closed'
 
+  async function loadConversation(currentToken: string, silent = false) {
+    try {
+      if (!silent) setLoading(true)
+      const response = await fetch(`/api/support/conversations/${currentToken}/messages`, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      })
+
+      if (response.status === 404) {
+        clearStoredChat()
+        setToken(null)
+        setConversation(null)
+        setMessages([])
+        setNotice('Dit supportgesprek is afgerond en gearchiveerd. Start gerust een nieuw gesprek.')
+        return
+      }
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Support chat niet gevonden')
+
+      setConversation(data.conversation)
+      setMessages(data.messages || [])
+      if (data.conversation) storeChat(data.conversation)
+      setError('')
+    } catch {
+      if (!silent) {
+        clearStoredChat()
+        setToken(null)
+        setConversation(null)
+        setMessages([])
+        setError('Je vorige chat kon niet worden geladen. Start gerust een nieuw gesprek.')
+      }
+    } finally {
+      if (!silent) setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY)
-    if (saved) setToken(saved)
+    const saved = readStoredChat()
+    if (saved?.token) setToken(saved.token)
     else setLoading(false)
   }, [])
 
@@ -50,49 +139,58 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
     if (!token) return
     let active = true
 
-    async function load() {
-      try {
-        const response = await fetch(`/api/support/conversations/${token}/messages`, { cache: 'no-store' })
-        if (!response.ok) throw new Error('Support chat niet gevonden')
-        const data = await response.json()
-        if (!active) return
-        setConversation(data.conversation)
-        setMessages(data.messages || [])
-        setLoading(false)
-      } catch {
-        if (!active) return
-        window.localStorage.removeItem(STORAGE_KEY)
-        setToken(null)
-        setConversation(null)
-        setMessages([])
-        setLoading(false)
+    const load = async (silent = false) => {
+      if (!active) return
+      await loadConversation(token, silent)
+    }
+
+    load(false)
+    const interval = window.setInterval(() => load(true), 2000)
+
+    const handleFocus = () => load(true)
+    const handleVisibility = () => {
+      if (!document.hidden) load(true)
+    }
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY || event.key === LEGACY_STORAGE_KEY) {
+        const saved = readStoredChat()
+        if (saved?.token && saved.token !== token) setToken(saved.token)
       }
     }
 
-    load()
-    const interval = window.setInterval(load, 6000)
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('storage', handleStorage)
+    document.addEventListener('visibilitychange', handleVisibility)
+
     return () => {
       active = false
       window.clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('storage', handleStorage)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [token])
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messages.length !== lastMessageCount.current) {
+      lastMessageCount.current = messages.length
+      endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages.length, hasChat])
 
   const statusText = useMemo(() => {
-    if (!conversation) return 'Online support foundation · meestal snel antwoord.'
-    if (conversation.status === 'closed') return 'Deze chat is gesloten. Start gerust een nieuw gesprek.'
-    if (conversation.status === 'answered') return 'Support heeft geantwoord.'
+    if (!conversation) return 'Live support · chat blijft bewaard op dit apparaat.'
+    if (conversation.status === 'closed') return 'Deze chat is gesloten. Je ontvangt een kopie wanneer support hem archiveert.'
+    if (conversation.status === 'answered') return 'ASORTA Support heeft gereageerd · je kunt direct terugtypen.'
     if (conversation.status === 'pending') return 'Je bericht staat klaar voor ASORTA Support.'
-    return 'Chat actief · ASORTA Support leest mee via Atlas.'
+    return 'Live chat actief · berichten worden automatisch bijgewerkt.'
   }, [conversation])
 
   async function startChat(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setStarting(true)
     setError('')
+    setNotice('')
 
     const form = event.currentTarget
     const formData = new FormData(form)
@@ -119,7 +217,7 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Chat kon niet worden gestart')
 
-      window.localStorage.setItem(STORAGE_KEY, data.conversation.public_token)
+      storeChat(data.conversation)
       setToken(data.conversation.public_token)
       setConversation(data.conversation)
       setMessages(data.messages || [])
@@ -153,7 +251,9 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
       if (!response.ok) throw new Error(data.error || 'Bericht kon niet worden verzonden')
       setMessages(data.messages || [])
       setConversation(data.conversation)
+      if (data.conversation) storeChat(data.conversation)
       form.reset()
+      window.setTimeout(() => loadConversation(token, true), 450)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bericht verzenden lukte niet.')
     } finally {
@@ -162,11 +262,12 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
   }
 
   function newChat() {
-    window.localStorage.removeItem(STORAGE_KEY)
+    clearStoredChat()
     setToken(null)
     setConversation(null)
     setMessages([])
     setError('')
+    setNotice('')
     setLoading(false)
   }
 
@@ -192,15 +293,23 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
         </div>
       </div>
 
+      {notice && !hasChat && (
+        <div className="mt-5 rounded-3xl border border-[#6f7d64]/35 bg-[#6f7d64]/10 p-4 text-sm leading-6 text-white/60">
+          <CheckCircle2 className="mb-2 text-[#c8d6bd]" size={20} />
+          {notice}
+        </div>
+      )}
+
       {hasChat ? (
         <div className="mt-5 grid gap-4">
-          <div className="support-chat-window rounded-3xl border border-white/10 bg-black/30 p-3">
+          <div className="support-chat-window rounded-3xl border border-white/10 bg-black/30 p-3" aria-live="polite">
             {messages.map((message) => {
               const mine = message.sender_type === 'customer'
+              const system = message.sender_type === 'system'
               return (
-                <div key={message.id} className={`mb-3 flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 ${mine ? 'bg-white text-black' : 'border border-white/10 bg-white/[.06] text-white/75'}`}>
-                    {!mine && <p className="mb-1 text-[10px] font-black uppercase tracking-[.18em] text-[#b7c8ad]">{message.author_name || 'ASORTA Support'}</p>}
+                <div key={message.id} className={`mb-3 flex ${system ? 'justify-center' : mine ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 ${system ? 'border border-white/10 bg-white/[.035] text-center text-white/42' : mine ? 'bg-white text-black' : 'border border-white/10 bg-white/[.06] text-white/75'}`}>
+                    {!mine && !system && <p className="mb-1 text-[10px] font-black uppercase tracking-[.18em] text-[#b7c8ad]">{message.author_name || 'ASORTA Support'}</p>}
                     {message.body}
                   </div>
                 </div>
@@ -210,7 +319,12 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
           </div>
 
           {isClosed ? (
-            <button type="button" onClick={newChat} className="btn-primary w-full">Nieuw gesprek starten</button>
+            <div className="grid gap-3">
+              <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4 text-sm leading-6 text-white/50">
+                Dit gesprek is gesloten door ASORTA Support. Als het gesprek wordt gearchiveerd, ontvang je automatisch een kopie per e-mail.
+              </div>
+              <button type="button" onClick={newChat} className="btn-primary w-full">Nieuw gesprek starten</button>
+            </div>
           ) : (
             <form onSubmit={sendMessage} className="grid gap-3">
               <textarea name="message" className="support-input min-h-24 resize-none py-4" placeholder="Typ je bericht..." />
@@ -220,6 +334,10 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
               </button>
             </form>
           )}
+
+          <button type="button" onClick={() => token && loadConversation(token, true)} className="inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[.2em] text-white/38 transition hover:text-white/70">
+            <RotateCcw size={14} /> Chat verversen
+          </button>
 
           <button type="button" onClick={newChat} className="text-xs font-black uppercase tracking-[.2em] text-white/38 transition hover:text-white/70">
             Ander gesprek starten
@@ -236,7 +354,7 @@ export default function SupportChat({ source = 'support-widget', mode = 'widget'
             {starting ? 'Starten...' : 'Start live chat'} <ArrowRight className="ml-2" size={17} />
           </button>
           <p className="text-center text-xs leading-5 text-white/36">
-            Je gesprek blijft bewaard op dit apparaat. Als support niet direct online is, maken we automatisch een ticket aan.
+            Je gesprek blijft bewaard op dit apparaat en is ook zichtbaar op de contactpagina. Antwoorden verschijnen automatisch in deze chat.
           </p>
         </form>
       )}

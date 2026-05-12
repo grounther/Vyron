@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { MessageCircle, Send, ShieldAlert } from 'lucide-react'
+import { MessageCircle, Send, ShieldAlert, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { replyToSupportConversation, updateSupportStatus } from './actions'
+import { emailAndDeleteClosedConversation, replyToSupportConversation, updateSupportStatus } from './actions'
 
 export const metadata = { title: 'Atlas Support | ASORTA', robots: { index: false, follow: false } }
 
@@ -79,16 +79,27 @@ export default async function AtlasSupportPage({ searchParams }: { searchParams:
                   <p className="mt-2 text-sm text-white/50">{selected.customer_name || 'Customer'} · {selected.customer_email}</p>
                   <p className="mt-1 text-xs text-white/35">Chat #{selected.public_token.slice(0, 8)}</p>
                 </div>
-                <form action={updateSupportStatus} className="flex gap-2">
-                  <input type="hidden" name="conversation_id" value={selected.id} />
-                  <select name="status" defaultValue={selected.status} className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-sm font-bold text-white">
-                    <option value="open">Open</option>
-                    <option value="pending">Pending</option>
-                    <option value="answered">Answered</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                  <button className="rounded-full bg-white px-4 py-2 text-sm font-black text-black">Opslaan</button>
-                </form>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <form action={updateSupportStatus} className="flex gap-2">
+                    <input type="hidden" name="conversation_id" value={selected.id} />
+                    <select name="status" defaultValue={selected.status} className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-sm font-bold text-white">
+                      <option value="open">Open</option>
+                      <option value="pending">Pending</option>
+                      <option value="answered">Answered</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                    <button className="rounded-full bg-white px-4 py-2 text-sm font-black text-black">Opslaan</button>
+                  </form>
+
+                  {selected.status === 'closed' && selected.customer_email ? (
+                    <form action={emailAndDeleteClosedConversation}>
+                      <input type="hidden" name="conversation_id" value={selected.id} />
+                      <button className="inline-flex items-center justify-center rounded-full border border-red-300/25 bg-red-500/10 px-4 py-2 text-sm font-black text-red-100 transition hover:bg-red-500/20">
+                        <Trash2 className="mr-2" size={15} /> Mail kopie & verwijder
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
               </div>
 
               <div className="mt-5 max-h-[520px] overflow-auto rounded-3xl border border-white/10 bg-black/25 p-4">
@@ -104,11 +115,17 @@ export default async function AtlasSupportPage({ searchParams }: { searchParams:
                 })}
               </div>
 
-              <form action={replyToSupportConversation} className="mt-5 grid gap-3">
-                <input type="hidden" name="conversation_id" value={selected.id} />
-                <textarea name="message" className="support-input min-h-32 resize-none py-4" placeholder="Typ antwoord als ASORTA Support..." />
-                <button className="btn-primary w-full">Antwoord versturen <Send className="ml-2" size={17}/></button>
-              </form>
+              {selected.status === 'closed' ? (
+                <div className="mt-5 rounded-3xl border border-white/10 bg-white/[.035] p-5 text-sm leading-6 text-white/55">
+                  Dit gesprek is gesloten. Gebruik eventueel “Mail kopie & verwijder” om de klant automatisch een transcript te sturen en het gesprek uit Atlas te archiveren.
+                </div>
+              ) : (
+                <form action={replyToSupportConversation} className="mt-5 grid gap-3">
+                  <input type="hidden" name="conversation_id" value={selected.id} />
+                  <textarea name="message" className="support-input min-h-32 resize-none py-4" placeholder="Typ antwoord als ASORTA Support..." />
+                  <button className="btn-primary w-full">Antwoord versturen <Send className="ml-2" size={17}/></button>
+                </form>
+              )}
             </>
           ) : (
             <div className="grid min-h-96 place-items-center text-center text-white/50">Selecteer een supportgesprek.</div>
