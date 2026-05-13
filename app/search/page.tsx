@@ -1,3 +1,7 @@
 import SearchClient from '@/components/SearchClient'
-import { products } from '@/lib/products'
-export default function Search(){return <SearchClient products={products}/>}
+import { getProducts } from '@/lib/catalog'
+
+export default async function Search(){
+  const products = await getProducts()
+  return <SearchClient products={products}/>
+}

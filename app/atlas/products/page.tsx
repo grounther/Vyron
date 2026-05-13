@@ -3,16 +3,21 @@ import type React from 'react'
 import { assertAtlasAdmin } from '@/lib/atlas-auth'
 import { categories } from '@/lib/products'
 import { getProducts } from '@/lib/catalog'
-import { getCjIntegrationStatus } from '@/lib/cj'
-import { deleteProduct, importCjProduct, saveProduct } from './actions'
-import { Link2, PackagePlus, PackageSearch, Save, ShieldCheck, Trash2, UploadCloud } from 'lucide-react'
+import { deleteProduct, importCJProduct, saveProduct } from './actions'
+import { PackagePlus, PackageSearch, Save, Trash2, UploadCloud } from 'lucide-react'
+import CJImportFormClient from './CJImportFormClient'
 
 export const metadata = { title: 'Atlas Products | ASORTA internal', robots: { index: false, follow: false } }
 
 type RawProduct = Record<string, any>
+type SearchParams = Record<string, string | string[] | undefined>
 
 function text(value: unknown, fallback = '') {
   return typeof value === 'string' ? value : fallback
+}
+
+function param(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] || '' : value || ''
 }
 
 function list(value: unknown, fallback: string[] = []) {
@@ -35,10 +40,13 @@ async function getRawProducts() {
   return (data || []) as RawProduct[]
 }
 
-export default async function AtlasProducts(){
+export default async function AtlasProducts({ searchParams }: { searchParams?: Promise<SearchParams> | SearchParams }){
   await assertAtlasAdmin('/atlas/products')
+  const params = searchParams ? await searchParams : {}
+  const importStatus = param(params.cj_import)
+  const importMessage = param(params.cj_message)
+  const cjConfigured = Boolean(process.env.CJ_API_KEY || process.env.CJ_ACCESS_TOKEN)
   const [rawProducts, previewProducts] = await Promise.all([getRawProducts(), getProducts()])
-  const cjStatus = getCjIntegrationStatus()
   const rows: RawProduct[] = rawProducts.length ? rawProducts : previewProducts.map((p): RawProduct => ({
     slug: p.slug,
     name: p.name,
@@ -66,6 +74,9 @@ export default async function AtlasProducts(){
     supplier_url: p.supplier?.productUrl,
     warehouse: p.supplier?.warehouse,
     cj_product_id: p.supplier?.productId,
+    cj_product_sku: p.supplier?.productId,
+    cj_spu: p.supplier?.productId,
+    cj_sku: p.supplier?.productId,
     cj_variant_ids: p.supplier?.variantIds,
     supplier_status: p.supplier?.status,
     processing_time: p.supplier?.processingTime,
@@ -80,9 +91,13 @@ export default async function AtlasProducts(){
         <div className="flex items-center gap-3"><PackageSearch className="text-[#b7c8ad]"/><div><p className="kicker">Atlas product editor</p><h1 className="text-4xl font-black">Products</h1></div></div>
         <div className="rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 px-4 py-3 text-sm font-bold text-[#dbe9d4]">Supabase Auth + admin_users beveiligd</div>
       </div>
-      <p className="mt-4 max-w-3xl text-white/55">Voeg producten toe, bewerk bestaande producten, importeer CJ data en publiceer direct naar shop, categoriepagina’s en productpagina’s.</p>
+      <p className="mt-4 max-w-3xl text-white/55">Voeg producten toe, bewerk bestaande producten, importeer CJ producten via SPU/SKU en publiceer daarna gecontroleerd naar shop, categoriepagina’s en productpagina’s.</p>
 
-      <CjImportPanel categories={categories} cjStatus={cjStatus} />
+      {importStatus ? <div className={importStatus === 'success' ? 'mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100' : 'mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100'}>
+        {importMessage || (importStatus === 'success' ? 'CJ import gelukt.' : 'CJ import mislukt.')}
+      </div> : null}
+
+      <CJImportFormClient categories={categories} cjConfigured={cjConfigured} action={importCJProduct} />
 
       <details className="mt-8 rounded-[1.5rem] border border-[#b7c8ad]/20 bg-[#b7c8ad]/[.06] p-4 md:p-5" open={!rawProducts.length}>
         <summary className="flex cursor-pointer items-center gap-2 text-lg font-black"><PackagePlus className="text-[#b7c8ad]"/> Nieuw product handmatig toevoegen</summary>
@@ -96,7 +111,7 @@ export default async function AtlasProducts(){
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={text(product.hero_image) || '/products/asorta-product-fallback.svg'} alt="" className="h-16 w-16 rounded-2xl object-cover opacity-85" />
-              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}{product.cj_spu || product.cj_sku ? ` • CJ ${product.cj_spu || product.cj_sku}` : ''}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.cj_product_sku ? ` • CJ ${product.cj_product_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
             </div>
             <div className="text-right"><p className="text-2xl font-black">€{Number(product.price || 0).toFixed(2)}</p><p className="text-xs text-white/45">Cost ± €{Number(product.estimated_cost || 0).toFixed(2)}</p></div>
           </div>
@@ -111,62 +126,6 @@ export default async function AtlasProducts(){
       </details>)}
     </section>
   </main>
-}
-
-function CjImportPanel({ categories, cjStatus }:{ categories:{slug:string;name:string}[]; cjStatus: ReturnType<typeof getCjIntegrationStatus> }){
-  return <section className="mt-8 rounded-[1.7rem] border border-[#b7c8ad]/20 bg-[#b7c8ad]/[.06] p-4 md:p-5">
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex items-center gap-3"><Link2 className="text-[#b7c8ad]"/><div><p className="kicker">CJ Dropshipping import</p><h2 className="text-2xl font-black">Importeer product via CJ URL, SPU of SKU</h2></div></div>
-      <div className={`rounded-2xl border px-4 py-3 text-xs font-black uppercase tracking-[.16em] ${cjStatus.configured ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100' : 'border-amber-300/20 bg-amber-400/10 text-amber-100'}`}>
-        {cjStatus.configured ? 'CJ API configured' : 'CJ API key nodig'}
-      </div>
-    </div>
-    <p className="mt-3 max-w-4xl text-sm leading-6 text-white/55">Gebruik dit in plaats van CJ’s losse Connect-knop. Atlas haalt productdata en varianten op bij CJ, maakt jouw ASORTA product aan en bewaart de CJ mapping die later gebruikt wordt voor fulfilment.</p>
-
-    <form action={importCjProduct} className="mt-5 grid gap-5">
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Field label="CJ product URL" name="cj_input" defaultValue="https://cjdropshipping.com/product/front-and-rear-dual-recording-dashcam-p-2604160248311602900.html" />
-        <Field label="CJ SPU / productSku" name="cj_spu" defaultValue="CJYD2836955" />
-        <Field label="CJ PID fallback" name="cj_pid" placeholder="optioneel, uit product URL" />
-        <Field label="Shop productnaam" name="shop_name" defaultValue="ASORTA DualView DashCam" />
-        <Field label="Slug" name="slug" defaultValue="asorta-dualview-dashcam" />
-        <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Categorie</span><select name="category" defaultValue="automotive" className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]">{categories.map((c)=><option key={c.slug} value={c.slug}>{c.name}</option>)}</select></label>
-        <Field label="Prijs" name="price" type="number" step="0.01" defaultValue="89.95" />
-        <Field label="Compare at" name="compare_at" type="number" step="0.01" defaultValue="119.95" />
-        <Field label="Price multiplier als prijs leeg is" name="price_multiplier" type="number" step="0.05" defaultValue="2.35" />
-        <Field label="Estimated shipping" name="estimated_shipping" type="number" step="0.01" defaultValue="15.00" />
-        <Field label="Source country code" name="source_country_code" defaultValue="CN" />
-        <Field label="Default logistics" name="default_logistic_name" placeholder="bv. CJPacket Ordinary" />
-        <Field label="Target country code" name="target_country_code" defaultValue="NL" />
-        <Field label="Target country" name="target_country" defaultValue="Netherlands" />
-        <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Status</span><select name="status" defaultValue="draft" className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="draft">draft</option><option value="active">active</option><option value="launch">launch</option><option value="archived">archived</option></select></label>
-        <Field label="Badge" name="badge" defaultValue="CJ Import" />
-        <Field label="Supplier status" name="supplier_status" defaultValue="testing" />
-        <Field label="Processing time" name="processing_time" placeholder="bv. 1-3 days" />
-        <Field label="Delivery time" name="delivery_time" placeholder="bv. 7-15 business days" />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Textarea label="Short description" name="short_description" defaultValue="Front and rear dual recording dashcam imported from CJ for ASORTA validation." rows={3} />
-        <Textarea label="Shipping info" name="shipping_info" defaultValue="Tracked delivery. Final shipping method and delivery estimate are confirmed through CJ freight calculation." rows={3} />
-        <Textarea label="Supplier notes" name="supplier_notes" defaultValue="Dashcam imported from CJ. Check video quality, memory card requirements, installation expectations, EU compliance and return risk before publishing." rows={4} />
-        <Textarea label="Margin note" name="margin_note" defaultValue="Review CJ product cost, freight cost and VAT before activating paid ads." rows={4} />
-        <Textarea label="Features, één per regel" name="features" defaultValue={["Front and rear recording","Vehicle safety utility","Dashboard camera setup","Review claims before launch"].join('\n')} rows={5} />
-        <Textarea label="Box items, één per regel" name="box_items" defaultValue={["1× dashcam set as supplied by CJ","1× rear camera where included","1× cable/accessory set","Supplier packaging"].join('\n')} rows={5} />
-        <Textarea label="Content ideas, één per regel" name="content_ideas" defaultValue={["Before/after car safety setup","Dashcam install demo","Road trip protection angle","Night driving test content"].join('\n')} rows={5} />
-      </div>
-
-      <div className="grid gap-3 rounded-[1.25rem] border border-white/10 bg-black/25 p-4 text-sm text-white/55 md:grid-cols-2">
-        <label className="flex items-start gap-3"><input type="checkbox" name="add_to_my_products" className="mt-1"/><span><strong className="block text-white/75">Ook toevoegen aan CJ My Products</strong> Probeert CJ’s Add to My Product API. Als hij al bestaat, gaat Atlas gewoon door.</span></label>
-        <label className="flex items-start gap-3"><input type="checkbox" name="try_product_connection" className="mt-1"/><span><strong className="block text-white/75">Officiële CJ product connection proberen</strong> Alleen actief als <code>CJ_ENABLE_PRODUCT_CONNECTIONS=true</code> en er een API shop/store in CJ beschikbaar is.</span></label>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button className="btn-primary" type="submit"><ShieldCheck size={18} className="mr-2"/> Import from CJ</button>
-        <p className="text-xs leading-5 text-white/40">Geen CJ store gekoppeld? Geen probleem: de lokale CJ mapping werkt voor onze eigen fulfilment bridge.</p>
-      </div>
-    </form>
-  </section>
 }
 
 function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; product?:RawProduct; categories:{slug:string;name:string}[] }){
@@ -210,14 +169,12 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Supplier name" name="supplier_name" defaultValue={text(p.supplier_name)} />
         <Field label="Supplier URL" name="supplier_url" defaultValue={text(p.supplier_url)} />
-        <Field label="CJ product ID" name="cj_product_id" defaultValue={text(p.cj_product_id)} />
-        <Field label="CJ SPU" name="cj_spu" defaultValue={text(p.cj_spu)} />
+        <Field label="CJ product ID / PID" name="cj_product_id" defaultValue={text(p.cj_product_id)} />
         <Field label="CJ PID" name="cj_pid" defaultValue={text(p.cj_pid)} />
-        <Field label="CJ product URL" name="cj_product_url" defaultValue={text(p.cj_product_url)} />
+        <Field label="CJ SPU/Product SKU" name="cj_product_sku" defaultValue={text(p.cj_product_sku)} />
+        <Field label="CJ source URL" name="cj_source_url" defaultValue={text(p.cj_source_url)} />
         <Field label="CJ variant ID" name="cj_variant_id" defaultValue={text(p.cj_variant_id)} />
         <Field label="CJ SKU" name="cj_sku" defaultValue={text(p.cj_sku)} />
-        <Field label="CJ source country" name="cj_source_country_code" defaultValue={text(p.cj_source_country_code, 'CN')} />
-        <Field label="CJ default logistics" name="cj_default_logistic_name" defaultValue={text(p.cj_default_logistic_name)} />
         <Field label="Estimated shipping" name="estimated_shipping" type="number" step="0.01" defaultValue={String(p.estimated_shipping || '')} />
         <Field label="Supplier status" name="supplier_status" defaultValue={text(p.supplier_status, 'testing')} />
         <Field label="Processing time" name="processing_time" defaultValue={text(p.processing_time)} />

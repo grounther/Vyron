@@ -69,7 +69,7 @@ function mapProductRow(row: ProductRow): Product {
     landedCost: estimatedCost,
     status: (asString(row.supplier_status, fallback?.supplier?.status || 'testing') as SupplierInfo['status']) || 'testing',
     notes: asString(row.supplier_notes, fallback?.supplier?.notes || ''),
-    productId: asString(row.cj_spu, asString(row.cj_product_id, fallback?.supplier?.productId || '')),
+    productId: asString(row.cj_product_id, fallback?.supplier?.productId || ''),
     variantIds: asStringArray(row.cj_variant_ids, fallback?.supplier?.variantIds || []),
     variants: variants.map((v) => v.name),
     processingTime: asString(row.processing_time, fallback?.supplier?.processingTime || ''),
@@ -109,7 +109,7 @@ export async function getProducts(): Promise<Product[]> {
   const { data, error } = await client
     .from('products')
     .select('*')
-    .in('status', ['active', 'launch', 'draft'])
+    .in('status', ['active', 'launch'])
     .order('created_at', { ascending: true })
 
   if (error || !data?.length) return staticProducts
@@ -121,7 +121,7 @@ export async function getProduct(slug: string): Promise<Product | undefined> {
   const client = createAdminClient() || supabase
   if (!client) return staticGetProduct(slug)
 
-  const { data, error } = await client.from('products').select('*').eq('slug', slug).maybeSingle()
+  const { data, error } = await client.from('products').select('*').eq('slug', slug).in('status', ['active', 'launch']).maybeSingle()
   if (error || !data) return staticGetProduct(slug)
   return mapProductRow(data as ProductRow)
 }
