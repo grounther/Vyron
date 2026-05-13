@@ -69,7 +69,7 @@ function mapProductRow(row: ProductRow): Product {
     landedCost: estimatedCost,
     status: (asString(row.supplier_status, fallback?.supplier?.status || 'testing') as SupplierInfo['status']) || 'testing',
     notes: asString(row.supplier_notes, fallback?.supplier?.notes || ''),
-    productId: asString(row.cj_product_id, fallback?.supplier?.productId || ''),
+    productId: asString(row.cj_spu, asString(row.cj_product_id, fallback?.supplier?.productId || '')),
     variantIds: asStringArray(row.cj_variant_ids, fallback?.supplier?.variantIds || []),
     variants: variants.map((v) => v.name),
     processingTime: asString(row.processing_time, fallback?.supplier?.processingTime || ''),
