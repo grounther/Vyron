@@ -39,7 +39,7 @@ export default async function AtlasProducts(){
   await assertAtlasAdmin('/atlas/products')
   const [rawProducts, previewProducts] = await Promise.all([getRawProducts(), getProducts()])
   const cjStatus = getCjIntegrationStatus()
-  const rows = rawProducts.length ? rawProducts : previewProducts.map((p) => ({
+  const rows: RawProduct[] = rawProducts.length ? rawProducts : previewProducts.map((p): RawProduct => ({
     slug: p.slug,
     name: p.name,
     category: p.category,
