@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
 import type { AtlasSupportConversation, AtlasSupportMessage, AtlasSupportSnapshot } from '@/lib/support-admin'
+import CustomerPortalPanel from './CustomerPortalPanel'
 
 type BusyAction = 'reply' | 'status' | 'archive' | null
 
@@ -203,7 +204,7 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
           <div>
             <p className="kicker">Atlas Customer Care</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Support Center</h1>
-            <p className="mt-4 max-w-2xl text-white/60">Live 1-op-1 chats, tickets en contactpagina-berichten komen hier samen. Antwoorden verschijnen direct bij de klant.</p>
+            <p className="mt-4 max-w-2xl text-white/60">Live 1-op-1 chats, tickets en klantdossiers komen hier samen. Zoek direct op ordernummer, klantdata of tracking terwijl je antwoordt.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-4 py-2 text-sm font-black text-white/55">
             {liveState === 'connected' ? <Wifi size={16} className="text-[#b7c8ad]" /> : <WifiOff size={16} className="text-amber-200" />}
@@ -212,7 +213,7 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
         </div>
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[390px_1fr]">
+      <section className="mt-8 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)_430px]">
         <div className="card rounded-[2rem] p-4">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -331,6 +332,16 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
             </div>
           )}
         </div>
+
+        <CustomerPortalPanel
+          selectedConversation={selected ? {
+            id: selected.id,
+            customer_name: selected.customer_name,
+            customer_email: selected.customer_email,
+            subject: selected.subject,
+          } : null}
+          onSupportRefresh={manualRefresh}
+        />
       </section>
 
       <button

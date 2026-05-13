@@ -40,3 +40,14 @@ NEWSLETTER_FROM
 - Nieuwe klantberichten verschijnen automatisch in Atlas.
 - Antwoorden uit Atlas verschijnen automatisch bij de klant.
 - Zet een gesprek op `closed` en gebruik daarna `Mail kopie & archiveer` om een transcript naar de klant te sturen en de chat uit de actieve inbox te verwijderen.
+
+
+## Extra in v5.6.0: Support klantportaal
+
+Run na de live support migratie ook:
+
+```text
+supabase/v5_15_support_customer_portal_schema.sql
+```
+
+Daarmee krijgt `/atlas/support` een klantportaal met orderzoekfunctie, klantdossier, trackingbewerking, interne notities en supporthistorie.
