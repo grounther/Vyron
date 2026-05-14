@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { queryCJProduct, resolveCjProductReference, type CJProductDetail, type CJVariant } from '@/lib/cj'
+import { requireAtlasAdminApi } from '@/lib/server/atlas-api'
 
 function parseNumberish(input: unknown) {
   if (typeof input === 'number') return Number.isFinite(input) ? input : 0
@@ -42,6 +43,9 @@ function productImages(product: CJProductDetail) {
 }
 
 export async function GET(request: Request) {
+  const auth = await requireAtlasAdminApi()
+  if (!auth.ok) return auth.response
+
   const { searchParams } = new URL(request.url)
   const productUrl = searchParams.get('url') || ''
   const submittedSku = (searchParams.get('sku') || '').trim().toUpperCase()

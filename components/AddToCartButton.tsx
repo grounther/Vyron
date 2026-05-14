@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Check, ShoppingCart } from 'lucide-react'
 import ProductImage from './ProductImage'
 
-type CartProduct={slug:string;name:string;price:number;hero:string;variant?:string;sku?:string}
+type CartProduct={slug:string;name:string;price:number;hero:string;variant?:string;variantName?:string;variantSku?:string;sku?:string}
 
 function cartCount(items:any[]){return items.reduce((sum,item)=>sum + Number(item.qty || 0),0)}
 
@@ -42,7 +42,7 @@ export default function AddToCartButton({product}:{product:CartProduct}){
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#aab6a0]"><Check size={14}/> Added to cart</div>
             <p className="mt-1 truncate text-sm font-black text-white">{product.name}</p>
-            <p className="text-xs text-white/50">{product.variant ? `Uitvoering: ${product.variant}` : 'Added to your ASORTA cart.'}</p>
+            <p className="text-xs text-white/50">{product.variantName || product.variant ? `Uitvoering: ${product.variantName || product.variant}` : 'Added to your ASORTA cart.'}</p>
           </div>
           <div className="relative grid h-12 w-12 place-items-center rounded-full bg-white text-zinc-950">
             <ShoppingCart size={20} strokeWidth={3} className="text-black"/>

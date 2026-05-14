@@ -220,9 +220,12 @@ function normalizeCjUrl(input: string) {
   if (!/^https?:\/\//i.test(value)) return ''
   try {
     const url = new URL(value)
+    const host = url.hostname.toLowerCase()
+    const allowed = host === 'cjdropshipping.com' || host.endsWith('.cjdropshipping.com')
+    if (!allowed) return ''
     return url.toString()
   } catch {
-    return value
+    return ''
   }
 }
 

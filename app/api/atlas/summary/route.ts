@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { products } from '@/lib/products'
+import { requireAtlasAdminApi } from '@/lib/server/atlas-api'
 
 export async function GET(){
+  const auth = await requireAtlasAdminApi()
+  if (!auth.ok) return auth.response
+
   const inventoryValue = products.reduce((sum,p)=>sum + (p.cost || 0),0)
   return NextResponse.json({
     status:'ok',

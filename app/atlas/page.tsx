@@ -3,7 +3,7 @@ import { products } from '@/lib/products'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail, ShoppingCart, MessageCircle } from 'lucide-react'
+import { ShieldCheck, Package, TrendingUp, Truck, Euro, AlertTriangle, Lock, FileText, PackageSearch, Megaphone, Mail, ShoppingCart, MessageCircle, PlugZap } from 'lucide-react'
 
 const mockOrders = [
   { id:'AS-1001', customer:'demo@asorta.nl', product:'ASORTA AmbientDrive RGB', total:89.95, cost:42, status:'Payment pending', supplier:'CJ: not sent' },
@@ -69,6 +69,7 @@ export default async function AtlasPage(){
       <Link href="/atlas/newsletter" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Mail className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Exclusive Drops</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer e-mail inschrijvingen, welcome mails en drop campagnes.</p></Link>
       <Link href="/atlas/recovery" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><ShoppingCart className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Cart Recovery</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk abandoned carts en verstuur recovery mails.</p></Link>
       <Link href="/atlas/support" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><MessageCircle className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Support Center</h2><p className="mt-2 text-sm leading-6 text-white/55">Live chats, klantdossiers, orders, tracking en klantenservice antwoorden beheren.</p></Link>
+      <Link href="/atlas/integrations" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PlugZap className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Integrations</h2><p className="mt-2 text-sm leading-6 text-white/55">Shopify product-input, CJ/DSers supplier routing en payment/fulfillment status.</p></Link>
     </section>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
@@ -86,7 +87,8 @@ export default async function AtlasPage(){
           <Step title="Supabase" text="Products, customers, orders, order_items, profit logs." />
           <Step title="CJ mapping" text="PID, VID, SKU and shipping method per product." />
           <Step title="Payments" text="Mollie/iDEAL/Wero after KvK verification." />
-          <Step title="CJ fulfilment" text="Only after payment success: createOrderV2 + confirmOrder." />
+          <Step title="Shopify input" text="Products, variants, media and supplier metafields sync to Supabase." />
+          <Step title="Multi-supplier" text="CJ direct adapter and DSers bridge/direct adapter are routed per order item." />
         </div>
         {!adminCheckReady && <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Service role key ontbreekt. Atlas login werkt, maar admin allowlist kan nog niet server-side worden gecontroleerd.</div>}
       </div>

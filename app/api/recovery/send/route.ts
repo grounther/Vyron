@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAtlasAdminApi } from '@/lib/server/atlas-api'
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
 function recoveryHtml(items: any[], recoveryUrl: string) {
-  const rows = items.map((item) => `<li>${item.qty || 1}× ${item.name} — €${Number(item.price || 0).toFixed(2)}</li>`).join('')
+  const rows = items.map((item) => `<li>${Number(item.qty || 1)}× ${escapeHtml(item.name)} — €${Number(item.price || 0).toFixed(2)}</li>`).join('')
   return `
     <div style="font-family:Arial,sans-serif;background:#050505;color:#fff;padding:28px;border-radius:18px">
       <h1 style="margin:0 0 12px;font-size:28px">Je ASORTA cart staat nog klaar.</h1>
@@ -14,12 +23,14 @@ function recoveryHtml(items: any[], recoveryUrl: string) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAtlasAdminApi()
+  if (!auth.ok) return auth.response
+  const admin = auth.admin
+
   const body = await request.json().catch(() => ({}))
   const cartId = String(body.cartId || '')
   if (!cartId) return NextResponse.json({ error: 'Missing cartId.' }, { status: 400 })
 
-  const admin = createAdminClient()
-  if (!admin) return NextResponse.json({ error: 'Admin client unavailable.' }, { status: 500 })
 
   const { data: cart, error } = await admin.from('cart_sessions').select('*').eq('id', cartId).single()
   if (error || !cart) return NextResponse.json({ error: error?.message || 'Cart not found.' }, { status: 404 })
