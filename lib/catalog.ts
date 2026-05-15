@@ -118,7 +118,7 @@ export async function getProducts(): Promise<Product[]> {
 
   if (error || !data?.length) return []
 
-  return data.map((row) => mapProductRow(row as ProductRow))
+  return (data as ProductRow[]).map((row: ProductRow) => mapProductRow(row))
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
