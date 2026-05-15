@@ -7,8 +7,8 @@ import { Search } from 'lucide-react'
 
 function score(p:Product,q:string){
   const s=q.toLowerCase()
-  const fields=[p.name,p.category,p.badge,p.short,p.description,...p.features,...p.specs]
-  return fields.reduce((total,f)=>total+(f.toLowerCase().includes(s)?1:0),0)
+  const fields = [p.name, p.category, p.badge, p.short, p.description, ...(p.features || []), ...(p.specs || [])].filter((f): f is string => typeof f === 'string')
+  return fields.reduce((total, f) => total + (f.toLowerCase().includes(s) ? 1 : 0), 0)
 }
 
 export default function SearchClient({products}:{products:Product[]}){

@@ -139,7 +139,7 @@ export async function byCategory(slug: string): Promise<Product[]> {
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const items = await getProducts()
-  const preferred = items.filter((p) => ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge) || Boolean(p.compareAt))
+  const preferred = items.filter((p) => (typeof p.badge === 'string' && ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge)) || Boolean(p.compareAt))
   return preferred.length ? preferred.slice(0, 4) : items.slice(0, 4)
 }
 
