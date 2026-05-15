@@ -1,11 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { supabase } from '@/lib/supabase'
 import {
-  byCategory as staticByCategory,
   categories,
-  featured as staticFeatured,
-  getProduct as staticGetProduct,
-  products as staticProducts,
   type Product,
   type ProductVariant,
   type ProductVideo,
@@ -49,55 +45,55 @@ function asJsonArray<T>(value: unknown, fallback: T[] = []) {
 
 function mapProductRow(row: ProductRow): Product {
   const slug = asString(row.slug)
-  const fallback = staticGetProduct(slug)
-  const estimatedCost = asNumber(row.estimated_cost, fallback?.cost || 0)
-  const hero = asString(row.hero_image, fallback?.hero || '/products/asorta-product-fallback.svg')
-  const images = asStringArray(row.images, fallback?.images || (hero ? [hero] : []))
-  const features = asStringArray(row.features, fallback?.features || [])
-  const specs = asStringArray(row.specs, fallback?.specs || [])
-  const tags = asStringArray(row.tags, fallback?.tags || [])
-  const boxItems = asStringArray(row.box_items, fallback?.boxItems || [])
-  const variants = asJsonArray<ProductVariant>(row.variants, fallback?.variants || [])
-  const videos = asJsonArray<ProductVideo>(row.videos, fallback?.videos || [])
+  const hero = asString(row.hero_image, '/products/asorta-product-fallback.svg')
+  const images = asStringArray(row.images, hero ? [hero] : ['/products/asorta-product-fallback.svg'])
+  const features = asStringArray(row.features, [])
+  const specs = asStringArray(row.specs, [])
+  const tags = asStringArray(row.tags, [])
+  const boxItems = asStringArray(row.box_items, [])
+  const variants = asJsonArray<ProductVariant>(row.variants, [])
+  const videos = asJsonArray<ProductVideo>(row.videos, [])
+  const estimatedCost = asNumber(row.estimated_cost, 0)
+  const compareAt = row.compare_at == null ? undefined : asNumber(row.compare_at)
 
-  const supplier: SupplierInfo | undefined = {
-    name: asString(row.supplier_name, fallback?.supplier?.name || 'Supplier pending'),
-    productUrl: asString(row.supplier_url, fallback?.supplier?.productUrl || ''),
-    warehouse: asString(row.warehouse, fallback?.supplier?.warehouse || 'China'),
+  const supplier: SupplierInfo = {
+    name: asString(row.supplier_name, 'Shopify / DSers'),
+    productUrl: asString(row.supplier_url, ''),
+    warehouse: asString(row.warehouse, 'DSers'),
     estimatedProductCost: estimatedCost,
-    estimatedShipping: asNumber(row.estimated_shipping, fallback?.supplier?.estimatedShipping || 0),
+    estimatedShipping: asNumber(row.estimated_shipping, 0),
     landedCost: estimatedCost,
-    status: (asString(row.supplier_status, fallback?.supplier?.status || 'testing') as SupplierInfo['status']) || 'testing',
-    notes: asString(row.supplier_notes, fallback?.supplier?.notes || ''),
-    productId: asString(row.shopify_product_id, asString(row.supplier_product_id, asString(row.cj_product_id, fallback?.supplier?.productId || ''))),
-    variantIds: asStringArray(row.cj_variant_ids, fallback?.supplier?.variantIds || []),
+    status: (asString(row.supplier_status, 'approved') as SupplierInfo['status']) || 'approved',
+    notes: asString(row.supplier_notes, ''),
+    productId: asString(row.shopify_product_id, asString(row.supplier_product_id, '')),
+    variantIds: [asString(row.shopify_variant_id, ''), asString(row.shopify_variant_legacy_id, '')].filter(Boolean),
     variants: variants.map((v) => v.name),
-    processingTime: asString(row.processing_time, fallback?.supplier?.processingTime || ''),
-    deliveryTime: asString(row.delivery_time, fallback?.supplier?.deliveryTime || ''),
+    processingTime: asString(row.processing_time, ''),
+    deliveryTime: asString(row.delivery_time, ''),
   }
 
   return {
     slug,
-    name: asString(row.name, fallback?.name || 'Untitled product'),
-    category: asString(row.category, fallback?.category || 'smart-utility'),
-    price: asNumber(row.price, fallback?.price || 0),
-    compareAt: row.compare_at == null ? fallback?.compareAt : asNumber(row.compare_at),
+    name: asString(row.name, 'Untitled Shopify product'),
+    category: asString(row.category, 'smart-utility'),
+    price: asNumber(row.price, 0),
+    compareAt,
     cost: estimatedCost,
     hero,
     images: images.length ? images : [hero],
     videos,
     variants,
     boxItems,
-    badge: asString(row.badge, fallback?.badge || 'New'),
-    short: asString(row.short_description, fallback?.short || ''),
-    description: asString(row.description, fallback?.description || ''),
+    badge: asString(row.badge, 'Shopify Sync'),
+    short: asString(row.short_description, ''),
+    description: asString(row.description, ''),
     features,
     specs,
     tags,
-    shippingInfo: asString(row.shipping_info, fallback?.shippingInfo || 'Estimated delivery with tracked shipping.'),
-    contentIdeas: asStringArray(row.content_ideas, fallback?.contentIdeas || []),
-    supplierNotes: asString(row.supplier_notes, fallback?.supplierNotes || ''),
-    marginNote: asString(row.margin_note, fallback?.marginNote || ''),
+    shippingInfo: asString(row.shipping_info, 'Checkout and shipping are handled through Shopify/DSers.'),
+    contentIdeas: asStringArray(row.content_ideas, []),
+    supplierNotes: asString(row.supplier_notes, ''),
+    marginNote: asString(row.margin_note, ''),
     supplier,
     shopifyProductId: asString(row.shopify_product_id, ''),
     shopifyVariantId: asString(row.shopify_variant_id, ''),
@@ -105,27 +101,34 @@ function mapProductRow(row: ProductRow): Product {
   }
 }
 
-export async function getProducts(): Promise<Product[]> {
-  const client = createAdminClient() || supabase
-  if (!client) return staticProducts
-
-  const { data, error } = await client
+function productQuery(client: any) {
+  return client
     .from('products')
     .select('*')
     .in('status', ['active', 'launch'])
-    .order('created_at', { ascending: true })
+    .not('shopify_product_id', 'is', null)
+    .not('shopify_variant_legacy_id', 'is', null)
+}
 
-  if (error || !data?.length) return staticProducts
+export async function getProducts(): Promise<Product[]> {
+  const client = createAdminClient() || supabase
+  if (!client) return []
+
+  const { data, error } = await productQuery(client).order('created_at', { ascending: true })
+
+  if (error || !data?.length) return []
 
   return data.map((row) => mapProductRow(row as ProductRow))
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
   const client = createAdminClient() || supabase
-  if (!client) return staticGetProduct(slug)
+  if (!client) return undefined
 
-  const { data, error } = await client.from('products').select('*').eq('slug', slug).in('status', ['active', 'launch']).maybeSingle()
-  if (error || !data) return staticGetProduct(slug)
+  const { data, error } = await productQuery(client).eq('slug', slug).maybeSingle()
+
+  if (error || !data) return undefined
+
   return mapProductRow(data as ProductRow)
 }
 
@@ -136,8 +139,11 @@ export async function byCategory(slug: string): Promise<Product[]> {
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const items = await getProducts()
-  const preferred = items.filter((p) => ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller'].includes(p.badge) || Boolean(p.compareAt))
-  return preferred.length ? preferred.slice(0, 4) : staticFeatured
+  const preferred = items.filter((p) => ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge) || Boolean(p.compareAt))
+  return preferred.length ? preferred.slice(0, 4) : items.slice(0, 4)
 }
 
-export { categories, staticProducts }
+// Intentionally do not expose old hardcoded products as catalog data.
+// Shopify/Supabase is the only source of truth for customer-visible products.
+export const staticProducts: Product[] = []
+export { categories }

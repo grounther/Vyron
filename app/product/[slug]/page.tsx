@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { products as staticProducts } from '@/lib/products'
 import { getProduct, getProducts } from '@/lib/catalog'
 import { getActiveActions, getProductAction } from '@/lib/actions'
 import ActionBanner from '@/components/ActionBanner'
@@ -8,7 +7,9 @@ import ProductCard from '@/components/ProductCard'
 import ProductMediaGallery from '@/components/ProductMediaGallery'
 import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
 
-export function generateStaticParams(){return staticProducts.map(p=>({slug:p.slug}))}
+export const dynamic = 'force-dynamic'
+
+export function generateStaticParams(){return []}
 
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}){
   const { slug } = await params
