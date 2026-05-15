@@ -1,10 +1,11 @@
-import { shopifyAdminGraphql } from '@/lib/shopify/client'
+import { shopifyAdminGraphql, shopifyGidToLegacyId } from '@/lib/shopify/client'
 
 type ShopifyImage = { url?: string; altText?: string | null }
 type ShopifyMetafield = { namespace: string; key: string; value: string; type?: string }
 type ShopifySelectedOption = { name: string; value: string }
 type ShopifyVariantNode = {
   id: string
+  legacyResourceId?: string | number | null
   title: string
   sku?: string | null
   price?: string | null
@@ -15,6 +16,7 @@ type ShopifyVariantNode = {
 }
 type ShopifyProductNode = {
   id: string
+  legacyResourceId?: string | number | null
   title: string
   handle: string
   description?: string | null
@@ -42,12 +44,13 @@ type ShopifyProductsQuery = {
 export type NormalizedShopifyProduct = ReturnType<typeof normalizeShopifyProduct>
 
 const PRODUCTS_QUERY = `
-  query VyronProducts($first: Int!, $after: String) {
+  query AsortaProducts($first: Int!, $after: String) {
     products(first: $first, after: $after, sortKey: UPDATED_AT, reverse: true) {
       edges {
         cursor
         node {
           id
+          legacyResourceId
           title
           handle
           description
@@ -70,10 +73,11 @@ const PRODUCTS_QUERY = `
           metafields(first: 50) {
             edges { node { namespace key value type } }
           }
-          variants(first: 80) {
+          variants(first: 100) {
             edges {
               node {
                 id
+                legacyResourceId
                 title
                 sku
                 price
@@ -134,9 +138,10 @@ function metafieldMap(product: ShopifyProductNode) {
 }
 
 function categoryFor(product: ShopifyProductNode, fields: Record<string, string>) {
-  const explicit = fields['vyron.category'] || fields.category
+  const explicit = fields['asorta.category'] || fields['vyron.category'] || fields.category
   if (explicit) return slugify(explicit)
-  const type = product.productType || product.tags?.find((tag) => tag.toLowerCase().startsWith('category:'))?.split(':')[1]
+  const tagCategory = product.tags?.find((tag) => tag.toLowerCase().startsWith('category:'))?.split(':')[1]
+  const type = product.productType || tagCategory
   return type ? slugify(type) : 'smart-utility'
 }
 
@@ -147,27 +152,39 @@ function statusFor(product: ShopifyProductNode) {
   return 'draft'
 }
 
+function preferredSupplier(fields: Record<string, string>) {
+  const raw = String(fields['supplier.name'] || fields.supplier || fields['asorta.supplier'] || fields['vyron.supplier'] || 'dsers').toLowerCase()
+  if (raw.includes('cj')) return 'dsers'
+  if (raw.includes('ali') || raw.includes('dser')) return 'dsers'
+  return raw || 'dsers'
+}
+
 export function normalizeShopifyProduct(product: ShopifyProductNode) {
   const fields = metafieldMap(product)
-  const variants = (product.variants?.edges || []).map(({ node }) => ({
-    name: node.title || 'Default',
-    sku: node.sku || node.id,
-    variantId: node.id,
-    image: node.image?.url || product.featuredImage?.url || '/products/asorta-product-fallback.svg',
-    stock: node.inventoryQuantity ?? undefined,
-    shopifyVariantId: node.id,
-    options: node.selectedOptions || [],
-    price: parseNumber(node.price),
-    compareAtPrice: node.compareAtPrice ? parseNumber(node.compareAtPrice) : null,
-  }))
+  const variants = (product.variants?.edges || []).map(({ node }) => {
+    const shopifyVariantId = node.id
+    const shopifyVariantLegacyId = String(node.legacyResourceId || shopifyGidToLegacyId(node.id))
+    return {
+      name: node.title || 'Default',
+      sku: node.sku || shopifyVariantLegacyId || node.id,
+      variantId: shopifyVariantId,
+      image: node.image?.url || product.featuredImage?.url || '/products/asorta-product-fallback.svg',
+      stock: node.inventoryQuantity ?? undefined,
+      shopifyVariantId,
+      shopifyVariantLegacyId,
+      options: node.selectedOptions || [],
+      price: parseNumber(node.price),
+      compareAtPrice: node.compareAtPrice ? parseNumber(node.compareAtPrice) : null,
+    }
+  })
   const firstVariant = variants[0]
   const mediaImages = (product.media?.edges || []).map((edge) => edge.node.image?.url)
   const images = unique([product.featuredImage?.url, ...mediaImages, ...variants.map((variant) => variant.image)])
   const description = stripHtml(product.descriptionHtml || product.description || '')
   const tags = product.tags || []
-  const supplier = (fields['supplier.name'] || fields.supplier || fields['vyron.supplier'] || '').toLowerCase()
-  const supplierProductId = fields['supplier.product_id'] || fields.supplier_product_id || fields.cj_product_id || fields.dsers_product_id || ''
-  const supplierVariantId = fields['supplier.variant_id'] || fields.supplier_variant_id || fields.cj_variant_id || fields.dsers_variant_id || ''
+  const supplier = preferredSupplier(fields)
+  const supplierProductId = fields['supplier.product_id'] || fields.supplier_product_id || fields.dsers_product_id || product.id || ''
+  const supplierVariantId = fields['supplier.variant_id'] || fields.supplier_variant_id || fields.dsers_variant_id || firstVariant?.shopifyVariantId || ''
   const supplierSku = fields['supplier.sku'] || fields.supplier_sku || firstVariant?.sku || ''
   const supplierCost = parseNumber(fields['supplier.cost'] || fields.supplier_cost || fields.cost || 0)
 
@@ -178,13 +195,13 @@ export function normalizeShopifyProduct(product: ShopifyProductNode) {
     price: parseNumber(firstVariant?.price, 0),
     compare_at: firstVariant?.compareAtPrice || null,
     estimated_cost: supplierCost || null,
-    supplier_name: supplier ? supplier.toUpperCase() : fields.supplier_name || product.vendor || 'Shopify',
+    supplier_name: 'DSers via Shopify',
     supplier_url: fields['supplier.url'] || fields.supplier_url || product.onlineStoreUrl || '',
-    warehouse: fields['supplier.warehouse'] || fields.warehouse || 'Supplier',
+    warehouse: fields['supplier.warehouse'] || fields.warehouse || 'DSers / AliExpress supplier',
     status: statusFor(product),
     hero_image: images[0] || '/products/asorta-product-fallback.svg',
     images,
-    badge: fields['vyron.badge'] || fields.badge || 'Shopify Sync',
+    badge: fields['asorta.badge'] || fields['vyron.badge'] || fields.badge || 'Shopify Sync',
     short_description: product.seo?.description || description.slice(0, 180),
     description,
     features: tags.slice(0, 8).map((tag) => `Tag: ${tag}`),
@@ -192,22 +209,24 @@ export function normalizeShopifyProduct(product: ShopifyProductNode) {
       product.vendor ? `Vendor: ${product.vendor}` : '',
       product.productType ? `Type: ${product.productType}` : '',
       product.totalInventory != null ? `Inventory: ${product.totalInventory}` : '',
-      supplier ? `Supplier: ${supplier.toUpperCase()}` : '',
+      `Fulfillment: DSers via Shopify`,
     ]),
     tags,
-    box_items: fields['vyron.box_items'] ? fields['vyron.box_items'].split('\n').filter(Boolean) : ['Product as selected', 'Supplier packaging'],
-    shipping_info: fields['vyron.shipping_info'] || 'Tracked delivery. Final shipping method is selected during fulfilment.',
+    box_items: fields['asorta.box_items'] || fields['vyron.box_items'] ? String(fields['asorta.box_items'] || fields['vyron.box_items']).split('\n').filter(Boolean) : ['Product as selected', 'Supplier packaging'],
+    shipping_info: fields['asorta.shipping_info'] || fields['vyron.shipping_info'] || 'Secure PayPal checkout via Shopify. DSers processes the supplier order after payment.',
     content_ideas: [],
-    supplier_notes: fields['supplier.notes'] || fields.notes || 'Imported from Shopify. Check supplier mapping before scaling.',
+    supplier_notes: fields['supplier.notes'] || fields.notes || 'Imported from Shopify. DSers uses the Shopify order/variant mapping for fulfillment.',
     margin_note: supplierCost ? `Supplier cost from Shopify metafield: ${supplierCost}.` : 'Set supplier cost in Shopify metafields for accurate margin.',
     estimated_shipping: parseNumber(fields['supplier.shipping_cost'] || fields.shipping_cost || 0) || null,
-    supplier_status: supplier ? 'mapped' : 'needs_mapping',
+    supplier_status: 'mapped',
     processing_time: fields['supplier.processing_time'] || '',
     delivery_time: fields['supplier.delivery_time'] || '',
     variants,
     videos: [],
     shopify_product_id: product.id,
-    shopify_variant_id: firstVariant?.variantId || '',
+    shopify_product_legacy_id: String(product.legacyResourceId || shopifyGidToLegacyId(product.id)),
+    shopify_variant_id: firstVariant?.shopifyVariantId || '',
+    shopify_variant_legacy_id: firstVariant?.shopifyVariantLegacyId || '',
     shopify_handle: product.handle,
     shopify_status: product.status || '',
     shopify_vendor: product.vendor || '',
@@ -219,7 +238,7 @@ export function normalizeShopifyProduct(product: ShopifyProductNode) {
     supplier_product_id: supplierProductId,
     supplier_variant_id: supplierVariantId,
     supplier_sku: supplierSku,
-    supplier_raw: fields,
+    supplier_raw: { ...fields, route: 'dsers_via_shopify', shopifyProductId: product.id },
     updated_at: new Date().toISOString(),
   }
 }

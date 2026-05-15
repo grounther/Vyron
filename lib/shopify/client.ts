@@ -5,28 +5,103 @@ export type ShopifyGraphqlResponse<T> = {
   errors?: Array<{ message: string; [key: string]: unknown }>
 }
 
+type CachedToken = {
+  token: string
+  expiresAt: number
+}
+
+let cachedClientCredentialsToken: CachedToken | null = null
+
+function cleanDomain(value: string) {
+  return value.replace(/^https?:\/\//, '').replace(/\/$/, '').trim()
+}
+
+function deriveStoreDomain() {
+  const explicitDomain = process.env.SHOPIFY_STORE_DOMAIN?.trim()
+  if (explicitDomain) return cleanDomain(explicitDomain)
+
+  const shop = process.env.SHOPIFY_SHOP?.trim().replace(/\.myshopify\.com$/i, '')
+  return shop ? `${shop}.myshopify.com` : ''
+}
+
 export function getShopifyConfig() {
-  const storeDomain = process.env.SHOPIFY_STORE_DOMAIN?.replace(/^https?:\/\//, '').replace(/\/$/, '') || ''
+  const storeDomain = deriveStoreDomain()
+  const checkoutDomain = cleanDomain(process.env.SHOPIFY_CHECKOUT_DOMAIN || storeDomain || '')
   const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || ''
+  const clientId = process.env.SHOPIFY_CLIENT_ID || ''
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET || ''
   const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET || ''
   const apiVersion = process.env.SHOPIFY_API_VERSION || '2026-04'
-  return { storeDomain, adminToken, webhookSecret, apiVersion }
+  const shop = storeDomain.replace(/\.myshopify\.com$/i, '')
+
+  return { storeDomain, checkoutDomain, adminToken, clientId, clientSecret, webhookSecret, apiVersion, shop }
 }
 
 export function hasShopifyAdminConfig() {
-  const { storeDomain, adminToken } = getShopifyConfig()
-  return Boolean(storeDomain && adminToken)
+  const { storeDomain, adminToken, clientId, clientSecret } = getShopifyConfig()
+  return Boolean(storeDomain && (adminToken || (clientId && clientSecret)))
+}
+
+async function requestClientCredentialsToken() {
+  const { storeDomain, clientId, clientSecret } = getShopifyConfig()
+  if (!storeDomain || !clientId || !clientSecret) {
+    throw new Error('Shopify Admin config ontbreekt. Zet SHOPIFY_STORE_DOMAIN plus SHOPIFY_ADMIN_ACCESS_TOKEN of SHOPIFY_CLIENT_ID/SHOPIFY_CLIENT_SECRET.')
+  }
+
+  const response = await fetch(`https://${storeDomain}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+    cache: 'no-store',
+  })
+
+  const body = (await response.json().catch(() => ({}))) as { access_token?: string; expires_in?: number; error?: string; error_description?: string }
+
+  if (!response.ok || !body.access_token) {
+    throw new Error(`Shopify client-credentials token failed: ${body.error_description || body.error || `HTTP ${response.status}`}`)
+  }
+
+  const expiresInSeconds = Number(body.expires_in || 86399)
+  cachedClientCredentialsToken = {
+    token: body.access_token,
+    expiresAt: Date.now() + Math.max(60, expiresInSeconds - 300) * 1000,
+  }
+
+  return cachedClientCredentialsToken.token
+}
+
+export async function getShopifyAdminAccessToken() {
+  const { adminToken, clientId, clientSecret } = getShopifyConfig()
+  if (adminToken) return adminToken
+
+  if (!clientId || !clientSecret) {
+    throw new Error('SHOPIFY_ADMIN_ACCESS_TOKEN ontbreekt en SHOPIFY_CLIENT_ID/SHOPIFY_CLIENT_SECRET zijn niet gezet.')
+  }
+
+  if (cachedClientCredentialsToken && cachedClientCredentialsToken.expiresAt > Date.now()) {
+    return cachedClientCredentialsToken.token
+  }
+
+  return requestClientCredentialsToken()
 }
 
 export async function shopifyAdminGraphql<T>(query: string, variables?: Record<string, unknown>) {
-  const { storeDomain, adminToken, apiVersion } = getShopifyConfig()
-  if (!storeDomain || !adminToken) throw new Error('SHOPIFY_STORE_DOMAIN of SHOPIFY_ADMIN_ACCESS_TOKEN ontbreekt.')
+  const { storeDomain, apiVersion } = getShopifyConfig()
+  const token = await getShopifyAdminAccessToken()
+  if (!storeDomain) throw new Error('SHOPIFY_STORE_DOMAIN ontbreekt.')
 
   const response = await fetch(`https://${storeDomain}/admin/api/${apiVersion}/graphql.json`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': adminToken,
+      'X-Shopify-Access-Token': token,
     },
     body: JSON.stringify({ query, variables }),
     cache: 'no-store',
@@ -43,15 +118,16 @@ export async function shopifyAdminGraphql<T>(query: string, variables?: Record<s
 }
 
 export async function shopifyAdminRest<T>(path: string, init: RequestInit = {}) {
-  const { storeDomain, adminToken, apiVersion } = getShopifyConfig()
-  if (!storeDomain || !adminToken) throw new Error('SHOPIFY_STORE_DOMAIN of SHOPIFY_ADMIN_ACCESS_TOKEN ontbreekt.')
+  const { storeDomain, apiVersion } = getShopifyConfig()
+  const token = await getShopifyAdminAccessToken()
+  if (!storeDomain) throw new Error('SHOPIFY_STORE_DOMAIN ontbreekt.')
 
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   const response = await fetch(`https://${storeDomain}/admin/api/${apiVersion}${normalizedPath}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': adminToken,
+      'X-Shopify-Access-Token': token,
       ...(init.headers || {}),
     },
     cache: 'no-store',
@@ -73,4 +149,11 @@ export function verifyShopifyWebhook(rawBody: string, hmacHeader: string | null)
   const expected = Buffer.from(calculated, 'base64')
   if (received.length !== expected.length) return false
   return crypto.timingSafeEqual(received, expected)
+}
+
+export function shopifyGidToLegacyId(value: unknown) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+  const match = raw.match(/(\d+)(?:\?.*)?$/)
+  return match?.[1] || raw
 }

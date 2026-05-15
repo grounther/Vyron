@@ -30,7 +30,7 @@ export default function ShopifySyncButton() {
       return
     }
     setState('done')
-    setMessage(`Shopify sync klaar: ${body.imported} producten bijgewerkt, ${body.mapped} supplier mappings aangemaakt.`)
+    setMessage(`Shopify sync klaar: ${body.imported} producten bijgewerkt, ${body.mapped} DSers/Shopify variant mappings aangemaakt.`)
   }
 
   return (

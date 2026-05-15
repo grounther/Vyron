@@ -35,7 +35,7 @@ Minimaal voor Shopify sync:
 
 ```env
 SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-SHOPIFY_ADMIN_ACCESS_TOKEN=shpat_...
+SHOPIFY_ADMIN_ACCESS_TOKEN=your_admin_token_here
 SHOPIFY_WEBHOOK_SECRET=...
 SHOPIFY_API_VERSION=2026-04
 ```

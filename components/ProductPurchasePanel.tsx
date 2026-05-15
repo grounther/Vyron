@@ -61,10 +61,12 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
   const cartProduct = {
     slug: product.slug,
     name: product.name,
-    price: product.price,
+    price: selectedVariant?.price || product.price,
     hero: activeMedia.type === 'image' ? activeMedia.src : product.hero,
     variantName: selectedVariant?.name,
     variantSku: selectedVariant?.sku,
+    shopifyVariantId: selectedVariant?.shopifyVariantId,
+    shopifyVariantLegacyId: selectedVariant?.shopifyVariantLegacyId,
   }
 
   return <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
@@ -124,9 +126,9 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
 
         <div className="mt-7"><AddToCartButton product={cartProduct} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> Secure checkout ready</div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> PayPal checkout via Shopify</div>
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck size={18}/> {product.shippingInfo}</div>
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Premium ASORTA supplier mapping</div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> DSers fulfillment via Shopify order</div>
         </div>
       </div>
     </aside>

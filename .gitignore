@@ -1,10 +1,9 @@
 node_modules/
 .next/
+.vercel/
 .env
 .env.local
-.vercel/
+.env.*.local
 get-shopify-token.mjs
-get-shopify-token.mjs
-
-get-shopify-token.mjs
-.env.local
+.DS_Store
+*.log

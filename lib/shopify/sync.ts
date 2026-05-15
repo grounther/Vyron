@@ -1,13 +1,14 @@
 import { revalidatePath } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { fetchShopifyProducts, normalizeShopifyProduct } from '@/lib/shopify/products'
-
+import { shopifyGidToLegacyId } from '@/lib/shopify/client'
 
 function normalizeWebhookPayload(payload: any) {
   if (!payload || !payload.admin_graphql_api_id) return payload
   const tags = Array.isArray(payload.tags) ? payload.tags : String(payload.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean)
   return {
     id: payload.admin_graphql_api_id || `gid://shopify/Product/${payload.id}`,
+    legacyResourceId: String(payload.id || ''),
     title: payload.title,
     handle: payload.handle,
     description: payload.body_html || payload.description,
@@ -24,6 +25,7 @@ function normalizeWebhookPayload(payload: any) {
     metafields: { edges: [] },
     variants: { edges: (payload.variants || []).map((variant: any) => ({ node: {
       id: variant.admin_graphql_api_id || `gid://shopify/ProductVariant/${variant.id}`,
+      legacyResourceId: String(variant.id || ''),
       title: variant.title,
       sku: variant.sku,
       price: variant.price,
@@ -43,35 +45,45 @@ type SyncOptions = {
 
 function mapSupplierName(value: unknown) {
   const normalized = String(value || '').trim().toLowerCase()
-  if (normalized.includes('cj')) return 'cj'
+  if (!normalized) return 'dsers'
+  if (normalized.includes('cj')) return 'dsers'
   if (normalized.includes('dser')) return 'dsers'
   if (normalized.includes('aliexpress')) return 'dsers'
+  if (normalized.includes('shopify')) return 'dsers'
   return normalized
 }
 
 function variantMappings(row: Record<string, any>, productId?: string) {
   const supplier = mapSupplierName(row.supplier)
-  if (!supplier) return []
   const variants = Array.isArray(row.variants) ? row.variants : []
-  return variants.map((variant: Record<string, any>, index: number) => ({
-    product_id: productId || null,
-    product_slug: row.slug,
-    platform: 'shopify',
-    platform_product_id: row.shopify_product_id,
-    platform_variant_id: variant.shopifyVariantId || variant.variantId || row.shopify_variant_id || '',
-    platform_variant_sku: variant.sku || row.supplier_sku || '',
-    platform_variant_name: variant.name || `Variant ${index + 1}`,
-    supplier,
-    supplier_product_id: row.supplier_product_id || '',
-    supplier_variant_id: row.supplier_variant_id || variant.supplierVariantId || '',
-    supplier_sku: row.supplier_sku || variant.sku || '',
-    supplier_cost: row.estimated_cost || null,
-    supplier_shipping_method: row.supplier_raw?.['supplier.shipping_method'] || row.supplier_raw?.shipping_method || '',
-    supplier_raw: row.supplier_raw || {},
-    is_primary: index === 0,
-    enabled: true,
-    updated_at: new Date().toISOString(),
-  }))
+  return variants.map((variant: Record<string, any>, index: number) => {
+    const platformVariantId = variant.shopifyVariantId || variant.variantId || row.shopify_variant_id || ''
+    const legacyVariantId = variant.shopifyVariantLegacyId || row.shopify_variant_legacy_id || shopifyGidToLegacyId(platformVariantId)
+    return {
+      product_id: productId || null,
+      product_slug: row.slug,
+      platform: 'shopify',
+      platform_product_id: row.shopify_product_id,
+      platform_variant_id: platformVariantId,
+      platform_variant_sku: variant.sku || row.supplier_sku || legacyVariantId || '',
+      platform_variant_name: variant.name || `Variant ${index + 1}`,
+      supplier,
+      supplier_product_id: row.supplier_product_id || row.shopify_product_id || '',
+      supplier_variant_id: row.supplier_variant_id || platformVariantId || '',
+      supplier_sku: row.supplier_sku || variant.sku || legacyVariantId || '',
+      supplier_cost: row.estimated_cost || null,
+      supplier_shipping_method: row.supplier_raw?.['supplier.shipping_method'] || row.supplier_raw?.shipping_method || 'dsers_shopify_bridge',
+      supplier_raw: {
+        ...(row.supplier_raw || {}),
+        route: 'dsers_via_shopify',
+        shopifyVariantId: platformVariantId,
+        shopifyVariantLegacyId: legacyVariantId,
+      },
+      is_primary: index === 0,
+      enabled: true,
+      updated_at: new Date().toISOString(),
+    }
+  })
 }
 
 export async function upsertNormalizedShopifyProducts(admin: SupabaseClient, rows: Array<Record<string, any>>) {
@@ -114,7 +126,7 @@ export async function syncShopifyProducts(admin: SupabaseClient, options: SyncOp
     provider: 'shopify',
     event: options.source || 'manual',
     status: 'success',
-    message: `Shopify sync imported/updated ${result.imported} products and ${result.mapped} supplier mappings.`,
+    message: `Shopify sync imported/updated ${result.imported} products and created/updated ${result.mapped} DSers/Shopify variant mappings.`,
     payload: { slugs: result.slugs },
   }).then(() => undefined, () => undefined)
 

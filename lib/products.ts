@@ -4,6 +4,11 @@ export type ProductVariant = {
   variantId?: string
   image: string
   stock?: number
+  price?: number
+  compareAtPrice?: number | null
+  shopifyVariantId?: string
+  shopifyVariantLegacyId?: string
+  options?: Array<{ name: string; value: string }>
 }
 
 export type ProductVideo = {
@@ -52,6 +57,9 @@ export type Product = {
   supplierNotes:string
   marginNote:string
   supplier?: SupplierInfo
+  shopifyProductId?: string
+  shopifyVariantId?: string
+  shopifyVariantLegacyId?: string
 }
 
 export const categories = [
