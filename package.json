@@ -5,7 +5,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit --ignoreDeprecations 6.0"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@supabase/ssr": "0.10.3",
