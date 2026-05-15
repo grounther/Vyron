@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const result = await createShopifyCheckoutRedirect({
       items: body.items,
       email: body.email || body.shipping?.email,
+      discountCode: body.discountCode || body.discount_code || body.discount?.code,
       client: admin,
     })
 

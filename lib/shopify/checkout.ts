@@ -63,6 +63,15 @@ function normalizeVariantLegacyId(value: unknown) {
   return shopifyGidToLegacyId(raw) || raw
 }
 
+function normalizeDiscountCode(value: unknown) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9_-]/gi, '')
+    .toUpperCase()
+    .slice(0, 80)
+}
+
 function normalizeItem(item: any): CheckoutCartItem | null {
   const rawSlug = String(item?.slug || item?.productSlug || item?.handle || '').trim()
   const slug = normalizeCheckoutProductSlug(rawSlug)
@@ -170,7 +179,7 @@ function mergeLines(lines: Array<{ variantId: string; quantity: number }>) {
   return Array.from(merged.entries()).map(([variantId, quantity]) => ({ variantId, quantity }))
 }
 
-function buildCheckoutUrl(lines: Array<{ variantId: string; quantity: number }>, email?: string) {
+function buildCheckoutUrl(lines: Array<{ variantId: string; quantity: number }>, email?: string, discountCode?: unknown) {
   const { checkoutDomain } = getShopifyConfig()
   if (!checkoutDomain) throw new Error('SHOPIFY_STORE_DOMAIN ontbreekt.')
 
@@ -181,11 +190,13 @@ function buildCheckoutUrl(lines: Array<{ variantId: string; quantity: number }>,
   url.searchParams.set('utm_campaign', 'paypal_shopify_checkout')
   url.searchParams.set('attributes[asorta_source]', 'custom_frontend')
   url.searchParams.set('attributes[fulfillment]', 'dsers')
+  const discount = normalizeDiscountCode(discountCode)
+  if (discount) url.searchParams.set('discount', discount)
   if (email && email.includes('@')) url.searchParams.set('checkout[email]', email)
   return url.toString()
 }
 
-export async function createShopifyCheckoutRedirect(input: { items: unknown; email?: string; client?: SupabaseClient | null }) {
+export async function createShopifyCheckoutRedirect(input: { items: unknown; email?: string; discountCode?: unknown; client?: SupabaseClient | null }) {
   const items = normalizeItems(input.items)
   if (!items.length) throw new Error('Cart is leeg.')
 
@@ -222,7 +233,7 @@ export async function createShopifyCheckoutRedirect(input: { items: unknown; ema
 
   const mergedLines = mergeLines(lines)
   return {
-    checkoutUrl: buildCheckoutUrl(mergedLines, input.email),
+    checkoutUrl: buildCheckoutUrl(mergedLines, input.email, input.discountCode),
     lineCount: mergedLines.length,
     itemCount: mergedLines.reduce((sum, line) => sum + line.quantity, 0),
   }

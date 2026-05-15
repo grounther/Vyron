@@ -19,27 +19,61 @@ type CartItem = {
 
 type CheckoutState = 'idle' | 'submitting' | 'redirecting' | 'done' | 'error'
 
+function normalizeDiscountCode(value: unknown) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9_-]/gi, '')
+    .toUpperCase()
+    .slice(0, 80)
+}
+
 export default function CheckoutClient() {
   const [items, setItems] = useState<CartItem[]>([])
   const [state, setState] = useState<CheckoutState>('idle')
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
+  const [discountCode, setDiscountCode] = useState('')
+  const [discountNotice, setDiscountNotice] = useState('')
 
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('asorta_cart') || '[]')
     const savedEmail = localStorage.getItem('asorta_cart_email') || ''
+    const query = new URLSearchParams(window.location.search)
+    const incomingDiscount = query.get('discount') || query.get('code') || localStorage.getItem('asorta_discount_code') || ''
     setItems(cart)
     setEmail(savedEmail)
+    setDiscountCode(normalizeDiscountCode(incomingDiscount))
   }, [])
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0), [items])
+
+  const normalizedDiscountCode = useMemo(() => normalizeDiscountCode(discountCode), [discountCode])
+
+  function applyDiscountCode() {
+    const code = normalizeDiscountCode(discountCode)
+    setDiscountCode(code)
+
+    if (!code) {
+      localStorage.removeItem('asorta_discount_code')
+      setDiscountNotice('Kortingscode verwijderd.')
+      return
+    }
+
+    localStorage.setItem('asorta_discount_code', code)
+    setDiscountNotice(`${code} wordt toegepast in de beveiligde Shopify checkout.`)
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     setState('submitting')
     setMessage('')
 
+    const code = normalizeDiscountCode(discountCode)
+
     if (email) localStorage.setItem('asorta_cart_email', email)
+    if (code) localStorage.setItem('asorta_discount_code', code)
+    else localStorage.removeItem('asorta_discount_code')
 
     const response = await fetch('/api/checkout/shopify', {
       method: 'POST',
@@ -53,6 +87,7 @@ export default function CheckoutClient() {
           shopifyVariantId: item.shopifyVariantId,
           shopifyVariantLegacyId: item.shopifyVariantLegacyId,
         })),
+        discountCode: code,
       }),
     })
 
@@ -96,6 +131,33 @@ export default function CheckoutClient() {
           <span className="text-xs leading-5 text-white/40">Shopify vraagt straks je bezorgadres, shipping en PayPal-login. Je order komt daarna automatisch in Shopify terecht voor DSers.</span>
         </label>
 
+        <div className="mt-6 grid gap-2 text-sm text-white/60 md:max-w-xl">
+          <span className="font-black text-white/70">Kortingscode</span>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={discountCode}
+              onChange={(event) => {
+                setDiscountCode(event.target.value.toUpperCase())
+                setDiscountNotice('')
+              }}
+              onBlur={() => setDiscountCode(normalizeDiscountCode(discountCode))}
+              placeholder="GRANDOPENING10"
+              maxLength={80}
+              className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"
+            />
+            <button
+              type="button"
+              onClick={applyDiscountCode}
+              className="rounded-2xl border border-white/12 bg-white px-5 py-3 font-black text-black transition hover:bg-[#b7c8ad]"
+            >
+              Apply
+            </button>
+          </div>
+          <span className="text-xs leading-5 text-white/40">De code wordt meegestuurd naar Shopify en daar op je PayPal-checkout toegepast.</span>
+          {discountNotice && <span className="rounded-xl border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 px-3 py-2 text-xs text-[#e7f0e2]">{discountNotice}</span>}
+        </div>
+
         <div className="mt-8 grid gap-3 text-sm text-white/62 md:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock className="mb-3 text-[#b7c8ad]" /> Shopify variant IDs</div>
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><CreditCard className="mb-3 text-[#b7c8ad]" /> PayPal via Shopify</div>
@@ -114,8 +176,10 @@ export default function CheckoutClient() {
           {items.map((item) => <div key={`${item.slug}-${item.shopifyVariantId || item.shopifyVariantLegacyId || item.variantSku || item.sku || ''}`} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-3"><img src={item.hero || '/products/asorta-product-fallback.svg'} alt="" className="h-16 w-16 rounded-xl object-cover" /><div className="min-w-0 flex-1"><p className="truncate font-black">{item.name}</p>{item.variantName && <p className="truncate text-xs text-white/40">{item.variantName}</p>}<p className="text-sm text-white/45">{item.qty} × €{Number(item.price || 0).toFixed(2)}</p></div></div>)}
         </div>
         <div className="mt-6 flex justify-between text-white/65"><span>Subtotal</span><span>€{subtotal.toFixed(2)}</span></div>
+        {normalizedDiscountCode && <div className="mt-3 flex justify-between text-[#e7f0e2]"><span>Discount code</span><span>{normalizedDiscountCode}</span></div>}
         <div className="mt-3 flex justify-between text-white/65"><span>Shipping</span><span>In Shopify</span></div>
         <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>Total</span><span>€{subtotal.toFixed(2)}</span></div>
+        {normalizedDiscountCode && <p className="mt-2 text-xs leading-5 text-white/42">De korting wordt door Shopify berekend voordat je via PayPal betaalt.</p>}
         <button disabled={state === 'submitting' || state === 'redirecting'} className="btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"><PackageCheck size={18} className="mr-2" />{state === 'submitting' ? 'Starting Shopify checkout...' : state === 'redirecting' ? 'Redirecting to Shopify...' : 'Pay with PayPal'}</button>
         {message && <p className={`mt-4 rounded-2xl border p-4 text-sm ${state === 'error' ? 'border-red-400/25 bg-red-400/10 text-red-100' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100'}`}>{message}</p>}
         <p className="mt-4 flex gap-2 text-xs leading-5 text-white/42"><ShieldCheck size={15} /> Orders worden door Shopify/DSers verwerkt nadat PayPal-betaling is afgerond.</p>
