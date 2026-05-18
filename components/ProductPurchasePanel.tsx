@@ -110,7 +110,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
         <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{product.badge}</div>
         <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{product.name}</h1>
         <p className="mt-4 text-lg leading-8 text-white/58">{product.short}</p>
-        <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{product.compareAt&&<span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
+        <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
         <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Launch product • premium utility selection</div>
 
         {variants.length > 0 && <div className="mt-7">

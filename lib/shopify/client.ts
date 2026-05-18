@@ -2,7 +2,21 @@ import crypto from 'node:crypto'
 
 export type ShopifyGraphqlResponse<T> = {
   data?: T
-  errors?: Array<{ message: string; [key: string]: unknown }>
+  errors?: unknown
+}
+
+function normalizeShopifyErrors(value: unknown): string[] {
+  if (!value) return []
+  if (Array.isArray(value)) {
+    return value.map((item) => {
+      if (typeof item === 'string') return item
+      if (item && typeof item === 'object' && 'message' in item) return String((item as { message?: unknown }).message || JSON.stringify(item))
+      return JSON.stringify(item)
+    })
+  }
+  if (typeof value === 'string') return [value]
+  if (typeof value === 'object') return [JSON.stringify(value)]
+  return [String(value)]
 }
 
 type CachedToken = {
@@ -108,8 +122,9 @@ export async function shopifyAdminGraphql<T>(query: string, variables?: Record<s
   })
 
   const body = (await response.json().catch(() => ({}))) as ShopifyGraphqlResponse<T>
-  if (!response.ok || body.errors?.length) {
-    const detail = body.errors?.map((error) => error.message).join('; ') || `HTTP ${response.status}`
+  const errors = normalizeShopifyErrors(body.errors)
+  if (!response.ok || errors.length) {
+    const detail = errors.join('; ') || `HTTP ${response.status}`
     throw new Error(`Shopify Admin GraphQL request failed: ${detail}`)
   }
 

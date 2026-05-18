@@ -29,21 +29,44 @@ async function assertAdmin() {
   return admin
 }
 
-export async function saveSiteContent(formData: FormData) {
-  const admin = await assertAdmin()
+function encodeError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || 'Onbekende fout')
+  return encodeURIComponent(message.slice(0, 360))
+}
 
+export async function saveSiteContent(formData: FormData) {
+  let admin
+  try {
+    admin = await assertAdmin()
+  } catch (error) {
+    redirect(`/atlas/pages?error=${encodeError(error)}`)
+  }
+
+  const now = new Date().toISOString()
   const rows = siteContentDefaults.map((field) => ({
     key: field.key,
     value: String(formData.get(field.key) || '').trim() || field.value,
     type: field.type,
-    updated_at: new Date().toISOString(),
+    updated_at: now,
   }))
 
   const { error } = await admin.from('site_content').upsert(rows, { onConflict: 'key' })
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    // Some older installs created site_content without the optional type column.
+    // Retry without it so the editor keeps working, then ask the owner to run the migration.
+    if (/type|column/i.test(error.message)) {
+      const fallbackRows = rows.map(({ type: _type, ...row }) => row)
+      const retry = await admin.from('site_content').upsert(fallbackRows, { onConflict: 'key' })
+      if (retry.error) redirect(`/atlas/pages?error=${encodeError(retry.error.message)}`)
+    } else {
+      redirect(`/atlas/pages?error=${encodeError(error.message)}`)
+    }
+  }
 
   for (const path of ['/', '/shop', '/contact', '/faq', '/shipping', '/returns', '/privacy', '/terms', '/atlas/pages']) {
     revalidatePath(path)
   }
+
+  redirect('/atlas/pages?saved=1')
 }

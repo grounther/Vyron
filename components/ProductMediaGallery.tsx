@@ -86,7 +86,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
           </div>}
         </div>}
 
-        <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{product.compareAt&&<span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
+        <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
         <div className="mt-7"><AddToCartButton product={{slug:cartSlug,name:cartName,price:product.price,hero:cartImage,variant:selectedVariant?.name,sku:selectedVariant?.sku}} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Secure checkout ready</div>

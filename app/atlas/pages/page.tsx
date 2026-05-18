@@ -19,8 +19,11 @@ async function assertAdmin(){
   }
 }
 
-export default async function AtlasPages(){
+export default async function AtlasPages({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }){
   await assertAdmin()
+  const params = searchParams ? await searchParams : {}
+  const saved = params.saved === '1'
+  const errorMessage = typeof params.error === 'string' ? decodeURIComponent(params.error) : ''
   const content = await getSiteContent()
   const grouped = groupSiteContentFields(siteContentDefaults)
 
@@ -46,6 +49,9 @@ export default async function AtlasPages(){
         Beheer homepage teksten zonder code push. Opslaan schrijft veilig naar Supabase en vernieuwt de homepage rendering.
       </p>
 
+      {saved && <div className="mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm font-bold text-emerald-100">Pagina content opgeslagen en gepubliceerd.</div>}
+      {errorMessage && <div className="mt-6 rounded-2xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm font-bold text-red-100">Opslaan mislukt: {errorMessage}</div>}
+
       <form action={saveSiteContent} className="mt-8 grid gap-6">
         {Object.entries(grouped).map(([group, fields]) => (
           <section key={group} className="rounded-[1.5rem] border border-white/10 bg-white/[.025] p-4 md:p-5">
@@ -63,13 +69,13 @@ export default async function AtlasPages(){
                       name={field.key}
                       defaultValue={content[field.key] || field.value}
                       rows={4}
-                      className="min-h-28 rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-[#b7c8ad]"
+                      className="min-h-28 w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-[#b7c8ad]"
                     />
                   ) : (
                     <input
                       name={field.key}
                       defaultValue={content[field.key] || field.value}
-                      className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-[#b7c8ad]"
+                      className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-[#b7c8ad]"
                     />
                   )}
                 </label>
@@ -78,9 +84,9 @@ export default async function AtlasPages(){
           </section>
         ))}
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button className="btn-primary" type="submit"><Save size={18} className="mr-2"/> Save & publish</button>
-          <Link href="/" className="btn-secondary">Preview homepage</Link>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <button className="btn-primary w-full sm:w-auto" type="submit"><Save size={18} className="mr-2"/> Save & publish</button>
+          <Link href="/" className="btn-secondary w-full sm:w-auto">Preview homepage</Link>
         </div>
       </form>
     </section>

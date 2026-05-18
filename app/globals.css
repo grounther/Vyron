@@ -784,3 +784,23 @@ body{
 .support-chat-window::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
 .support-chat-window::-webkit-scrollbar-track{background:transparent}
 @media(max-width:640px){.support-chat-window{max-height:300px}.support-panel{max-height:calc(100vh - 1.5rem);overflow:auto}}
+
+/* ASORTA v6.3 mobile + multilingual polish */
+@media(max-width:640px){
+  html,body{overflow-x:hidden}
+  body{font-size:15px}
+  .btn-primary,.btn-secondary{min-height:46px;padding:.82rem 1rem}
+  .kicker{font-size:.62rem;letter-spacing:.22em}
+  .product-img{height:142px}
+  .product-detail-img{height:330px}
+  .card{box-shadow:0 18px 62px rgba(0,0,0,.34)}
+  .category-tile{min-height:126px;border-radius:1rem}
+  input,select,textarea,button{font-size:16px}
+}
+@media(min-width:641px) and (max-width:900px){
+  .product-img{height:188px}
+}
+@media(max-width:390px){
+  .product-img{height:128px}
+  .asorta-header-logo{height:28px}
+}

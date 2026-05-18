@@ -187,13 +187,16 @@ export function normalizeShopifyProduct(product: ShopifyProductNode) {
   const supplierVariantId = fields['supplier.variant_id'] || fields.supplier_variant_id || fields.dsers_variant_id || firstVariant?.shopifyVariantId || ''
   const supplierSku = fields['supplier.sku'] || fields.supplier_sku || firstVariant?.sku || ''
   const supplierCost = parseNumber(fields['supplier.cost'] || fields.supplier_cost || fields.cost || 0)
+  const price = parseNumber(firstVariant?.price, 0)
+  const rawCompareAt = firstVariant?.compareAtPrice ? parseNumber(firstVariant.compareAtPrice) : 0
+  const compareAt = rawCompareAt > price ? rawCompareAt : null
 
   return {
     slug: product.handle || slugify(product.title),
     name: product.title,
     category: categoryFor(product, fields),
-    price: parseNumber(firstVariant?.price, 0),
-    compare_at: firstVariant?.compareAtPrice || null,
+    price,
+    compare_at: compareAt,
     estimated_cost: supplierCost || null,
     supplier_name: 'DSers via Shopify',
     supplier_url: fields['supplier.url'] || fields.supplier_url || product.onlineStoreUrl || '',

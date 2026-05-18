@@ -54,7 +54,9 @@ function mapProductRow(row: ProductRow): Product {
   const variants = asJsonArray<ProductVariant>(row.variants, [])
   const videos = asJsonArray<ProductVideo>(row.videos, [])
   const estimatedCost = asNumber(row.estimated_cost, 0)
-  const compareAt = row.compare_at == null ? undefined : asNumber(row.compare_at)
+  const price = asNumber(row.price, 0)
+  const rawCompareAt = row.compare_at == null ? undefined : asNumber(row.compare_at)
+  const compareAt = typeof rawCompareAt === 'number' && rawCompareAt > price ? rawCompareAt : undefined
 
   const supplier: SupplierInfo = {
     name: asString(row.supplier_name, 'Shopify / DSers'),
@@ -76,7 +78,7 @@ function mapProductRow(row: ProductRow): Product {
     slug,
     name: asString(row.name, 'Untitled Shopify product'),
     category: asString(row.category, 'smart-utility'),
-    price: asNumber(row.price, 0),
+    price,
     compareAt,
     cost: estimatedCost,
     hero,
@@ -139,7 +141,7 @@ export async function byCategory(slug: string): Promise<Product[]> {
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const items = await getProducts()
-  const preferred = items.filter((p) => (typeof p.badge === 'string' && ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge)) || Boolean(p.compareAt))
+  const preferred = items.filter((p) => (typeof p.badge === 'string' && ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge)) || (typeof p.compareAt === 'number' && p.compareAt > p.price))
   return preferred.length ? preferred.slice(0, 4) : items.slice(0, 4)
 }
 
