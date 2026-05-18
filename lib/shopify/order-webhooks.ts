@@ -1,22 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { shopifyGidToLegacyId } from '@/lib/shopify/client'
 
 type ShopifyOrderPayload = Record<string, any>
-type ProductRow = Record<string, any>
+type ProductCostRow = Record<string, any>
 
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value || 0)
   return Number.isFinite(parsed) ? parsed : fallback
-}
-
-function text(value: unknown, fallback = '') {
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback
-}
-
-function legacyId(value: unknown) {
-  const raw = String(value || '').trim()
-  if (!raw) return ''
-  const match = raw.match(/(\d+)(?:\?.*)?$/)
-  return match?.[1] || raw
 }
 
 function orderId(value: unknown) {
@@ -70,70 +60,45 @@ function fulfillmentStatus(payload: ShopifyOrderPayload) {
   return 'pending_dsers'
 }
 
-function buildProductMaps(products: ProductRow[]) {
-  const byVariant = new Map<string, ProductRow>()
-  const byProduct = new Map<string, ProductRow>()
-  const bySku = new Map<string, ProductRow>()
-  const byName = new Map<string, ProductRow>()
+function makeCostLookup(products: ProductCostRow[]) {
+  const map = new Map<string, ProductCostRow>()
 
   for (const product of products) {
-    const variantKeys = [product.shopify_variant_legacy_id, product.shopify_variant_id, legacyId(product.shopify_variant_id)].map((value) => text(value)).filter(Boolean)
-    const productKeys = [product.shopify_product_legacy_id, product.shopify_product_id, legacyId(product.shopify_product_id)].map((value) => text(value)).filter(Boolean)
-    for (const key of variantKeys) byVariant.set(key, product)
-    for (const key of productKeys) byProduct.set(key, product)
-    const sku = text(product.supplier_sku).toLowerCase()
-    if (sku) bySku.set(sku, product)
-    const name = text(product.name).toLowerCase()
-    if (name) byName.set(name, product)
+    const variantLegacy = String(product.shopify_variant_legacy_id || '').trim()
+    const variantGid = String(product.shopify_variant_id || '').trim()
+    const productLegacy = String(product.shopify_product_legacy_id || '').trim()
+    const productGid = String(product.shopify_product_id || '').trim()
+
+    if (variantLegacy) map.set(`variant:${variantLegacy}`, product)
+    if (variantGid) map.set(`variant:${variantGid}`, product)
+    if (variantGid) map.set(`variant:${shopifyGidToLegacyId(variantGid)}`, product)
+    if (productLegacy) map.set(`product:${productLegacy}`, product)
+    if (productGid) map.set(`product:${productGid}`, product)
+    if (productGid) map.set(`product:${shopifyGidToLegacyId(productGid)}`, product)
   }
 
-  return { byVariant, byProduct, bySku, byName }
+  return map
 }
 
-async function loadProductsForOrder(admin: SupabaseClient) {
-  const { data, error } = await admin
+async function loadProductCostLookup(admin: SupabaseClient) {
+  const { data } = await admin
     .from('products')
-    .select('id,name,slug,price,estimated_cost,supplier_sku,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id')
-    .not('shopify_product_id', 'is', null)
+    .select('id,slug,name,estimated_cost,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id')
     .limit(2000)
 
-  if (error) return [] as ProductRow[]
-  return (data || []) as ProductRow[]
+  return makeCostLookup((data || []) as ProductCostRow[])
 }
 
-function findProductForLine(line: any, maps: ReturnType<typeof buildProductMaps>) {
-  const variantId = text(line.variant_id)
-  const productId = text(line.product_id)
-  const sku = text(line.sku).toLowerCase()
-  const title = text(line.title || line.name).toLowerCase()
-
-  return (
-    maps.byVariant.get(variantId) ||
-    maps.byVariant.get(legacyId(variantId)) ||
-    maps.byProduct.get(productId) ||
-    maps.byProduct.get(legacyId(productId)) ||
-    maps.bySku.get(sku) ||
-    maps.byName.get(title) ||
-    null
-  )
+function matchProduct(costs: Map<string, ProductCostRow>, line: any) {
+  const variantId = String(line.variant_id || '').trim()
+  const productId = String(line.product_id || '').trim()
+  return costs.get(`variant:${variantId}`) || costs.get(`product:${productId}`) || null
 }
 
 export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: ShopifyOrderPayload, topic = 'orders/update') {
   const id = orderId(payload.id)
   const name = String(payload.name || payload.order_number || id || '').trim()
   if (!id || !name) throw new Error('Shopify order webhook mist id/name.')
-
-  const products = await loadProductsForOrder(admin)
-  const productMaps = buildProductMaps(products)
-  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : []
-  const calculatedLines = lineItems.map((line: any) => {
-    const product = findProductForLine(line, productMaps)
-    const quantity = number(line.quantity, 1)
-    const unitPrice = number(line.price)
-    const estimatedUnitCost = number(product?.estimated_cost)
-
-    return { line, product, quantity, unitPrice, estimatedUnitCost }
-  })
 
   const tracking = trackingFromOrder(payload)
   const email = String(payload.email || payload.contact_email || payload.customer?.email || '').toLowerCase()
@@ -145,8 +110,13 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
   const vatTotal = number(payload.total_tax)
   const financialStatus = String(payload.financial_status || 'pending')
   const orderStatus = fulfillmentStatus(payload)
-  const estimatedCost = calculatedLines.reduce((sum, line) => sum + line.estimatedUnitCost * line.quantity, 0)
-  const estimatedProfit = total - estimatedCost
+  const costLookup = await loadProductCostLookup(admin)
+
+  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : []
+  const orderEstimatedCost = lineItems.reduce((sum: number, line: any) => {
+    const product = matchProduct(costLookup, line)
+    return sum + number(product?.estimated_cost) * number(line.quantity, 1)
+  }, 0)
 
   const orderRow = {
     order_number: `SHOPIFY-${name.replace(/^#/, '')}`,
@@ -155,8 +125,8 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     shipping_total: shippingTotal,
     vat_total: vatTotal,
     total,
-    estimated_cost: estimatedCost,
-    estimated_profit: estimatedProfit,
+    estimated_cost: orderEstimatedCost,
+    estimated_profit: total - orderEstimatedCost,
     payment_provider: 'shopify_paypal',
     payment_status: financialStatus,
     fulfillment_status: orderStatus,
@@ -173,7 +143,7 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     shopify_tracking_numbers: tracking.numbers,
     shopify_tracking_urls: tracking.urls,
     shopify_raw: payload,
-    raw: { source: 'shopify_webhook', topic, estimated_cost_source: 'products.estimated_cost' },
+    raw: { source: 'shopify_webhook', topic },
     updated_at: new Date().toISOString(),
   }
 
@@ -190,25 +160,29 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     orderDbId = data.id
   }
 
-  if (orderDbId) {
+  if (orderDbId && lineItems.length) {
     await admin.from('order_items').delete().eq('order_id', orderDbId)
-    const rows = calculatedLines.map(({ line, product, quantity, unitPrice, estimatedUnitCost }) => ({
-      order_id: orderDbId,
-      product_slug: text(product?.slug, String(line.product_id || line.sku || line.title || 'shopify-item')),
-      product_name: String(line.title || line.name || product?.name || 'Shopify item'),
-      quantity,
-      unit_price: unitPrice,
-      estimated_unit_cost: estimatedUnitCost,
-      variant_sku: line.sku || '',
-      supplier: 'dsers',
-      supplier_product_id: String(line.product_id || ''),
-      supplier_variant_id: String(line.variant_id || ''),
-      supplier_sku: line.sku || '',
-      shopify_line_item_id: String(line.id || ''),
-      shopify_product_id: String(line.product_id || ''),
-      shopify_variant_id: String(line.variant_id || ''),
-      raw: { ...line, matched_product_id: product?.id || null },
-    }))
+    const rows = lineItems.map((line: any) => {
+      const product = matchProduct(costLookup, line)
+      const quantity = number(line.quantity, 1)
+      return {
+        order_id: orderDbId,
+        product_slug: String(product?.slug || line.product_id || line.sku || line.title || 'shopify-item'),
+        product_name: String(product?.name || line.title || line.name || 'Shopify item'),
+        quantity,
+        unit_price: number(line.price),
+        estimated_unit_cost: number(product?.estimated_cost),
+        variant_sku: line.sku || '',
+        supplier: 'dsers',
+        supplier_product_id: String(line.product_id || ''),
+        supplier_variant_id: String(line.variant_id || ''),
+        supplier_sku: line.sku || '',
+        shopify_line_item_id: String(line.id || ''),
+        shopify_product_id: String(line.product_id || ''),
+        shopify_variant_id: String(line.variant_id || ''),
+        raw: line,
+      }
+    })
     if (rows.length) {
       const { error } = await admin.from('order_items').insert(rows)
       if (error) throw new Error(error.message)
@@ -219,11 +193,11 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     provider: 'shopify',
     event: topic,
     status: 'success',
-    message: `Shopify order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Fulfillment: ${orderStatus}. Est. profit: €${estimatedProfit.toFixed(2)}.`,
-    payload: { shopify_order_id: id, name, tracking, estimated_cost: estimatedCost, estimated_profit: estimatedProfit },
+    message: `Shopify order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Fulfillment: ${orderStatus}.`,
+    payload: { shopify_order_id: id, name, tracking, estimatedCost: orderEstimatedCost },
   }).then(() => undefined, () => undefined)
 
-  return { orderId: orderDbId, shopifyOrderId: id, shopifyOrderName: name, tracking, estimatedCost, estimatedProfit }
+  return { orderId: orderDbId, shopifyOrderId: id, shopifyOrderName: name, tracking }
 }
 
 export async function updateShopifyFulfillmentWebhook(admin: SupabaseClient, payload: Record<string, any>, topic = 'fulfillments/update') {
