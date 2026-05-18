@@ -137,6 +137,32 @@ export type PortalLoyalty = {
   updated_at: string | null
 }
 
+export type PortalLoyaltyTier = {
+  tier_key: string
+  name: string
+  min_points: number | null
+  min_lifetime_spend: number | null
+  reward_label: string | null
+  active: boolean | null
+  position: number | null
+}
+
+export type PortalLoyaltyEvent = {
+  id: string
+  customer_id: string | null
+  customer_email: string | null
+  order_id: string | null
+  event_type: string
+  delta_points: number
+  previous_points: number | null
+  new_points: number | null
+  tier_before: string | null
+  tier_after: string | null
+  reason: string | null
+  created_by: string | null
+  created_at: string | null
+}
+
 export type PortalNote = {
   id: string
   customer_id: string | null
@@ -163,6 +189,8 @@ export type SupportCustomerPortal = {
   carts: PortalCart[]
   wishlist: PortalWishlistItem[]
   loyalty: PortalLoyalty | null
+  loyaltyTiers: PortalLoyaltyTier[]
+  loyaltyEvents: PortalLoyaltyEvent[]
   notes: PortalNote[]
   metrics: {
     totalOrders: number
@@ -187,6 +215,8 @@ const archiveSelect = 'id, original_conversation_id, public_token, customer_name
 const cartSelect = 'id, session_key, customer_email, customer_id, auth_user_id, items, subtotal, currency, status, source, recovery_stage, converted_order_id, last_activity_at, created_at, updated_at'
 const wishlistSelect = 'id, auth_user_id, customer_id, product_slug, created_at'
 const loyaltySelect = 'id, customer_id, auth_user_id, points, lifetime_spend, tier, updated_at'
+const loyaltyTierSelect = 'tier_key, name, min_points, min_lifetime_spend, reward_label, active, position'
+const loyaltyEventSelect = 'id, customer_id, customer_email, order_id, event_type, delta_points, previous_points, new_points, tier_before, tier_after, reason, created_by, created_at'
 const noteSelect = 'id, customer_id, customer_email, order_id, conversation_id, note_type, note, created_by, created_at, updated_at'
 
 function clean(value: unknown, limit = 180) {
@@ -247,6 +277,54 @@ async function safeRows<T>(warnings: string[], label: string, query: PromiseLike
 function getMetaUuid(record: PortalSupportConversation | null, key: string) {
   const raw = record?.metadata?.[key]
   return typeof raw === 'string' && isUuid(raw) ? raw : ''
+}
+
+function normalizeTier(value: unknown) {
+  return clean(value, 40).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'bronze'
+}
+
+function calculateTier(tiers: PortalLoyaltyTier[], points: number, lifetimeSpend: number, fallback = 'bronze') {
+  const active = tiers
+    .filter((tier) => tier.active !== false)
+    .sort((a, b) => Number(a.position || 0) - Number(b.position || 0))
+
+  let matched = active.find((tier) => tier.tier_key === fallback) || active[0] || null
+
+  for (const tier of active) {
+    const minPoints = Number(tier.min_points || 0)
+    const minSpend = Number(tier.min_lifetime_spend || 0)
+    const pointsOk = points >= minPoints
+    const spendOk = lifetimeSpend >= minSpend
+    if (pointsOk || spendOk) matched = tier
+  }
+
+  return matched?.tier_key || fallback
+}
+
+async function findOrCreateCustomer(admin: SupabaseAdmin, input: { customerId?: string | null; email?: string | null; name?: string | null }) {
+  const customerId = clean(input.customerId, 80)
+  const email = lowerEmail(input.email)
+
+  if (customerId && isUuid(customerId)) {
+    const { data } = await admin.from('customers').select(customerSelect).eq('id', customerId).maybeSingle()
+    if (data) return data as Omit<PortalCustomer, 'source'>
+  }
+
+  if (email) {
+    const { data: existing } = await admin.from('customers').select(customerSelect).eq('email', email).maybeSingle()
+    if (existing) return existing as Omit<PortalCustomer, 'source'>
+
+    const { data, error } = await admin
+      .from('customers')
+      .insert({ email, full_name: clean(input.name, 180) || null })
+      .select(customerSelect)
+      .single()
+
+    if (error) throw new Error(error.message || 'Klant aanmaken lukte niet.')
+    return data as Omit<PortalCustomer, 'source'>
+  }
+
+  throw new Error('Geen klant of e-mail gevonden voor loyalty update.')
 }
 
 function inferCustomerFromSupport(conversation: PortalSupportConversation | null): PortalCustomer | null {
@@ -416,7 +494,7 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
 
   orders.forEach((order) => add(orderIds, order.id))
 
-  const [orderItems, conversationsByEmail, conversationsByCustomer, ticketsByEmail, ticketsByCustomer, archives, cartsByEmail, cartsByCustomer, wishlistByCustomer, loyaltyByCustomer, notesByCustomer, notesByEmail, notesByOrder] = await Promise.all([
+  const [orderItems, conversationsByEmail, conversationsByCustomer, ticketsByEmail, ticketsByCustomer, archives, cartsByEmail, cartsByCustomer, wishlistByCustomer, loyaltyByCustomer, loyaltyEventsByCustomer, loyaltyTiers, notesByCustomer, notesByEmail, notesByOrder] = await Promise.all([
     orderIds.size ? safeRows<PortalOrderItem>(warnings, 'Orderregels', admin.from('order_items').select(orderItemSelect).in('order_id', Array.from(orderIds)).order('created_at', { ascending: true }).limit(240)) : Promise.resolve([]),
     emails.size ? safeRows<PortalSupportConversation>(warnings, 'Supportgesprekken op e-mail', admin.from('support_conversations').select(conversationSelect).in('customer_email', Array.from(emails)).order('last_message_at', { ascending: false }).limit(40)) : Promise.resolve([]),
     customerIds.size ? safeRows<PortalSupportConversation>(warnings, 'Supportgesprekken op klant-ID', admin.from('support_conversations').select(conversationSelect).in('linked_customer_id', Array.from(customerIds)).order('last_message_at', { ascending: false }).limit(40)) : Promise.resolve([]),
@@ -427,6 +505,8 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
     customerIds.size ? safeRows<PortalCart>(warnings, 'Cart sessions op klant-ID', admin.from('cart_sessions').select(cartSelect).in('customer_id', Array.from(customerIds)).order('last_activity_at', { ascending: false }).limit(20)) : Promise.resolve([]),
     customerIds.size ? safeRows<PortalWishlistItem>(warnings, 'Wishlist', admin.from('customer_wishlists').select(wishlistSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(30)) : Promise.resolve([]),
     customerIds.size ? safeRows<PortalLoyalty>(warnings, 'Loyalty', admin.from('customer_loyalty').select(loyaltySelect).in('customer_id', Array.from(customerIds)).order('updated_at', { ascending: false }).limit(3)) : Promise.resolve([]),
+    customerIds.size ? safeRows<PortalLoyaltyEvent>(warnings, 'Loyalty events', admin.from('customer_loyalty_events').select(loyaltyEventSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(20)) : Promise.resolve([]),
+    safeRows<PortalLoyaltyTier>(warnings, 'Loyalty tiers', admin.from('loyalty_tiers').select(loyaltyTierSelect).order('position', { ascending: true }).limit(20)),
     customerIds.size ? safeRows<PortalNote>(warnings, 'Interne notities op klant-ID', admin.from('support_customer_notes').select(noteSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
     emails.size ? safeRows<PortalNote>(warnings, 'Interne notities op e-mail', admin.from('support_customer_notes').select(noteSelect).in('customer_email', Array.from(emails)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
     orderIds.size ? safeRows<PortalNote>(warnings, 'Interne notities op order-ID', admin.from('support_customer_notes').select(noteSelect).in('order_id', Array.from(orderIds)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
@@ -473,6 +553,8 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
     carts,
     wishlist: wishlistByCustomer,
     loyalty,
+    loyaltyTiers: loyaltyTiers || [],
+    loyaltyEvents: loyaltyEventsByCustomer || [],
     notes,
     metrics: {
       totalOrders: orders.length,
@@ -487,6 +569,85 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
     warnings: uniq(warnings).slice(0, 10),
     serverTime: new Date().toISOString(),
   }
+}
+
+
+export async function updateCustomerLoyalty(
+  admin: SupabaseAdmin,
+  input: {
+    customerId?: string | null
+    customerEmail?: string | null
+    customerName?: string | null
+    pointsMode?: string
+    points?: number
+    lifetimeSpend?: number | null
+    tier?: string | null
+    reason?: string | null
+    createdBy?: string | null
+  },
+) {
+  const customer = await findOrCreateCustomer(admin, {
+    customerId: input.customerId,
+    email: input.customerEmail,
+    name: input.customerName,
+  })
+
+  const tiers = await safeRows<PortalLoyaltyTier>([], 'Loyalty tiers', admin.from('loyalty_tiers').select(loyaltyTierSelect).order('position', { ascending: true }).limit(20))
+  const { data: current } = await admin.from('customer_loyalty').select(loyaltySelect).eq('customer_id', customer.id).maybeSingle()
+
+  const previousPoints = Number((current as PortalLoyalty | null)?.points || 0)
+  const previousTier = normalizeTier((current as PortalLoyalty | null)?.tier || 'bronze')
+  const previousSpend = Number((current as PortalLoyalty | null)?.lifetime_spend || 0)
+  const rawPoints = Number(input.points || 0)
+  const mode = clean(input.pointsMode, 40) || 'add'
+
+  let nextPoints = previousPoints
+  if (mode === 'set') nextPoints = rawPoints
+  else if (mode === 'subtract') nextPoints = previousPoints - Math.abs(rawPoints)
+  else nextPoints = previousPoints + rawPoints
+  nextPoints = Math.max(0, Math.round(nextPoints))
+
+  const nextSpend = typeof input.lifetimeSpend === 'number' && Number.isFinite(input.lifetimeSpend)
+    ? Math.max(0, Number(input.lifetimeSpend))
+    : previousSpend
+
+  const explicitTier = normalizeTier(input.tier || '')
+  const nextTier = explicitTier && explicitTier !== 'auto'
+    ? explicitTier
+    : calculateTier(tiers || [], nextPoints, nextSpend, previousTier)
+
+  const loyaltyRow = {
+    customer_id: customer.id,
+    auth_user_id: customer.auth_user_id || null,
+    points: nextPoints,
+    lifetime_spend: nextSpend,
+    tier: nextTier,
+    updated_at: new Date().toISOString(),
+  }
+
+  if ((current as PortalLoyalty | null)?.id) {
+    const { error } = await admin.from('customer_loyalty').update(loyaltyRow).eq('id', (current as PortalLoyalty).id)
+    if (error) throw new Error(error.message || 'Loyalty bijwerken lukte niet.')
+  } else {
+    const { error } = await admin.from('customer_loyalty').insert(loyaltyRow)
+    if (error) throw new Error(error.message || 'Loyalty aanmaken lukte niet.')
+  }
+
+  const { error: eventError } = await admin.from('customer_loyalty_events').insert({
+    customer_id: customer.id,
+    customer_email: customer.email || input.customerEmail || null,
+    event_type: mode === 'subtract' ? 'manual_subtract' : mode === 'set' ? 'manual_set' : 'manual_add',
+    delta_points: nextPoints - previousPoints,
+    previous_points: previousPoints,
+    new_points: nextPoints,
+    tier_before: previousTier,
+    tier_after: nextTier,
+    reason: clean(input.reason, 500) || 'Handmatige Atlas loyalty update',
+    created_by: input.createdBy || 'Atlas',
+  })
+  if (eventError) throw new Error(eventError.message || 'Loyalty log opslaan lukte niet.')
+
+  return { customerId: customer.id, previousPoints, nextPoints, previousTier, nextTier }
 }
 
 export async function linkSupportConversation(

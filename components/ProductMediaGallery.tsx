@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Play, Check } from 'lucide-react'
 import ProductImage from './ProductImage'
 import AddToCartButton from './AddToCartButton'
+import WishlistButton from './WishlistButton'
 import type { Product, ProductVariant } from '@/lib/products'
 
 type Media = {
@@ -87,7 +88,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
         </div>}
 
         <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
-        <div className="mt-7"><AddToCartButton product={{slug:cartSlug,name:cartName,price:product.price,hero:cartImage,variant:selectedVariant?.name,sku:selectedVariant?.sku}} /></div>
+        <div className="mt-7 grid gap-3"><AddToCartButton product={{slug:cartSlug,name:cartName,price:product.price,hero:cartImage,variant:selectedVariant?.name,sku:selectedVariant?.sku,shopifyVariantId:selectedVariant?.shopifyVariantId || product.shopifyVariantId,shopifyVariantLegacyId:selectedVariant?.shopifyVariantLegacyId || product.shopifyVariantLegacyId}} /><WishlistButton productSlug={product.slug} productName={product.name} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Secure checkout ready</div>
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Tracked shipping</div>

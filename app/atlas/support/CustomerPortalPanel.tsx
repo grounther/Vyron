@@ -73,6 +73,11 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [noteDraft, setNoteDraft] = useState('')
+  const [loyaltyPoints, setLoyaltyPoints] = useState('')
+  const [loyaltyMode, setLoyaltyMode] = useState<'add' | 'subtract' | 'set'>('add')
+  const [loyaltyTier, setLoyaltyTier] = useState('auto')
+  const [loyaltySpend, setLoyaltySpend] = useState('')
+  const [loyaltyReason, setLoyaltyReason] = useState('')
 
   const orderItemsByOrder = useMemo(() => {
     const grouped: Record<string, PortalOrderItem[]> = {}
@@ -162,6 +167,41 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
     } finally {
       setBusy(null)
     }
+  }
+
+  useEffect(() => {
+    if (!portal) return
+    setLoyaltyTier(portal.loyalty?.tier || portal.metrics.loyaltyTier || 'auto')
+    setLoyaltySpend(String(portal.loyalty?.lifetime_spend ?? portal.metrics.totalSpent ?? 0))
+  }, [portal?.loyalty?.id, portal?.loyalty?.tier, portal?.loyalty?.lifetime_spend, portal?.metrics.totalSpent, portal?.metrics.loyaltyTier])
+
+  async function saveLoyalty(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!portal) return
+    const points = Number(loyaltyPoints || 0)
+    const lifetimeSpend = loyaltySpend.trim() ? Number(loyaltySpend) : null
+    if (!Number.isFinite(points)) {
+      setError('Vul een geldig aantal punten in.')
+      return
+    }
+    if (lifetimeSpend !== null && !Number.isFinite(lifetimeSpend)) {
+      setError('Vul een geldige lifetime spend in.')
+      return
+    }
+
+    await portalPatch({
+      action: 'updateLoyalty',
+      customerId: portal.customer?.id || null,
+      customerEmail: portal.customer?.email || selectedConversation?.customer_email || query || null,
+      customerName: portal.customer?.full_name || selectedConversation?.customer_name || null,
+      pointsMode: loyaltyMode,
+      points,
+      lifetimeSpend,
+      tier: loyaltyTier,
+      reason: loyaltyReason,
+    })
+    setLoyaltyPoints('')
+    setLoyaltyReason('')
   }
 
   const customer = portal?.customer || null
@@ -286,6 +326,46 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
                   <span className="rounded-full border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[.14em] text-[#dbe9d4]">{portal.metrics.loyaltyTier}</span>
                 </div>
                 <p className="mt-2 text-sm text-white/50">{portal.metrics.loyaltyPoints} punten · lifetime {formatMoney(portal.loyalty?.lifetime_spend || portal.metrics.totalSpent)}</p>
+                <form onSubmit={saveLoyalty} className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Actie
+                      <select value={loyaltyMode} onChange={(event: ChangeEvent<HTMLSelectElement>) => setLoyaltyMode(event.target.value as 'add' | 'subtract' | 'set')} className="support-input h-11 text-sm normal-case tracking-normal">
+                        <option value="add">Punten toevoegen</option>
+                        <option value="subtract">Punten aftrekken</option>
+                        <option value="set">Punten instellen</option>
+                      </select>
+                    </label>
+                    <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Punten
+                      <input value={loyaltyPoints} onChange={(event: ChangeEvent<HTMLInputElement>) => setLoyaltyPoints(event.target.value)} inputMode="numeric" className="support-input h-11 text-sm normal-case tracking-normal" placeholder="bijv. 100" />
+                    </label>
+                    <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Tier
+                      <select value={loyaltyTier} onChange={(event: ChangeEvent<HTMLSelectElement>) => setLoyaltyTier(event.target.value)} className="support-input h-11 text-sm normal-case tracking-normal">
+                        <option value="auto">Automatisch</option>
+                        {portal.loyaltyTiers.map((tier) => <option key={tier.tier_key} value={tier.tier_key}>{tier.name}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Lifetime spend
+                    <input value={loyaltySpend} onChange={(event: ChangeEvent<HTMLInputElement>) => setLoyaltySpend(event.target.value)} inputMode="decimal" className="support-input h-11 text-sm normal-case tracking-normal" placeholder="bijv. 149.95" />
+                  </label>
+                  <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Reden / audit note
+                    <textarea value={loyaltyReason} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setLoyaltyReason(event.target.value)} className="support-input min-h-20 resize-none py-3 text-sm normal-case tracking-normal" placeholder="Bijv. retour order #1234, goodwill of correctie." />
+                  </label>
+                  <button type="submit" disabled={busy === 'updateLoyalty'} className="rounded-full border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 px-4 py-3 text-xs font-black uppercase tracking-[.14em] text-[#dbe9d4] transition hover:bg-[#b7c8ad]/15 disabled:opacity-60">
+                    {busy === 'updateLoyalty' ? 'Loyalty opslaan...' : 'Loyalty punten/tier opslaan'}
+                  </button>
+                </form>
+                {portal.loyaltyEvents.length ? (
+                  <div className="mt-4 grid gap-2">
+                    <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Laatste loyalty mutaties</p>
+                    {portal.loyaltyEvents.slice(0, 5).map((event) => (
+                      <div key={event.id} className="rounded-xl border border-white/10 bg-white/[.025] p-3 text-xs text-white/50">
+                        <div className="flex items-center justify-between gap-3"><span className="font-black text-white/70">{event.delta_points > 0 ? '+' : ''}{event.delta_points} pt</span><span>{formatDate(event.created_at)}</span></div>
+                        <p className="mt-1">{event.reason || event.event_type} · {event.created_by || 'system'}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               {portal.carts.slice(0, 3).map((cart) => (
                 <div key={cart.id} className="rounded-2xl border border-white/10 bg-white/[.03] p-4">

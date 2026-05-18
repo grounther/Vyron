@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Heart, Package, Trophy, User } from 'lucide-react'
 import { getSiteContent } from '@/lib/site-content'
+import AccountWishlistClient from '@/components/AccountWishlistClient'
 
 export const metadata = { title: 'Account | ASORTA' }
 
@@ -18,6 +19,7 @@ export default async function AccountPage() {
   let orders: any[] = []
   let loyalty: any = null
   let wishlistCount = 0
+  let wishlistItems: any[] = []
 
   if (admin) {
     const { data: adminUser } = await admin.from('admin_users').select('email').eq('email', user.email).eq('active', true).maybeSingle()
@@ -32,8 +34,28 @@ export default async function AccountPage() {
     const { data: loyaltyRow } = await admin.from('customer_loyalty').select('*').eq('auth_user_id', user.id).maybeSingle()
     loyalty = loyaltyRow
 
-    const { count } = await admin.from('customer_wishlists').select('*', { count: 'exact', head: true }).eq('auth_user_id', user.id)
+    const { data: wishlistRows, count } = await admin
+      .from('customer_wishlists')
+      .select('id, product_slug, created_at', { count: 'exact' })
+      .eq('auth_user_id', user.id)
+      .order('created_at', { ascending: false })
     wishlistCount = count || 0
+
+    const wishlistSlugs = Array.from(new Set((wishlistRows || []).map((item) => item.product_slug).filter(Boolean)))
+    if (wishlistSlugs.length) {
+      const { data: wishlistProducts } = await admin
+        .from('products')
+        .select('slug,name,category,price,compare_at,hero_image,short_description,status')
+        .in('slug', wishlistSlugs)
+
+      const productsBySlug = new Map((wishlistProducts || []).map((product) => [product.slug, product]))
+      wishlistItems = (wishlistRows || []).map((item) => ({
+        id: item.id,
+        productSlug: item.product_slug,
+        createdAt: item.created_at,
+        product: productsBySlug.get(item.product_slug) || null,
+      }))
+    }
   }
 
   const points = Number(loyalty?.points || 0)
@@ -63,6 +85,17 @@ export default async function AccountPage() {
           <p className="mt-3 text-white/55">{content['account.loyalty.text']}</p>
           <div className="mt-5 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4"><p className="text-sm font-black text-[#dbe9d4]">Current tier</p><p className="mt-1 text-3xl font-black">{tier.toUpperCase()}</p></div>
         </div>
+      </section>
+
+      <section className="mt-8 card rounded-[2rem] p-6">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.25em] text-[#b7c8ad]">Saved items</p>
+            <h2 className="mt-2 text-2xl font-black">Wishlist</h2>
+          </div>
+          <Link href="/shop" className="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white/60 hover:bg-white/10 hover:text-white">Discover products</Link>
+        </div>
+        <AccountWishlistClient initialItems={wishlistItems} />
       </section>
 
       <div className="mt-8 flex flex-wrap gap-3">
