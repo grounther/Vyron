@@ -29,7 +29,7 @@ export default async function Footer(){
       <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">{dict.footer.brandText}</p>
     </div>
     <div><h4 className="font-black">Shop</h4><div className="mt-4 grid gap-2 text-sm text-white/55">{categories.slice(0,5).map(c=><Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-white">{categoryName(locale, c.slug, c.name)}</Link>)}</div></div>
-    <div><h4 className="font-black">Support</h4><div className="mt-4 grid gap-2 text-sm text-white/55"><Link href="/shipping">Shipping</Link><Link href="/returns">Returns</Link><Link href="/contact">Contact</Link><Link href="/faq">FAQ</Link></div></div>
+    <div><h4 className="font-black">Support</h4><div className="mt-4 grid gap-2 text-sm text-white/55"><Link href="/about">Over ASORTA</Link><Link href="/track-order">Order volgen</Link><Link href="/shipping">Shipping</Link><Link href="/returns">Returns</Link><Link href="/contact">Contact</Link><Link href="/faq">FAQ</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></div>
     <div><h4 className="font-black">{dict.footer.payments}</h4><div className="mt-4 grid gap-2 text-sm text-white/55"><span>PayPal</span><span>iDEAL | Wero</span><span>Cards</span><span>Apple Pay / Google Pay</span></div></div>
   </div>
   <div className="border-t border-white/10 px-4 py-5 text-center text-xs text-white/35">© 2026 ASORTA. Premium utility ecommerce concept.</div>
