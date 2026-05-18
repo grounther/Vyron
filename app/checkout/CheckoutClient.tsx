@@ -35,7 +35,34 @@ function readLocale(): Locale {
   return normalizeLocale(match ? decodeURIComponent(match[1]) : localStorage.getItem('asorta_lang'))
 }
 
-export default function CheckoutClient({ copy = {} }: { copy?: Partial<ReturnType<typeof getDictionary>['checkout']> & { trust1?: string; trust2?: string; trust3?: string } }) {
+
+type CheckoutClientCopy = {
+  secure?: string
+  title?: string
+  intro?: string
+  emptyTitle?: string
+  emptyText?: string
+  shopProducts?: string
+  email?: string
+  emailHelp?: string
+  discount?: string
+  discountHelp?: string
+  apply?: string
+  bridgeNote?: string
+  order?: string
+  summary?: string
+  subtotal?: string
+  shipping?: string
+  shippingValue?: string
+  total?: string
+  pay?: string
+  afterPayment?: string
+  trust1?: string
+  trust2?: string
+  trust3?: string
+}
+
+export default function CheckoutClient({ copy = {} }: { copy?: CheckoutClientCopy }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [state, setState] = useState<CheckoutState>('idle')
   const [message, setMessage] = useState('')
