@@ -58,10 +58,29 @@ function mapProductRow(row: ProductRow): Product {
   const rawCompareAt = row.compare_at == null ? undefined : asNumber(row.compare_at)
   const compareAt = typeof rawCompareAt === 'number' && rawCompareAt > price ? rawCompareAt : undefined
 
+  function sanitizeBadge(value: string) {
+    const lower = value.toLowerCase()
+    if (!value || lower.includes('shopify') || lower.includes('dsers') || lower.includes('cj')) return 'New Arrival'
+    return value
+  }
+
+  function sanitizePublicText(value: string, fallback = '') {
+    const lower = value.toLowerCase()
+    if (!value || lower.includes('shopify') || lower.includes('dsers') || lower.includes('cj dropshipping')) return fallback
+    return value
+  }
+
+  function sanitizePublicList(values: string[]) {
+    return values.filter((value) => {
+      const lower = value.toLowerCase()
+      return !lower.includes('shopify') && !lower.includes('dsers') && !lower.includes('cj dropshipping')
+    })
+  }
+
   const supplier: SupplierInfo = {
-    name: asString(row.supplier_name, 'Shopify / DSers'),
+    name: asString(row.supplier_name, 'ASORTA fulfillment'),
     productUrl: asString(row.supplier_url, ''),
-    warehouse: asString(row.warehouse, 'DSers'),
+    warehouse: asString(row.warehouse, 'Tracked delivery'),
     estimatedProductCost: estimatedCost,
     estimatedShipping: asNumber(row.estimated_shipping, 0),
     landedCost: estimatedCost,
@@ -86,15 +105,15 @@ function mapProductRow(row: ProductRow): Product {
     videos,
     variants,
     boxItems,
-    badge: asString(row.badge, 'Shopify Sync'),
-    short: asString(row.short_description, ''),
-    description: asString(row.description, ''),
-    features,
-    specs,
+    badge: sanitizeBadge(asString(row.badge, 'New Arrival')),
+    short: sanitizePublicText(asString(row.short_description, ''), ''),
+    description: sanitizePublicText(asString(row.description, ''), ''),
+    features: sanitizePublicList(features),
+    specs: sanitizePublicList(specs),
     tags,
-    shippingInfo: asString(row.shipping_info, 'Checkout and shipping are handled through Shopify/DSers.'),
+    shippingInfo: sanitizePublicText(asString(row.shipping_info, ''), 'Je ontvangt tracking zodra je pakket is aangemeld voor verzending.'),
     contentIdeas: asStringArray(row.content_ideas, []),
-    supplierNotes: asString(row.supplier_notes, ''),
+    supplierNotes: sanitizePublicText(asString(row.supplier_notes, ''), 'Neem contact op met support als je vragen hebt over dit product of je bestelling.'),
     marginNote: asString(row.margin_note, ''),
     supplier,
     shopifyProductId: asString(row.shopify_product_id, ''),

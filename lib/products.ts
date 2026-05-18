@@ -1,8 +1,8 @@
 /**
  * Legacy static product catalog disabled.
  *
- * ASORTA now uses Shopify as the only source for buyable storefront products.
- * Products shown on the public site must come from Shopify sync -> Supabase.
+ * ASORTA uses a synced product database as the source for buyable storefront products.
+ * Do not add legacy static storefront products here.
  */
 
 export type Category = {
@@ -85,7 +85,7 @@ export const categories: Category[] = [
     name: 'Smart Utility',
     text: 'Practical smart tools and everyday tech upgrades.',
     short: 'Practical smart tools and everyday tech upgrades.',
-    description: 'Useful smart products synced from Shopify for the ASORTA storefront.',
+    description: 'Useful smart products selected for the ASORTA storefront.',
   },
   {
     slug: 'automotive',
@@ -125,7 +125,7 @@ export function getCategory(slug: string): Category | undefined {
 
 /**
  * Keep this empty. Do not add static storefront products here.
- * Shopify sync -> Supabase is the only product source.
+ * The synced database is the only storefront product source.
  */
 export const products: Product[] = []
 

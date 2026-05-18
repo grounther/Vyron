@@ -71,7 +71,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
 
     <aside className="lg:sticky lg:top-24">
       <div className="card rounded-[2rem] p-6 md:p-8">
-        <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{product.badge}</div>
+        <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{product.badge && !/shopify|dsers|cj/i.test(product.badge) ? product.badge : 'New Arrival'}</div>
         <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{product.name}</h1>
         <p className="mt-4 text-lg leading-8 text-white/58">{product.short}</p>
 
@@ -82,7 +82,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
           </select>
           {selectedVariant && <div className="mt-3 grid gap-2 rounded-2xl border border-white/10 bg-white/[.035] p-4 text-xs text-white/55">
             <div className="flex items-center gap-2"><Check size={14} className="text-[#b7c8ad]"/> SKU: {selectedVariant.sku}</div>
-            {typeof selectedVariant.stock === 'number' && <div>Factory stock: {selectedVariant.stock.toLocaleString('nl-NL')}+</div>}
+            {typeof selectedVariant.stock === 'number' && <div>Beschikbaar</div>}
           </div>}
         </div>}
 
@@ -90,8 +90,8 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
         <div className="mt-7"><AddToCartButton product={{slug:cartSlug,name:cartName,price:product.price,hero:cartImage,variant:selectedVariant?.name,sku:selectedVariant?.sku}} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Secure checkout ready</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Tracked shipping supplier flow</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Low refund product positioning</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Tracked shipping</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Support available</div>
         </div>
       </div>
     </aside>

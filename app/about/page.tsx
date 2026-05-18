@@ -8,9 +8,9 @@ export const metadata = {
 }
 
 const values = [
-  { icon: PackageCheck, title: 'Curated products', text: 'We tonen alleen producten die via Shopify zijn gesynct en checkout-ready zijn.' },
-  { icon: ShieldCheck, title: 'Veilige checkout', text: 'Bestellen loopt via een beveiligde Shopify/PayPal checkout-flow.' },
-  { icon: Truck, title: 'Tracking-first', text: 'Orders worden verwerkt via Shopify en DSers, met tracking zodra fulfillment beschikbaar is.' },
+  { icon: PackageCheck, title: 'Curated products', text: 'We selecteren praktische producten op bruikbaarheid, uitstraling en duidelijke informatie.' },
+  { icon: ShieldCheck, title: 'Veilige checkout', text: 'Bestellen verloopt via een beveiligde betaalomgeving.' },
+  { icon: Truck, title: 'Tracking-first', text: 'Je ontvangt tracking zodra je pakket is aangemeld voor verzending.' },
 ]
 
 export default async function AboutPage() {
@@ -43,7 +43,7 @@ export default async function AboutPage() {
         <Sparkles className="text-[#b7c8ad]" />
         <h2 className="mt-4 text-2xl font-black">Waarom deze pagina belangrijk is</h2>
       </div>
-      <p className="text-sm leading-7 text-white/58">Een duidelijke over-ons pagina, contactinformatie, verzendinformatie, retourbeleid en voorwaarden helpen bezoekers en zoekmachines begrijpen dat ASORTA een echte webshop is met een herkenbare serviceflow. Daarom houden we deze pagina’s zichtbaar, actueel en gekoppeld aan je Shopify-productcatalogus.</p>
+      <p className="text-sm leading-7 text-white/58">Een duidelijke over-ons pagina, contactinformatie, verzendinformatie, retourbeleid en voorwaarden helpen bezoekers en zoekmachines begrijpen dat ASORTA een echte webshop is met een herkenbare serviceflow. Daarom houden we deze pagina’s zichtbaar, actueel en klantgericht.</p>
     </section>
   </main>
 }

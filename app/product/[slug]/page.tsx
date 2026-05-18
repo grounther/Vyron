@@ -53,7 +53,7 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
       <Info title="Key Features" items={p.features}/>
       <Info title="Specs" items={p.specs}/>
       <Info title="What's in the box" items={p.boxItems || ['Product as selected','Supplier packaging','Tracked shipment']}/>
-      <div className="card rounded-[1.7rem] p-6"><PackageCheck/><h3 className="mt-4 font-black">Supplier Notes</h3><p className="mt-3 text-sm leading-6 text-white/55">{p.supplierNotes}</p></div>
+      <div className="card rounded-[1.7rem] p-6"><PackageCheck/><h3 className="mt-4 font-black">Support & returns</h3><p className="mt-3 text-sm leading-6 text-white/55">Heb je vragen over dit product of je bestelling? ASORTA Support helpt je met productinformatie, tracking en retouraanvragen.</p></div>
     </section>
 
     {related.length>0 && <section className="mt-16"><p className="kicker">Related Utility</p><h2 className="mt-2 text-3xl font-black md:text-5xl">More in {p.category.replace('-',' ')}</h2><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{related.map(x=><ProductCard key={x.slug} p={x}/>)}</div></section>}

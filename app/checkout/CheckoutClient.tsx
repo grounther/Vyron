@@ -184,9 +184,9 @@ export default function CheckoutClient() {
         </div>
 
         <div className="mt-8 grid gap-3 text-sm text-white/62 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock className="mb-3 text-[#b7c8ad]" /> Shopify variant IDs</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><CreditCard className="mb-3 text-[#b7c8ad]" /> PayPal via Shopify</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck className="mb-3 text-[#b7c8ad]" /> DSers fulfillment</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock className="mb-3 text-[#b7c8ad]" /> Veilige checkout</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><CreditCard className="mb-3 text-[#b7c8ad]" /> PayPal betaling</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck className="mb-3 text-[#b7c8ad]" /> Tracking per e-mail</div>
         </div>
 
         <div className="mt-8 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4 text-sm leading-6 text-[#e7f0e2] sm:p-5">

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { shopifyGidToLegacyId } from '@/lib/shopify/client'
+import { sendOrderConfirmationEmail, sendTrackingUpdateEmail } from '@/lib/email/order-emails'
 
 type ShopifyOrderPayload = Record<string, any>
 type ProductCostRow = Record<string, any>
@@ -57,7 +58,7 @@ function fulfillmentStatus(payload: ShopifyOrderPayload) {
   if (raw === 'fulfilled') return 'fulfilled'
   if (raw === 'partial') return 'partially_fulfilled'
   if (raw) return raw
-  return 'pending_dsers'
+  return 'processing'
 }
 
 function makeCostLookup(products: ProductCostRow[]) {
@@ -119,7 +120,7 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
   }, 0)
 
   const orderRow = {
-    order_number: `SHOPIFY-${name.replace(/^#/, '')}`,
+    order_number: `AS-${name.replace(/^#/, '')}`,
     customer_email: email || null,
     subtotal,
     shipping_total: shippingTotal,
@@ -189,11 +190,30 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     }
   }
 
+  const { data: persistedItems } = orderDbId
+    ? await admin.from('order_items').select('*').eq('order_id', orderDbId).order('created_at', { ascending: true })
+    : { data: [] as any[] }
+
+  const persistedOrder = { id: orderDbId, ...orderRow }
+
+  if (['paid', 'authorized', 'partially_paid', 'complete', 'completed'].includes(financialStatus.toLowerCase())) {
+    await sendOrderConfirmationEmail(admin, { order: persistedOrder, items: persistedItems || [] }).catch(() => undefined)
+  }
+
+  if (tracking.numbers.length || tracking.urls.length) {
+    await sendTrackingUpdateEmail(admin, {
+      order: persistedOrder,
+      items: persistedItems || [],
+      trackingNumber: tracking.numbers[0] || null,
+      trackingUrl: tracking.urls[0] || null,
+    }).catch(() => undefined)
+  }
+
   await admin.from('integration_sync_logs').insert({
     provider: 'shopify',
     event: topic,
     status: 'success',
-    message: `Shopify order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Fulfillment: ${orderStatus}.`,
+    message: `Order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Status: ${orderStatus}.`,
     payload: { shopify_order_id: id, name, tracking, estimatedCost: orderEstimatedCost },
   }).then(() => undefined, () => undefined)
 
@@ -223,11 +243,25 @@ export async function updateShopifyFulfillmentWebhook(admin: SupabaseClient, pay
 
   if (error) throw new Error(error.message)
 
+  const { data: order } = await admin
+    .from('orders')
+    .select('*')
+    .eq('shopify_order_id', shopifyOrderId)
+    .maybeSingle()
+
+  if (order && (trackingNumbers.length || trackingUrls.length)) {
+    await sendTrackingUpdateEmail(admin, {
+      order,
+      trackingNumber: trackingNumbers[0] || null,
+      trackingUrl: trackingUrls[0] || null,
+    }).catch(() => undefined)
+  }
+
   await admin.from('integration_sync_logs').insert({
     provider: 'shopify',
     event: topic,
     status: 'success',
-    message: `Shopify fulfillment update received for order ${shopifyOrderId}.`,
+    message: `Fulfillment update received for order ${shopifyOrderId}.`,
     payload: { shopify_order_id: shopifyOrderId, trackingNumbers, trackingUrls },
   }).then(() => undefined, () => undefined)
 

@@ -28,43 +28,43 @@ export const siteContentDefaults: SiteContentField[] = [
   { key: 'shop.title', label: 'Shop title', value: 'Just what you need.', type: 'text', group: 'Shop page' },
   { key: 'shop.text', label: 'Shop body text', value: 'Een curated launch catalog met premium utility producten. Zoek, filter en vind snel wat past bij jouw setup, auto, carry of daily routine.', type: 'textarea', group: 'Shop page' },
   { key: 'about.title', label: 'About title', value: 'Over ASORTA', type: 'text', group: 'About page' },
-  { key: 'about.body', label: 'About body', value: `ASORTA is een Nederlandse webshop voor praktische smart utility producten, automotive accessoires, desk setup upgrades en everyday carry gear. We gebruiken onze eigen storefront voor de merkervaring en Shopify als betrouwbare checkout- en orderlaag.
+  { key: 'about.body', label: 'About body', value: `ASORTA is een Nederlandse webshop voor praktische smart utility producten, automotive accessoires, desk setup upgrades en everyday carry gear.
 
-Onze collectie wordt samengesteld op bruikbaarheid, duidelijke productinformatie en een eerlijke checkoutflow. Producten worden via Shopify gesynchroniseerd naar ASORTA, zodat prijs, beschikbaarheid en checkout aansluiten op de producten die echt koopbaar zijn.
+Onze collectie wordt samengesteld op bruikbaarheid, duidelijke productinformatie en een veilige checkoutflow. We selecteren producten op praktische waarde, uitstraling en geschiktheid voor dagelijks gebruik.
 
-Bestellingen worden verwerkt via Shopify en DSers. Zodra tracking beschikbaar is, ontvangt de klant de verzendinformatie per e-mail.`, type: 'textarea', group: 'About page' },
+Na je bestelling ontvang je een orderbevestiging per e-mail. Zodra tracking beschikbaar is, ontvang je automatisch een verzendupdate.`, type: 'textarea', group: 'About page' },
   { key: 'contact.title', label: 'Contact title', value: 'Contact', type: 'text', group: 'Contact page' },
   { key: 'contact.text', label: 'Contact intro', value: 'Heb je een vraag over je bestelling, verzending, retour of productinformatie? Neem contact op met ASORTA Support. Vermeld bij ordervragen altijd je ordernummer en het e-mailadres waarmee je hebt besteld.', type: 'textarea', group: 'Contact page' },
   { key: 'contact.button', label: 'Contact button', value: 'Send message', type: 'text', group: 'Contact page' },
   { key: 'faq.title', label: 'FAQ title', value: 'Veelgestelde vragen', type: 'text', group: 'FAQ page' },
   { key: 'faq.items', label: 'FAQ items: vraag | antwoord per regel', value: `Wat is ASORTA? | ASORTA is een webshop voor praktische smart utility producten, automotive accessoires, desk setup upgrades en everyday carry gear.
-Hoe werkt betalen? | Op dit moment verloopt betaling via Shopify checkout met PayPal. Later kunnen iDEAL en Wero via Mollie worden toegevoegd zodra de zakelijke verificatie rond is.
-Waar komt mijn order vandaan? | Orders worden via Shopify verwerkt en door DSers/suppliers fulfilled. Je ontvangt tracking zodra de leverancier of het warehouse de zending heeft aangemaakt.
-Wanneer ontvang ik tracking? | Tracking is meestal beschikbaar nadat de order is verwerkt en verzonden. Zodra tracking beschikbaar is, ontvang je een verzendbevestiging per e-mail.
+Hoe werkt betalen? | Je rekent af via een beveiligde betaalomgeving. Beschikbare betaalmethodes kunnen per moment verschillen.
+Hoe volg ik mijn bestelling? | Gebruik de pagina Order volgen met je ordernummer en het e-mailadres waarmee je hebt besteld.
+Wanneer ontvang ik tracking? | Tracking is beschikbaar zodra je pakket is aangemeld voor verzending. Je ontvangt dan automatisch een verzendupdate per e-mail.
 Kan ik retourneren? | Ja, retouraanvragen worden beoordeeld volgens het retourbeleid. Neem contact op met support met je ordernummer en reden van retour.
-Waarom zie ik Shopify tijdens checkout? | ASORTA gebruikt een eigen storefront voor de winkelervaring en Shopify als veilige checkout- en orderlaag voor PayPal en DSers-fulfillment.`, type: 'textarea', group: 'FAQ page' },
+Waar kan ik terecht met vragen? | Neem contact op met ASORTA Support. Vermeld bij ordervragen altijd je ordernummer en e-mailadres.`, type: 'textarea', group: 'FAQ page' },
   { key: 'shipping.title', label: 'Shipping title', value: 'Verzending & levering', type: 'text', group: 'Shipping page' },
-  { key: 'shipping.body', label: 'Shipping body', value: `ASORTA werkt met Shopify en DSers/suppliers voor orderverwerking en verzending. De verwachte levertijd kan per product, leverancier en bestemming verschillen.
+  { key: 'shipping.body', label: 'Shipping body', value: `Na betaling ontvang je een orderbevestiging per e-mail. Je bestelling wordt daarna voorbereid en aangemeld voor verzending.
 
-Na betaling ontvang je een orderbevestiging. Zodra de order is verwerkt en tracking beschikbaar is, ontvang je een verzendbevestiging met trackinginformatie.
+De verwachte levertijd kan per product en bestemming verschillen. Zodra tracking beschikbaar is, ontvang je automatisch een verzendbevestiging met trackinginformatie.
 
-Omdat producten supplier-based worden verzonden, kan tracking soms later beschikbaar komen dan bij lokale voorraad. We houden de productinformatie en checkout zo duidelijk mogelijk, zodat je weet wat je kunt verwachten.`, type: 'textarea', group: 'Shipping page' },
+Heb je na je bestelling nog geen tracking ontvangen? Gebruik de pagina Order volgen of neem contact op met ASORTA Support met je ordernummer.`, type: 'textarea', group: 'Shipping page' },
   { key: 'returns.title', label: 'Returns title', value: 'Retourbeleid', type: 'text', group: 'Returns page' },
   { key: 'returns.body', label: 'Returns body', value: `Wil je een retour aanvragen? Neem contact op met ASORTA Support met je ordernummer, e-mailadres en reden van retour. We beoordelen je aanvraag en geven daarna de vervolgstappen.
 
 Producten moeten ongebruikt, compleet en waar mogelijk in originele verpakking worden geretourneerd. Beschadigde, gebruikte of onvolledige producten kunnen worden geweigerd of gedeeltelijk vergoed.
 
-Voor defecten of verkeerde leveringen vragen we foto's of video's, zodat we het probleem met de leverancier of fulfillmentpartner kunnen oplossen.`, type: 'textarea', group: 'Returns page' },
+Voor defecten of verkeerde leveringen vragen we foto's of video's, zodat we het probleem met de vervoerder of fulfillmentpartner kunnen oplossen.`, type: 'textarea', group: 'Returns page' },
   { key: 'privacy.title', label: 'Privacy title', value: 'Privacybeleid', type: 'text', group: 'Privacy page' },
   { key: 'privacy.body', label: 'Privacy body', value: `ASORTA verwerkt klantgegevens voor bestellingen, klantenservice, analytics, checkout, betaling en verzending. Denk aan naam, e-mailadres, verzendadres, ordergegevens, betaalstatus en supportberichten.
 
-Voor analyse gebruiken we Google Analytics 4. Voor checkout en orderverwerking gebruiken we Shopify en gekoppelde fulfillmentdiensten. Betaalgegevens worden verwerkt door de betaalprovider en niet als volledige betaalkaartgegevens door ASORTA opgeslagen.
+Voor analyse gebruiken we Google Analytics 4. Betaalgegevens worden verwerkt door de betaalprovider en niet als volledige betaalkaartgegevens door ASORTA opgeslagen.
 
 Je kunt contact opnemen met ASORTA Support voor vragen over je gegevens, correctie of verwijdering waar wettelijk mogelijk.`, type: 'textarea', group: 'Privacy page' },
   { key: 'terms.title', label: 'Terms title', value: 'Algemene voorwaarden', type: 'text', group: 'Terms page' },
   { key: 'terms.body', label: 'Terms body', value: `Door een bestelling te plaatsen bij ASORTA ga je akkoord met deze voorwaarden. Productinformatie, prijzen en beschikbaarheid worden zo zorgvuldig mogelijk bijgehouden. Kennelijke fouten kunnen worden gecorrigeerd.
 
-Betaling verloopt via een beveiligde checkout. Na betaling wordt de order verwerkt via Shopify en de gekoppelde fulfillmentpartner. Leveringstijden zijn indicatief en kunnen afwijken door leverancier, vervoerder, douane of drukte.
+Betaling verloopt via een beveiligde checkout. Na betaling wordt je bestelling verwerkt. Leveringstijden zijn indicatief en kunnen afwijken door leverancier, vervoerder, douane of drukte.
 
 Voor vragen, klachten, retouren of problemen met je bestelling neem je contact op met ASORTA Support. We zoeken altijd naar een redelijke oplossing binnen de geldende consumentenregels.`, type: 'textarea', group: 'Terms page' },
   { key: 'site.shipping.message', label: 'Global shipping message', value: 'Estimated delivery: 6–12 business days with tracked shipping.', type: 'text', group: 'Global snippets' },
