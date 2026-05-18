@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
+import AtlasMetricsGridClient from '@/components/atlas/AtlasMetricsGridClient'
 import {
   ShieldCheck,
   Package,
@@ -298,30 +299,7 @@ export default async function AtlasPage(){
     {!adminCheckReady && <section className="mt-8 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Service role key ontbreekt. Atlas login werkt, maar live order metrics kunnen nog niet server-side worden geladen.</section>}
     {metrics.errors.length ? <section className="mt-8 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-100"><strong>Atlas data warning:</strong> {metrics.errors.join(' | ')}</section> : null}
 
-    <section className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Stat className="lg:col-start-1 lg:row-start-1" icon={<Package/>} label="Active products" value={String(metrics.activeProducts)} helper="Shopify-synced and buyable" />
-      <MetricDetails
-        summaryClassName="lg:col-start-2 lg:row-start-1"
-        panelClassName="col-span-full sm:col-span-2 lg:col-start-1 lg:col-span-2 lg:row-start-2"
-        icon={<Euro/>}
-        label="Paid revenue"
-        value={eur(metrics.paidRevenue)}
-        helper={`${metrics.paidOrders} paid orders`}
-      >
-        <RevenuePanel metrics={metrics} />
-      </MetricDetails>
-      <MetricDetails
-        summaryClassName="lg:col-start-3 lg:row-start-1"
-        panelClassName="col-span-full sm:col-span-2 lg:col-start-3 lg:col-span-2 lg:row-start-2"
-        icon={<TrendingUp/>}
-        label="Est. profit"
-        value={eur(metrics.estimatedProfit)}
-        helper={`${eur(metrics.estimatedCost)} estimated cost`}
-      >
-        <ProfitPanel metrics={metrics} />
-      </MetricDetails>
-      <Stat className="lg:col-start-4 lg:row-start-1" icon={<Truck/>} label="Avg. margin" value={`${metrics.avgMargin}%`} helper="Based on paid orders" />
-    </section>
+    <AtlasMetricsGridClient metrics={metrics} />
 
     <section className="mt-8 grid gap-4 md:grid-cols-4">
       <Link href="/atlas/pages" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><FileText className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Page Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer homepage teksten, promo slider content en support snippets.</p></Link>
