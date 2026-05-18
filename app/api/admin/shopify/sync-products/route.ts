@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   if (!auth.ok) return auth.response
 
   if (!hasShopifyAdminConfig()) {
-    return NextResponse.json({ error: 'Shopify env vars ontbreken: SHOPIFY_STORE_DOMAIN plus SHOPIFY_ADMIN_ACCESS_TOKEN of SHOPIFY_CLIENT_ID/SHOPIFY_CLIENT_SECRET.' }, { status: 400 })
+    return NextResponse.json({ error: 'Shopify env vars ontbreken: zet SHOPIFY_STORE_DOMAIN plus SHOPIFY_CLIENT_ID en SHOPIFY_CLIENT_SECRET.' }, { status: 400 })
   }
 
   try {
