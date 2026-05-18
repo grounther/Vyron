@@ -5,7 +5,7 @@ import { categories } from '@/lib/products'
 import { categoryName, categoryText } from '@/lib/i18n/config'
 import { getServerLocale } from '@/lib/i18n/server'
 import { getFeaturedProducts, getProducts } from '@/lib/catalog'
-import { getSiteContent } from '@/lib/site-content'
+import { getSiteContent, splitLines } from '@/lib/site-content'
 import { getActiveActions, getPrimaryAction } from '@/lib/actions'
 import ActionBanner from '@/components/ActionBanner'
 import ExclusiveDropsSignup from '@/components/ExclusiveDropsSignup'
@@ -68,5 +68,12 @@ export default async function Home(){
     title={content['homepage.insiders.title']}
     text={content['homepage.insiders.text']}
     button={content['homepage.insiders.button']}
+    nameLabel={content['homepage.insiders.nameLabel']}
+    namePlaceholder={content['homepage.insiders.namePlaceholder']}
+    emailLabel={content['homepage.insiders.emailLabel']}
+    emailPlaceholder={content['homepage.insiders.emailPlaceholder']}
+    successButton={content['homepage.insiders.successButton']}
+    consentText={content['homepage.insiders.consent']}
+    chips={splitLines(content['homepage.insiders.chips'])}
   />
 </main>}

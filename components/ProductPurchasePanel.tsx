@@ -107,7 +107,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
     </div>
     <aside className="lg:sticky lg:top-24">
       <div className="card rounded-[2rem] p-6 md:p-8">
-        <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{product.badge && !/shopify|dsers|cj/i.test(product.badge) ? product.badge : 'New Arrival'}</div>
+        <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/60">{product.badge}</div>
         <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{product.name}</h1>
         <p className="mt-4 text-lg leading-8 text-white/58">{product.short}</p>
         <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
@@ -120,7 +120,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
           </select>
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[.035] p-3 text-xs leading-5 text-white/50">
             <strong className="text-white/75">SKU:</strong> {selectedVariant?.sku || 'Pending'}
-            {typeof selectedVariant?.stock === 'number' && <><br/><strong className="text-white/75">Beschikbaarheid:</strong> Op voorraad</>}
+            {typeof selectedVariant?.stock === 'number' && <><br/><strong className="text-white/75">Factory stock:</strong> ± {selectedVariant.stock.toLocaleString('nl-NL')}</>}
           </div>
         </div>}
 
@@ -128,7 +128,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> Veilige checkout</div>
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck size={18}/> {product.shippingInfo}</div>
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Support bij vragen over je bestelling</div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Veilige orderverwerking met trackingupdates</div>
         </div>
       </div>
     </aside>

@@ -113,15 +113,15 @@ export default function CartClient() {
         <label className="mt-5 grid gap-2 rounded-2xl border border-white/10 bg-black/30 p-4">
           <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-white/38"><Mail size={14} /> Checkout email</span>
           <input value={email} onChange={(event) => saveEmail(event.target.value)} type="email" placeholder="jij@email.nl" className="rounded-xl border border-white/10 bg-black/50 px-3 py-2 text-white outline-none focus:border-[#b7c8ad]" />
-          <span className="text-xs leading-5 text-white/40">Deze mail wordt meegestuurd naar Shopify checkout als startpunt. Shopify vraagt straks ook je bezorggegevens.</span>
+          <span className="text-xs leading-5 text-white/40">We gebruiken dit e-mailadres voor je orderbevestiging en trackingupdates.</span>
           <span className="inline-flex items-center gap-2 text-xs text-white/35">{syncState === 'syncing' ? <RefreshCw size={13} className="animate-spin" /> : null}{syncState === 'saved' ? 'Cart opgeslagen voor recovery.' : 'Cart recovery foundation actief.'}</span>
         </label>
 
         <div className="mt-6 flex justify-between text-white/65"><span>Subtotal</span><span>€{subtotal.toFixed(2)}</span></div>
-        <div className="mt-3 flex justify-between text-white/65"><span>Shipping</span><span>Calculated in Shopify</span></div>
+        <div className="mt-3 flex justify-between text-white/65"><span>Shipping</span><span>Calculated at checkout</span></div>
         <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>Total</span><span>€{subtotal.toFixed(2)}</span></div>
-        <Link href="/checkout" className="btn-primary mt-6 w-full">Pay with PayPal</Link>
-        <p className="mt-4 flex gap-2 text-xs leading-5 text-white/45"><Lock size={15} /> Tijdelijke live-flow: PayPal via Shopify checkout. DSers verwerkt de Shopify order na betaling.</p>
+        <Link href="/checkout" className="btn-primary mt-6 w-full">Proceed to checkout</Link>
+        <p className="mt-4 flex gap-2 text-xs leading-5 text-white/45"><Lock size={15} /> Je wordt veilig doorgestuurd naar de betaalomgeving. Na betaling ontvang je orderupdates per e-mail.</p>
       </aside>
     </div>
   )

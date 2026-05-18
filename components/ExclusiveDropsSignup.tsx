@@ -10,6 +10,13 @@ type ExclusiveDropsSignupProps = {
   title?: string
   text?: string
   button?: string
+  nameLabel?: string
+  namePlaceholder?: string
+  emailLabel?: string
+  emailPlaceholder?: string
+  successButton?: string
+  consentText?: string
+  chips?: string[]
 }
 
 export default function ExclusiveDropsSignup({
@@ -17,6 +24,13 @@ export default function ExclusiveDropsSignup({
   title = 'Exclusive drops, early access.',
   text = 'Schrijf je in voor exclusieve drops, early access en tijdelijke ASORTA kortingen. Geen spam — alleen updates die waarde hebben.',
   button = 'Join early access',
+  nameLabel = 'Naam',
+  namePlaceholder = 'Oscar',
+  emailLabel = 'E-mail',
+  emailPlaceholder = 'info@asorta.nl',
+  successButton = 'Aangemeld',
+  consentText = 'Door je in te schrijven ga je akkoord met ASORTA updates. Uitschrijven kan altijd.',
+  chips = ['Early access', 'Drop alerts', 'Launch discounts'],
 }: ExclusiveDropsSignupProps) {
   const [state, setState] = useState<SignupState>('idle')
   const [message, setMessage] = useState('')
@@ -65,28 +79,26 @@ export default function ExclusiveDropsSignup({
             <p className="mt-4 max-w-2xl leading-7 text-white/58">{text}</p>
 
             <div className="mt-6 flex flex-wrap gap-3 text-xs font-black uppercase tracking-[.20em] text-white/38">
-              <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2">Early access</span>
-              <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2">Drop alerts</span>
-              <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2">Launch discounts</span>
+              {chips.map((chip) => <span key={chip} className="rounded-full border border-white/10 bg-black/25 px-3 py-2">{chip}</span>)}
             </div>
           </div>
 
           <form action={submit} className="rounded-[1.5rem] border border-white/10 bg-black/35 p-4 backdrop-blur-xl">
             <label className="grid gap-2">
-              <span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Naam</span>
-              <input name="name" autoComplete="name" placeholder="Oscar" className="rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#b7c8ad]" />
+              <span className="text-xs font-black uppercase tracking-[.20em] text-white/38">{nameLabel}</span>
+              <input name="name" autoComplete="name" placeholder={namePlaceholder} className="rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#b7c8ad]" />
             </label>
             <label className="mt-3 grid gap-2">
-              <span className="text-xs font-black uppercase tracking-[.20em] text-white/38">E-mail</span>
-              <input name="email" type="email" required autoComplete="email" placeholder="info@asorta.nl" className="rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#b7c8ad]" />
+              <span className="text-xs font-black uppercase tracking-[.20em] text-white/38">{emailLabel}</span>
+              <input name="email" type="email" required autoComplete="email" placeholder={emailPlaceholder} className="rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#b7c8ad]" />
             </label>
             <button disabled={state === 'loading'} className="mt-4 flex w-full items-center justify-center rounded-full bg-white px-5 py-3 font-black text-black transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60" type="submit">
               {state === 'loading' ? <Loader2 className="mr-2 animate-spin" size={18} /> : state === 'success' ? <CheckCircle2 className="mr-2" size={18} /> : <Mail className="mr-2" size={18} />}
-              {state === 'success' ? 'Aangemeld' : button}
+              {state === 'success' ? successButton : button}
               {state === 'idle' && <ArrowRight className="ml-2" size={18} />}
             </button>
             {message && <p className={`mt-3 text-sm leading-6 ${state === 'error' ? 'text-red-200' : 'text-[#dbe9d4]'}`}>{message}</p>}
-            <p className="mt-3 text-xs leading-5 text-white/35">Door je in te schrijven ga je akkoord met ASORTA updates. Uitschrijven kan altijd.</p>
+            <p className="mt-3 text-xs leading-5 text-white/35">{consentText}</p>
           </form>
         </div>
       </div>

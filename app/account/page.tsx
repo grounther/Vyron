@@ -3,10 +3,12 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Heart, Package, Trophy, User } from 'lucide-react'
+import { getSiteContent } from '@/lib/site-content'
 
 export const metadata = { title: 'Account | ASORTA' }
 
 export default async function AccountPage() {
+  const content = await getSiteContent()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) redirect('/login?next=/account')
@@ -39,9 +41,9 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-      <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Customer portal</p>
-      <h1 className="mt-4 text-5xl font-black">Your ASORTA account</h1>
-      <p className="mt-4 text-white/60">Ingelogd als <span className="font-black text-white">{user.email}</span>. Hier beheer je straks orders, tracking, wishlist en loyalty.</p>
+      <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">{content['account.kicker']}</p>
+      <h1 className="mt-4 text-5xl font-black">{content['account.title']}</h1>
+      <p className="mt-4 text-white/60" dangerouslySetInnerHTML={{__html: content['account.intro'].replace('{email}', `<span class="font-black text-white">${user.email}</span>`)}} />
 
       <section className="mt-8 grid gap-4 md:grid-cols-4">
         <AccountStat icon={<Package />} label="Orders" value={String(orders.length)} />
@@ -52,19 +54,19 @@ export default async function AccountPage() {
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
         <div className="card rounded-[2rem] p-6">
-          <h2 className="text-2xl font-black">Order history</h2>
-          {!orders.length ? <p className="mt-3 text-white/55">Nog geen orders gekoppeld aan dit account.</p> : <div className="mt-5 grid gap-3">{orders.map((order) => <div key={order.order_number} className="rounded-2xl border border-white/10 bg-white/[.03] p-4"><div className="flex flex-wrap justify-between gap-3"><strong>{order.order_number}</strong><span>€{Number(order.total || 0).toFixed(2)}</span></div><p className="mt-2 text-sm text-white/50">{order.payment_status} • {order.fulfillment_status}</p>{order.tracking_url && <a href={order.tracking_url} className="mt-3 inline-block text-sm font-black text-[#b7c8ad]">Track order →</a>}</div>)}</div>}
+          <h2 className="text-2xl font-black">{content['account.orders.title']}</h2>
+          {!orders.length ? <p className="mt-3 text-white/55">{content['account.orders.empty']}</p> : <div className="mt-5 grid gap-3">{orders.map((order) => <div key={order.order_number} className="rounded-2xl border border-white/10 bg-white/[.03] p-4"><div className="flex flex-wrap justify-between gap-3"><strong>{order.order_number}</strong><span>€{Number(order.total || 0).toFixed(2)}</span></div><p className="mt-2 text-sm text-white/50">{order.payment_status} • {order.fulfillment_status}</p>{order.tracking_url && <a href={order.tracking_url} className="mt-3 inline-block text-sm font-black text-[#b7c8ad]">Track order →</a>}</div>)}</div>}
         </div>
 
         <div className="card rounded-[2rem] p-6">
-          <h2 className="text-2xl font-black">Loyalty foundation</h2>
-          <p className="mt-3 text-white/55">ASORTA loyalty is voorbereid voor punten, tiers, exclusive drops en member-only korting.</p>
+          <h2 className="text-2xl font-black">{content['account.loyalty.title']}</h2>
+          <p className="mt-3 text-white/55">{content['account.loyalty.text']}</p>
           <div className="mt-5 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4"><p className="text-sm font-black text-[#dbe9d4]">Current tier</p><p className="mt-1 text-3xl font-black">{tier.toUpperCase()}</p></div>
         </div>
       </section>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/shop" className="btn-primary inline-flex">Continue shopping</Link>
+        <Link href="/shop" className="btn-primary inline-flex">{content['account.continue']}</Link>
         {isAdmin && <Link href="/atlas" className="rounded-full border border-[#b7c8ad]/30 px-5 py-3 text-sm font-black text-[#b7c8ad] hover:bg-[#b7c8ad]/10">Open Atlas</Link>}
         <form action="/auth/signout" method="post"><button className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/55 hover:bg-white/10 hover:text-white">Log out</button></form>
       </div>
