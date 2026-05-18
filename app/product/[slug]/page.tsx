@@ -5,6 +5,9 @@ import { getActiveActions, getProductAction } from '@/lib/actions'
 import ActionBanner from '@/components/ActionBanner'
 import ProductCard from '@/components/ProductCard'
 import ProductMediaGallery from '@/components/ProductMediaGallery'
+import ProductViewTracker from '@/components/ProductViewTracker'
+import { breadcrumbJsonLd, productJsonLd, stringifyJsonLd } from '@/lib/seo/structured-data'
+import { absoluteUrl } from '@/lib/seo/config'
 import { ArrowLeft, BadgeCheck, PackageCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -15,10 +18,13 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
   const { slug } = await params
   const p = await getProduct(slug)
   if(!p) return { title: 'Product | ASORTA' }
+  const description = p.short || p.description || `${p.name} bij ASORTA.`
   return {
-    title: `${p.name} | ASORTA`,
-    description: p.short,
-    openGraph: { title: `${p.name} | ASORTA`, description: p.short, images: [p.hero] }
+    title: p.name,
+    description,
+    alternates: { canonical: `/product/${p.slug}` },
+    openGraph: { title: `${p.name} | ASORTA`, description, url: absoluteUrl(`/product/${p.slug}`), images: [p.hero] },
+    twitter: { card: 'summary_large_image', title: `${p.name} | ASORTA`, description, images: [p.hero] },
   }
 }
 
@@ -30,9 +36,9 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
   const productAction = getProductAction(actions, p)
   const related = allProducts.filter(x=>x.category===p.category && x.slug!==p.slug).slice(0,4)
   return <main className="mx-auto max-w-7xl px-5 py-8 md:py-12">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
-      '@context':'https://schema.org', '@type':'Product', name:p.name, description:p.description, image:[p.hero, ...(p.images || [])], brand:{'@type':'Brand',name:'ASORTA'}, offers:{'@type':'Offer',priceCurrency:'EUR',price:p.price,availability:'https://schema.org/InStock',url:`https://asorta.nl/product/${p.slug}`}
-    })}} />
+    <ProductViewTracker product={p}/>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: stringifyJsonLd(productJsonLd(p))}} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd([{ name: 'Home', url: absoluteUrl('/') }, { name: 'Shop', url: absoluteUrl('/shop') }, { name: p.name, url: absoluteUrl(`/product/${p.slug}`) }]))}} />
     <Link href="/shop" className="mb-7 inline-flex items-center gap-2 text-sm font-black text-white/55 hover:text-white"><ArrowLeft size={16}/> Back to shop</Link>
     <ProductMediaGallery product={p}/>
 

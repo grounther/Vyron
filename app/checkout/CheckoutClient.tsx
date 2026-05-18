@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { getDictionary, normalizeLocale, type Locale } from '@/lib/i18n/config'
 import { CreditCard, Lock, PackageCheck, ShieldCheck, Truck } from 'lucide-react'
+import { trackBeginCheckout, trackShopifyCheckoutRedirect } from '@/lib/analytics-client'
 
 type CartItem = {
   slug: string
@@ -89,6 +90,15 @@ export default function CheckoutClient() {
     if (code) localStorage.setItem('asorta_discount_code', code)
     else localStorage.removeItem('asorta_discount_code')
 
+    const analyticsItems = items.map((item) => ({
+      item_id: item.shopifyVariantLegacyId || item.shopifyVariantId || item.slug,
+      item_name: item.name,
+      item_variant: item.variantName || item.variantSku || item.sku,
+      price: Number(item.price || 0),
+      quantity: Number(item.qty || 0),
+    }))
+    trackBeginCheckout(analyticsItems, subtotal, 'EUR', code)
+
     const response = await fetch('/api/checkout/shopify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,6 +124,7 @@ export default function CheckoutClient() {
 
     if (body.checkoutUrl) {
       setState('redirecting')
+      trackShopifyCheckoutRedirect(analyticsItems, subtotal, 'EUR', code)
       window.location.href = body.checkoutUrl
       return
     }

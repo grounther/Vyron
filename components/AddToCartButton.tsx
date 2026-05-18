@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Check, ShoppingCart } from 'lucide-react'
 import ProductImage from './ProductImage'
+import { trackAddToCart } from '@/lib/analytics-client'
 
 type CartProduct = {
   slug: string
@@ -46,6 +47,7 @@ export default function AddToCartButton({ product }: { product: CartProduct }) {
     const total = cartCount(current)
     setCount(total)
     window.dispatchEvent(new CustomEvent('asorta-cart', { detail: { product, count: total } }))
+    trackAddToCart({ item_id: product.shopifyVariantLegacyId || product.shopifyVariantId || product.slug, item_name: product.name, item_variant: product.variantName || product.variant, price: product.price, quantity: 1 })
     setShow(false)
     requestAnimationFrame(() => setShow(true))
   }
