@@ -298,15 +298,29 @@ export default async function AtlasPage(){
     {!adminCheckReady && <section className="mt-8 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100/75"><AlertTriangle size={18} className="mb-2"/> Service role key ontbreekt. Atlas login werkt, maar live order metrics kunnen nog niet server-side worden geladen.</section>}
     {metrics.errors.length ? <section className="mt-8 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-100"><strong>Atlas data warning:</strong> {metrics.errors.join(' | ')}</section> : null}
 
-    <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Stat icon={<Package/>} label="Active products" value={String(metrics.activeProducts)} helper="Shopify-synced and buyable" />
-      <MetricDetails icon={<Euro/>} label="Paid revenue" value={eur(metrics.paidRevenue)} helper={`${metrics.paidOrders} paid orders`}>
+    <section className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Stat className="lg:col-start-1 lg:row-start-1" icon={<Package/>} label="Active products" value={String(metrics.activeProducts)} helper="Shopify-synced and buyable" />
+      <MetricDetails
+        summaryClassName="lg:col-start-2 lg:row-start-1"
+        panelClassName="col-span-full sm:col-span-2 lg:col-start-1 lg:col-span-2 lg:row-start-2"
+        icon={<Euro/>}
+        label="Paid revenue"
+        value={eur(metrics.paidRevenue)}
+        helper={`${metrics.paidOrders} paid orders`}
+      >
         <RevenuePanel metrics={metrics} />
       </MetricDetails>
-      <MetricDetails icon={<TrendingUp/>} label="Est. profit" value={eur(metrics.estimatedProfit)} helper={`${eur(metrics.estimatedCost)} estimated cost`}>
+      <MetricDetails
+        summaryClassName="lg:col-start-3 lg:row-start-1"
+        panelClassName="col-span-full sm:col-span-2 lg:col-start-3 lg:col-span-2 lg:row-start-2"
+        icon={<TrendingUp/>}
+        label="Est. profit"
+        value={eur(metrics.estimatedProfit)}
+        helper={`${eur(metrics.estimatedCost)} estimated cost`}
+      >
         <ProfitPanel metrics={metrics} />
       </MetricDetails>
-      <Stat icon={<Truck/>} label="Avg. margin" value={`${metrics.avgMargin}%`} helper="Based on paid orders" />
+      <Stat className="lg:col-start-4 lg:row-start-1" icon={<Truck/>} label="Avg. margin" value={`${metrics.avgMargin}%`} helper="Based on paid orders" />
     </section>
 
     <section className="mt-8 grid gap-4 md:grid-cols-4">
@@ -342,16 +356,16 @@ export default async function AtlasPage(){
   </main>
 }
 
-function Stat({icon,label,value,helper}:{icon:React.ReactNode;label:string;value:string;helper?:string}){
-  return <div className="card rounded-[1.5rem] p-5"><div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-3xl font-black">{value}</p>{helper && <p className="mt-2 text-xs text-white/40">{helper}</p>}</div>
+function Stat({icon,label,value,helper,className = ''}:{icon:React.ReactNode;label:string;value:string;helper?:string;className?:string}){
+  return <div className={`card min-h-[158px] self-start rounded-[1.5rem] p-5 ${className}`}><div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-3xl font-black">{value}</p>{helper && <p className="mt-2 text-xs text-white/40">{helper}</p>}</div>
 }
 
-function MetricDetails({icon,label,value,helper,children}:{icon:React.ReactNode;label:string;value:string;helper?:string;children:React.ReactNode}){
-  return <details className="group rounded-[1.5rem]">
-    <summary className="card list-none rounded-[1.5rem] p-5 transition hover:-translate-y-1 hover:border-white/25 cursor-pointer [&::-webkit-details-marker]:hidden">
+function MetricDetails({icon,label,value,helper,children,summaryClassName = '',panelClassName = ''}:{icon:React.ReactNode;label:string;value:string;helper?:string;children:React.ReactNode;summaryClassName?:string;panelClassName?:string}){
+  return <details className="group contents">
+    <summary className={`card min-h-[158px] self-start list-none rounded-[1.5rem] p-5 transition hover:-translate-y-1 hover:border-white/25 cursor-pointer group-open:border-[#b7c8ad]/40 group-open:bg-[#b7c8ad]/[.06] [&::-webkit-details-marker]:hidden ${summaryClassName}`}>
       <div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-3xl font-black">{value}</p>{helper && <p className="mt-2 text-xs text-white/40">{helper}</p>}<p className="mt-3 text-xs font-black uppercase tracking-[.18em] text-[#b7c8ad]/70">Click for breakdown</p>
     </summary>
-    <div className="mt-3 rounded-[1.5rem] border border-white/10 bg-black/45 p-5">{children}</div>
+    <div className={`mt-0 rounded-[1.5rem] border border-white/10 bg-black/45 p-4 md:p-5 ${panelClassName}`}>{children}</div>
   </details>
 }
 

@@ -7,3 +7,6 @@ node_modules/
 get-shopify-token.mjs
 .DS_Store
 *.log
+
+.vercel
+.env*.local
