@@ -1,13 +1,22 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { shopifyGidToLegacyId } from '@/lib/shopify/client'
-import { sendOrderConfirmationEmail, sendTrackingUpdateEmail } from '@/lib/email/order-emails'
 
 type ShopifyOrderPayload = Record<string, any>
-type ProductCostRow = Record<string, any>
+type ProductRow = Record<string, any>
 
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value || 0)
   return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function text(value: unknown, fallback = '') {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function legacyId(value: unknown) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+  const match = raw.match(/(\d+)(?:\?.*)?$/)
+  return match?.[1] || raw
 }
 
 function orderId(value: unknown) {
@@ -36,6 +45,123 @@ function normalizeAddress(address: any) {
   }
 }
 
+async function ensureCustomerForOrder(admin: SupabaseClient, input: { email: string; name?: string | null; phone?: string | null }) {
+  const email = String(input.email || '').trim().toLowerCase()
+  if (!email) return null
+
+  const { data: existing } = await admin.from('customers').select('id,email,full_name,phone,auth_user_id').eq('email', email).maybeSingle()
+  if (existing?.id) return existing as { id: string; auth_user_id?: string | null }
+
+  const { data, error } = await admin
+    .from('customers')
+    .insert({ email, full_name: input.name || null, phone: input.phone || null })
+    .select('id,email,auth_user_id')
+    .single()
+
+  if (error) return null
+  return data as { id: string; auth_user_id?: string | null }
+}
+
+async function loadLoyaltyTiers(admin: SupabaseClient) {
+  const { data } = await admin.from('loyalty_tiers').select('tier_key,min_points,min_lifetime_spend,active,position').order('position', { ascending: true }).limit(20)
+  return (data || []) as Array<{ tier_key: string; min_points?: number | null; min_lifetime_spend?: number | null; active?: boolean | null; position?: number | null }>
+}
+
+function calculateLoyaltyTier(tiers: Awaited<ReturnType<typeof loadLoyaltyTiers>>, points: number, lifetimeSpend: number, fallback = 'bronze') {
+  const active = tiers.filter((tier) => tier.active !== false)
+  let matched = active.find((tier) => tier.tier_key === fallback) || active[0] || null
+  for (const tier of active) {
+    if (points >= Number(tier.min_points || 0) || lifetimeSpend >= Number(tier.min_lifetime_spend || 0)) matched = tier
+  }
+  return matched?.tier_key || fallback
+}
+
+async function applyOrderLoyalty(admin: SupabaseClient, input: { orderDbId: string; email: string; total: number; financialStatus: string; payload: ShopifyOrderPayload; name: string }) {
+  const paidStatuses = new Set(['paid', 'authorized', 'partially_paid'])
+  const reversalStatuses = new Set(['refunded', 'voided', 'cancelled'])
+  if (!input.email || (!paidStatuses.has(input.financialStatus) && !reversalStatuses.has(input.financialStatus))) return
+
+  const customer = await ensureCustomerForOrder(admin, {
+    email: input.email,
+    name: fullName(input.payload.customer) || fullName(input.payload.billing_address) || fullName(input.payload.shipping_address) || null,
+    phone: input.payload.customer?.phone || input.payload.billing_address?.phone || input.payload.shipping_address?.phone || null,
+  })
+  if (!customer?.id) return
+
+  await admin.from('orders').update({ customer_id: customer.id, auth_user_id: customer.auth_user_id || null }).eq('id', input.orderDbId).then(() => undefined, () => undefined)
+
+  const eventKey = `order_award:${input.orderDbId}`
+  const reversalKey = `order_reversal:${input.orderDbId}`
+  const tiers = await loadLoyaltyTiers(admin)
+
+  const { data: current } = await admin.from('customer_loyalty').select('id,points,lifetime_spend,tier').eq('customer_id', customer.id).maybeSingle()
+  const previousPoints = Number(current?.points || 0)
+  const previousSpend = Number(current?.lifetime_spend || 0)
+  const previousTier = String(current?.tier || 'bronze')
+
+  if (paidStatuses.has(input.financialStatus)) {
+    const { data: existingAward } = await admin.from('customer_loyalty_events').select('id').eq('event_key', eventKey).maybeSingle()
+    if (existingAward) return
+
+    const earnedPoints = Math.max(0, Math.floor(Number(input.total || 0)))
+    if (!earnedPoints) return
+
+    const nextPoints = previousPoints + earnedPoints
+    const nextSpend = previousSpend + Number(input.total || 0)
+    const nextTier = calculateLoyaltyTier(tiers, nextPoints, nextSpend, previousTier)
+
+    const row = { customer_id: customer.id, auth_user_id: customer.auth_user_id || null, points: nextPoints, lifetime_spend: nextSpend, tier: nextTier, updated_at: new Date().toISOString() }
+    if (current?.id) await admin.from('customer_loyalty').update(row).eq('id', current.id)
+    else await admin.from('customer_loyalty').insert(row)
+
+    await admin.from('customer_loyalty_events').insert({
+      event_key: eventKey,
+      customer_id: customer.id,
+      customer_email: input.email,
+      order_id: input.orderDbId,
+      event_type: 'order_award',
+      delta_points: earnedPoints,
+      previous_points: previousPoints,
+      new_points: nextPoints,
+      tier_before: previousTier,
+      tier_after: nextTier,
+      reason: `Automatisch toegekend voor betaalde order ${input.name}`,
+      created_by: 'shopify_webhook',
+    }).then(() => undefined, () => undefined)
+  }
+
+  if (reversalStatuses.has(input.financialStatus)) {
+    const [{ data: award }, { data: existingReversal }] = await Promise.all([
+      admin.from('customer_loyalty_events').select('delta_points').eq('event_key', eventKey).maybeSingle(),
+      admin.from('customer_loyalty_events').select('id').eq('event_key', reversalKey).maybeSingle(),
+    ])
+    if (!award || existingReversal) return
+
+    const subtract = Math.abs(Number(award.delta_points || 0))
+    const nextPoints = Math.max(0, previousPoints - subtract)
+    const nextTier = calculateLoyaltyTier(tiers, nextPoints, previousSpend, previousTier)
+
+    const row = { customer_id: customer.id, auth_user_id: customer.auth_user_id || null, points: nextPoints, lifetime_spend: previousSpend, tier: nextTier, updated_at: new Date().toISOString() }
+    if (current?.id) await admin.from('customer_loyalty').update(row).eq('id', current.id)
+    else await admin.from('customer_loyalty').insert(row)
+
+    await admin.from('customer_loyalty_events').insert({
+      event_key: reversalKey,
+      customer_id: customer.id,
+      customer_email: input.email,
+      order_id: input.orderDbId,
+      event_type: 'order_reversal',
+      delta_points: -subtract,
+      previous_points: previousPoints,
+      new_points: nextPoints,
+      tier_before: previousTier,
+      tier_after: nextTier,
+      reason: `Automatische correctie vanwege orderstatus ${input.financialStatus} voor ${input.name}`,
+      created_by: 'shopify_webhook',
+    }).then(() => undefined, () => undefined)
+  }
+}
+
 function trackingFromOrder(payload: ShopifyOrderPayload) {
   const fulfillments = Array.isArray(payload.fulfillments) ? payload.fulfillments : []
   const numbers = new Set<string>()
@@ -58,48 +184,73 @@ function fulfillmentStatus(payload: ShopifyOrderPayload) {
   if (raw === 'fulfilled') return 'fulfilled'
   if (raw === 'partial') return 'partially_fulfilled'
   if (raw) return raw
-  return 'processing'
+  return 'pending_dsers'
 }
 
-function makeCostLookup(products: ProductCostRow[]) {
-  const map = new Map<string, ProductCostRow>()
+function buildProductMaps(products: ProductRow[]) {
+  const byVariant = new Map<string, ProductRow>()
+  const byProduct = new Map<string, ProductRow>()
+  const bySku = new Map<string, ProductRow>()
+  const byName = new Map<string, ProductRow>()
 
   for (const product of products) {
-    const variantLegacy = String(product.shopify_variant_legacy_id || '').trim()
-    const variantGid = String(product.shopify_variant_id || '').trim()
-    const productLegacy = String(product.shopify_product_legacy_id || '').trim()
-    const productGid = String(product.shopify_product_id || '').trim()
-
-    if (variantLegacy) map.set(`variant:${variantLegacy}`, product)
-    if (variantGid) map.set(`variant:${variantGid}`, product)
-    if (variantGid) map.set(`variant:${shopifyGidToLegacyId(variantGid)}`, product)
-    if (productLegacy) map.set(`product:${productLegacy}`, product)
-    if (productGid) map.set(`product:${productGid}`, product)
-    if (productGid) map.set(`product:${shopifyGidToLegacyId(productGid)}`, product)
+    const variantKeys = [product.shopify_variant_legacy_id, product.shopify_variant_id, legacyId(product.shopify_variant_id)].map((value) => text(value)).filter(Boolean)
+    const productKeys = [product.shopify_product_legacy_id, product.shopify_product_id, legacyId(product.shopify_product_id)].map((value) => text(value)).filter(Boolean)
+    for (const key of variantKeys) byVariant.set(key, product)
+    for (const key of productKeys) byProduct.set(key, product)
+    const sku = text(product.supplier_sku).toLowerCase()
+    if (sku) bySku.set(sku, product)
+    const name = text(product.name).toLowerCase()
+    if (name) byName.set(name, product)
   }
 
-  return map
+  return { byVariant, byProduct, bySku, byName }
 }
 
-async function loadProductCostLookup(admin: SupabaseClient) {
-  const { data } = await admin
+async function loadProductsForOrder(admin: SupabaseClient) {
+  const { data, error } = await admin
     .from('products')
-    .select('id,slug,name,estimated_cost,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id')
+    .select('id,name,slug,price,estimated_cost,supplier_sku,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id')
+    .not('shopify_product_id', 'is', null)
     .limit(2000)
 
-  return makeCostLookup((data || []) as ProductCostRow[])
+  if (error) return [] as ProductRow[]
+  return (data || []) as ProductRow[]
 }
 
-function matchProduct(costs: Map<string, ProductCostRow>, line: any) {
-  const variantId = String(line.variant_id || '').trim()
-  const productId = String(line.product_id || '').trim()
-  return costs.get(`variant:${variantId}`) || costs.get(`product:${productId}`) || null
+function findProductForLine(line: any, maps: ReturnType<typeof buildProductMaps>) {
+  const variantId = text(line.variant_id)
+  const productId = text(line.product_id)
+  const sku = text(line.sku).toLowerCase()
+  const title = text(line.title || line.name).toLowerCase()
+
+  return (
+    maps.byVariant.get(variantId) ||
+    maps.byVariant.get(legacyId(variantId)) ||
+    maps.byProduct.get(productId) ||
+    maps.byProduct.get(legacyId(productId)) ||
+    maps.bySku.get(sku) ||
+    maps.byName.get(title) ||
+    null
+  )
 }
 
 export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: ShopifyOrderPayload, topic = 'orders/update') {
   const id = orderId(payload.id)
   const name = String(payload.name || payload.order_number || id || '').trim()
   if (!id || !name) throw new Error('Shopify order webhook mist id/name.')
+
+  const products = await loadProductsForOrder(admin)
+  const productMaps = buildProductMaps(products)
+  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : []
+  const calculatedLines = lineItems.map((line: any) => {
+    const product = findProductForLine(line, productMaps)
+    const quantity = number(line.quantity, 1)
+    const unitPrice = number(line.price)
+    const estimatedUnitCost = number(product?.estimated_cost)
+
+    return { line, product, quantity, unitPrice, estimatedUnitCost }
+  })
 
   const tracking = trackingFromOrder(payload)
   const email = String(payload.email || payload.contact_email || payload.customer?.email || '').toLowerCase()
@@ -111,23 +262,18 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
   const vatTotal = number(payload.total_tax)
   const financialStatus = String(payload.financial_status || 'pending')
   const orderStatus = fulfillmentStatus(payload)
-  const costLookup = await loadProductCostLookup(admin)
-
-  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : []
-  const orderEstimatedCost = lineItems.reduce((sum: number, line: any) => {
-    const product = matchProduct(costLookup, line)
-    return sum + number(product?.estimated_cost) * number(line.quantity, 1)
-  }, 0)
+  const estimatedCost = calculatedLines.reduce((sum, line) => sum + line.estimatedUnitCost * line.quantity, 0)
+  const estimatedProfit = total - estimatedCost
 
   const orderRow = {
-    order_number: `AS-${name.replace(/^#/, '')}`,
+    order_number: `SHOPIFY-${name.replace(/^#/, '')}`,
     customer_email: email || null,
     subtotal,
     shipping_total: shippingTotal,
     vat_total: vatTotal,
     total,
-    estimated_cost: orderEstimatedCost,
-    estimated_profit: total - orderEstimatedCost,
+    estimated_cost: estimatedCost,
+    estimated_profit: estimatedProfit,
     payment_provider: 'shopify_paypal',
     payment_status: financialStatus,
     fulfillment_status: orderStatus,
@@ -144,7 +290,7 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     shopify_tracking_numbers: tracking.numbers,
     shopify_tracking_urls: tracking.urls,
     shopify_raw: payload,
-    raw: { source: 'shopify_webhook', topic },
+    raw: { source: 'shopify_webhook', topic, estimated_cost_source: 'products.estimated_cost' },
     updated_at: new Date().toISOString(),
   }
 
@@ -161,63 +307,44 @@ export async function upsertShopifyOrderWebhook(admin: SupabaseClient, payload: 
     orderDbId = data.id
   }
 
-  if (orderDbId && lineItems.length) {
+  if (orderDbId) {
     await admin.from('order_items').delete().eq('order_id', orderDbId)
-    const rows = lineItems.map((line: any) => {
-      const product = matchProduct(costLookup, line)
-      const quantity = number(line.quantity, 1)
-      return {
-        order_id: orderDbId,
-        product_slug: String(product?.slug || line.product_id || line.sku || line.title || 'shopify-item'),
-        product_name: String(product?.name || line.title || line.name || 'Shopify item'),
-        quantity,
-        unit_price: number(line.price),
-        estimated_unit_cost: number(product?.estimated_cost),
-        variant_sku: line.sku || '',
-        supplier: 'dsers',
-        supplier_product_id: String(line.product_id || ''),
-        supplier_variant_id: String(line.variant_id || ''),
-        supplier_sku: line.sku || '',
-        shopify_line_item_id: String(line.id || ''),
-        shopify_product_id: String(line.product_id || ''),
-        shopify_variant_id: String(line.variant_id || ''),
-        raw: line,
-      }
-    })
+    const rows = calculatedLines.map(({ line, product, quantity, unitPrice, estimatedUnitCost }) => ({
+      order_id: orderDbId,
+      product_slug: text(product?.slug, String(line.product_id || line.sku || line.title || 'shopify-item')),
+      product_name: String(line.title || line.name || product?.name || 'Shopify item'),
+      quantity,
+      unit_price: unitPrice,
+      estimated_unit_cost: estimatedUnitCost,
+      variant_sku: line.sku || '',
+      supplier: 'dsers',
+      supplier_product_id: String(line.product_id || ''),
+      supplier_variant_id: String(line.variant_id || ''),
+      supplier_sku: line.sku || '',
+      shopify_line_item_id: String(line.id || ''),
+      shopify_product_id: String(line.product_id || ''),
+      shopify_variant_id: String(line.variant_id || ''),
+      raw: { ...line, matched_product_id: product?.id || null },
+    }))
     if (rows.length) {
       const { error } = await admin.from('order_items').insert(rows)
       if (error) throw new Error(error.message)
     }
   }
 
-  const { data: persistedItems } = orderDbId
-    ? await admin.from('order_items').select('*').eq('order_id', orderDbId).order('created_at', { ascending: true })
-    : { data: [] as any[] }
-
-  const persistedOrder = { id: orderDbId, ...orderRow }
-
-  if (['paid', 'authorized', 'partially_paid', 'complete', 'completed'].includes(financialStatus.toLowerCase())) {
-    await sendOrderConfirmationEmail(admin, { order: persistedOrder, items: persistedItems || [] }).catch(() => undefined)
-  }
-
-  if (tracking.numbers.length || tracking.urls.length) {
-    await sendTrackingUpdateEmail(admin, {
-      order: persistedOrder,
-      items: persistedItems || [],
-      trackingNumber: tracking.numbers[0] || null,
-      trackingUrl: tracking.urls[0] || null,
-    }).catch(() => undefined)
+  if (orderDbId) {
+    await applyOrderLoyalty(admin, { orderDbId, email, total, financialStatus, payload, name })
   }
 
   await admin.from('integration_sync_logs').insert({
     provider: 'shopify',
     event: topic,
     status: 'success',
-    message: `Order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Status: ${orderStatus}.`,
-    payload: { shopify_order_id: id, name, tracking, estimatedCost: orderEstimatedCost },
+    message: `Shopify order ${name} mirrored to ASORTA. Payment: ${financialStatus}. Fulfillment: ${orderStatus}. Est. profit: €${estimatedProfit.toFixed(2)}.`,
+    payload: { shopify_order_id: id, name, tracking, estimated_cost: estimatedCost, estimated_profit: estimatedProfit },
   }).then(() => undefined, () => undefined)
 
-  return { orderId: orderDbId, shopifyOrderId: id, shopifyOrderName: name, tracking }
+  return { orderId: orderDbId, shopifyOrderId: id, shopifyOrderName: name, tracking, estimatedCost, estimatedProfit }
 }
 
 export async function updateShopifyFulfillmentWebhook(admin: SupabaseClient, payload: Record<string, any>, topic = 'fulfillments/update') {
@@ -242,26 +369,11 @@ export async function updateShopifyFulfillmentWebhook(admin: SupabaseClient, pay
     .eq('shopify_order_id', shopifyOrderId)
 
   if (error) throw new Error(error.message)
-
-  const { data: order } = await admin
-    .from('orders')
-    .select('*')
-    .eq('shopify_order_id', shopifyOrderId)
-    .maybeSingle()
-
-  if (order && (trackingNumbers.length || trackingUrls.length)) {
-    await sendTrackingUpdateEmail(admin, {
-      order,
-      trackingNumber: trackingNumbers[0] || null,
-      trackingUrl: trackingUrls[0] || null,
-    }).catch(() => undefined)
-  }
-
   await admin.from('integration_sync_logs').insert({
     provider: 'shopify',
     event: topic,
     status: 'success',
-    message: `Fulfillment update received for order ${shopifyOrderId}.`,
+    message: `Shopify fulfillment update received for order ${shopifyOrderId}.`,
     payload: { shopify_order_id: shopifyOrderId, trackingNumbers, trackingUrls },
   }).then(() => undefined, () => undefined)
 

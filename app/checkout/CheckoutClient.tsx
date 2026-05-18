@@ -62,7 +62,7 @@ type CheckoutClientCopy = {
   trust3?: string
 }
 
-export default function CheckoutClient({ copy = {} }: { copy?: CheckoutClientCopy }) {
+export default function CheckoutClient({ copy = {} }: { copy?: Record<string, string | undefined> }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [state, setState] = useState<CheckoutState>('idle')
   const [message, setMessage] = useState('')
@@ -201,9 +201,9 @@ export default function CheckoutClient({ copy = {} }: { copy?: CheckoutClientCop
         </div>
 
         <div className="mt-8 grid gap-3 text-sm text-white/62 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock className="mb-3 text-[#b7c8ad]" /> {checkout.trust1 || 'Veilige betaalomgeving'}</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><CreditCard className="mb-3 text-[#b7c8ad]" /> {checkout.trust2 || 'Bevestiging per e-mail'}</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck className="mb-3 text-[#b7c8ad]" /> {checkout.trust3 || 'Tracking zodra beschikbaar'}</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock className="mb-3 text-[#b7c8ad]" /> {copy.trust1 || 'Veilige betaalomgeving'}</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><CreditCard className="mb-3 text-[#b7c8ad]" /> {copy.trust2 || 'Bevestiging per e-mail'}</div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck className="mb-3 text-[#b7c8ad]" /> {copy.trust3 || 'Tracking zodra beschikbaar'}</div>
         </div>
 
         <div className="mt-8 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4 text-sm leading-6 text-[#e7f0e2] sm:p-5">
@@ -229,3 +229,4 @@ export default function CheckoutClient({ copy = {} }: { copy?: CheckoutClientCop
     </form>
   )
 }
+
