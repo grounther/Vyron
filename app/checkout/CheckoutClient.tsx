@@ -182,6 +182,8 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
 
     if (body.checkoutUrl) {
       setState('redirecting')
+      localStorage.removeItem('asorta_cart')
+      setItems([])
       window.location.href = body.checkoutUrl
       return
     }
@@ -189,8 +191,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
     setState('done')
     if (hasManualItems && body.order?.orderNumber) {
       localStorage.removeItem('asorta_cart')
-      setItems([])
-      setMessage(`${body.message || 'Order aangemaakt.'} Ordernummer: ${body.order.orderNumber}`)
+      window.location.href = `/checkout/success?order=${encodeURIComponent(body.order.orderNumber)}`
       return
     }
     setMessage(body.message || checkout.noUrl)

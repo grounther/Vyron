@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrderFromCheckout } from '@/lib/checkout/orders'
 import { createMolliePayment, hasMollieConfig } from '@/lib/checkout/mollie'
 import { createShopifyCheckoutRedirect } from '@/lib/shopify/checkout'
+import { canCreateManualShopifyDraftOrder, createManualShopifyDraftOrder } from '@/lib/shopify/manual-draft-order'
 
 export const runtime = 'nodejs'
 
@@ -25,11 +26,46 @@ export async function POST(request: Request) {
 
     const result = await createOrderFromCheckout(admin, { items: body.items, shipping: body.shipping, source: 'site_checkout' })
 
+    // Eigen voorraad gaat voorlopig via Shopify Draft Order invoice checkout, zodat
+    // PayPal gebruikt kan worden zonder dat het product als Shopify/DSers variant
+    // in de catalogus hoeft te bestaan. Mollie/iDEAL/Wero kan later alsnog worden
+    // ingeschakeld door MOLLIE_API_KEY te zetten en deze providerkeuze aan te passen.
+    if (canCreateManualShopifyDraftOrder()) {
+      const draft = await createManualShopifyDraftOrder({
+        order: result.order,
+        items: result.items,
+        shipping: result.shipping,
+        discountCode: body.discountCode || body.discount_code || body.discount?.code,
+      })
+
+      await admin
+        .from('orders')
+        .update({
+          payment_id: draft.id,
+          payment_provider: 'shopify_paypal',
+          payment_status: 'open',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', result.order.id)
+
+      return NextResponse.json({
+        ok: true,
+        paymentProvider: 'shopify_paypal',
+        checkoutUrl: draft.invoiceUrl,
+        order: {
+          id: result.order.id,
+          orderNumber: result.order.order_number,
+          total: result.order.total,
+        },
+      })
+    }
+
     if (!hasMollieConfig()) {
       return NextResponse.json({
         ok: true,
         paymentProvider: 'manual',
-        message: 'Order aangemaakt. MOLLIE_API_KEY ontbreekt, dus er is nog geen betaalredirect gemaakt.',
+        checkoutUrl: `/checkout/success?order=${encodeURIComponent(result.order.order_number)}&payment=manual`,
+        message: 'Order aangemaakt. PayPal/Shopify draft checkout is nog niet geconfigureerd voor eigen voorraad.',
         order: {
           id: result.order.id,
           orderNumber: result.order.order_number,
