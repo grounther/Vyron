@@ -204,7 +204,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
         <p className="mt-4 text-sm leading-6 text-white/55 sm:text-base">{checkout.intro}</p>
 
         {hasManualItems && <div className="mt-6 rounded-2xl border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 p-4 text-sm leading-6 text-[#e7f0e2]">
-          Je winkelmand bevat een of meerdere Pokemon producten. Deze checkout maakt een interne order aan en wordt apart verwerkt om zo de beste service te kunnen garanderen. Na het plaatsen van je order ontvang je een bevestiging per e-mail met daarin alle details en de verwachte levertijd. Heb je vragen? Neem gerust contact op via <a href="mailto:info@asorta.nl" className="underline">
+          Je winkelmand bevat een of meerdere Pokemon producten. Deze checkout maakt een interne order aan en wordt apart verwerkt om zo de beste service te kunnen garanderen. Na het plaatsen van je order ontvang je een bevestiging per e-mail met daarin alle details en de verwachte levertijd. Heb je vragen? Neem gerust contact op met de klantenservice.
         </div>}
 
         <label className="mt-7 grid gap-2 text-sm text-white/60 md:max-w-xl">
