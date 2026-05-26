@@ -67,6 +67,7 @@ export type Product = {
   boxItems: string[]
   tags: string[]
   shippingInfo?: string
+  estimatedShipping?: number
   contentIdeas: string[]
   supplierNotes?: string
   marginNote?: string

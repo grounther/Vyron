@@ -122,6 +122,7 @@ function mapProductRow(row: ProductRow): Product {
     specs: sanitizePublicList(specs),
     tags,
     shippingInfo: sanitizePublicText(asString(row.shipping_info, ''), 'Je ontvangt tracking zodra je pakket is aangemeld voor verzending.'),
+    estimatedShipping: asNumber(row.estimated_shipping, 0),
     contentIdeas: asStringArray(row.content_ideas, []),
     supplierNotes: sanitizePublicText(asString(row.supplier_notes, ''), 'Neem contact op met support als je vragen hebt over dit product of je bestelling.'),
     marginNote: asString(row.margin_note, ''),

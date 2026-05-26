@@ -6,6 +6,7 @@ type CheckoutItemInput = {
   slug: string
   qty: number
   variantSku?: string
+  estimatedShipping?: number
 }
 
 type ShippingInput = {
@@ -29,11 +30,20 @@ function parseNumber(value: unknown, fallback = 0) {
 }
 
 function normalizeItem(item: any): CheckoutItemInput | null {
-  const slug = String(item?.slug || '').trim()
+  let slug = String(item?.slug || '').trim()
   const qty = Math.min(20, Math.max(1, Number(item?.qty || item?.quantity || 1)))
-  const variantSku = String(item?.variantSku || item?.sku || item?.variant_sku || '').trim()
+  let variantSku = String(item?.variantSku || item?.sku || item?.variant_sku || '').trim()
+
+  // Older cart payloads stored variant lines as "product-slug__SKU". The checkout
+  // must look up the product by the base slug and keep the SKU only as variant selector.
+  if (slug.includes('__')) {
+    const [baseSlug, encodedSku] = slug.split('__')
+    slug = baseSlug.trim()
+    if (!variantSku) variantSku = String(encodedSku || '').trim()
+  }
+
   if (!slug) return null
-  return { slug, qty, variantSku }
+  return { slug, qty, variantSku, estimatedShipping: parseNumber(item?.estimatedShipping || item?.estimated_shipping, 0) }
 }
 
 export function normalizeCheckoutItems(input: unknown) {
@@ -153,6 +163,7 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
       supplier_variant_id: mapping?.supplier_variant_id || product.supplier_variant_id || product.cj_variant_id || variant?.variantId || '',
       supplier_sku: mapping?.supplier_sku || product.supplier_sku || product.cj_sku || variant?.sku || '',
       supplier_shipping_method: mapping?.supplier_shipping_method || '',
+      shipping_unit_price: parseNumber(product.estimated_shipping, item.estimatedShipping || 0),
       cj_product_id: product.cj_product_id || mapping?.supplier_product_id || '',
       cj_variant_id: product.cj_variant_id || mapping?.supplier_variant_id || '',
       cj_sku: product.cj_sku || mapping?.supplier_sku || variant?.sku || '',
@@ -161,7 +172,7 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
   }
 
   const subtotal = calculatedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
-  const shippingTotal = 0
+  const shippingTotal = calculatedItems.reduce((sum, item) => sum + parseNumber(item.shipping_unit_price, 0) * item.quantity, 0)
   const vatTotal = 0
   const total = subtotal + shippingTotal + vatTotal
   const estimatedCost = calculatedItems.reduce((sum, item) => sum + item.estimated_unit_cost * item.quantity, 0)
@@ -191,7 +202,7 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
 
   if (error) throw new Error(error.message)
 
-  const rows = calculatedItems.map((item) => ({ ...item, order_id: order.id }))
+  const rows = calculatedItems.map(({ shipping_unit_price, ...item }) => ({ ...item, order_id: order.id, raw: { ...(item.raw || {}), shipping_unit_price } }))
   const { error: itemError } = await admin.from('order_items').insert(rows)
   if (itemError) throw new Error(itemError.message)
 

@@ -8,6 +8,7 @@ type Item = {
   slug: string
   name: string
   price: number
+  estimatedShipping?: number
   hero: string
   qty: number
   variantName?: string
@@ -42,6 +43,8 @@ export default function CartClient() {
   }, [])
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), [items])
+  const shippingTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.estimatedShipping || 0) * Number(item.qty || 0), 0), [items])
+  const total = subtotal + shippingTotal
 
   useEffect(() => {
     if (!items.length) return
@@ -118,8 +121,8 @@ export default function CartClient() {
         </label>
 
         <div className="mt-6 flex justify-between text-white/65"><span>Subtotal</span><span>€{subtotal.toFixed(2)}</span></div>
-        <div className="mt-3 flex justify-between text-white/65"><span>Shipping</span><span>Calculated at checkout</span></div>
-        <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>Total</span><span>€{subtotal.toFixed(2)}</span></div>
+        <div className="mt-3 flex justify-between text-white/65"><span>Shipping</span><span>{shippingTotal > 0 ? `€${shippingTotal.toFixed(2)}` : 'Calculated at checkout'}</span></div>
+        <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>Total</span><span>€{total.toFixed(2)}</span></div>
         <Link href="/checkout" className="btn-primary mt-6 w-full">Proceed to checkout</Link>
         <p className="mt-4 flex gap-2 text-xs leading-5 text-white/45"><Lock size={15} /> Je wordt veilig doorgestuurd naar de betaalomgeving. Na betaling ontvang je orderupdates per e-mail.</p>
       </aside>

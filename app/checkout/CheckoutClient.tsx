@@ -9,6 +9,7 @@ type CartItem = {
   slug: string
   name: string
   price: number
+  estimatedShipping?: number
   hero?: string
   qty: number
   variantName?: string
@@ -114,6 +115,8 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
   const checkout = { ...dict.checkout, ...copy }
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0), [items])
   const hasManualItems = useMemo(() => items.some((item) => !hasShopifyVariant(item)), [items])
+  const shippingTotal = useMemo(() => hasManualItems ? items.reduce((sum, item) => sum + Number(item.estimatedShipping || 0) * Number(item.qty || 0), 0) : 0, [hasManualItems, items])
+  const total = subtotal + shippingTotal
   const normalizedDiscountCode = useMemo(() => normalizeDiscountCode(discountCode), [discountCode])
 
   function updateShipping(key: keyof ShippingState, value: string) {
@@ -149,6 +152,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
       slug: item.slug,
       qty: item.qty,
       variantSku: item.variantSku || item.sku,
+      estimatedShipping: item.estimatedShipping,
       shopifyVariantId: item.shopifyVariantId,
       shopifyVariantLegacyId: item.shopifyVariantLegacyId,
     }))
@@ -203,9 +207,6 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
         <h1 className="mt-3 text-3xl font-black sm:text-4xl md:text-5xl">{checkout.title}</h1>
         <p className="mt-4 text-sm leading-6 text-white/55 sm:text-base">{checkout.intro}</p>
 
-        {hasManualItems && <div className="mt-6 rounded-2xl border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 p-4 text-sm leading-6 text-[#e7f0e2]">
-          Je winkelmand bevat een of meerdere Pokemon producten. Deze checkout maakt een interne order aan en wordt apart verwerkt om zo de beste service te kunnen garanderen. Na het plaatsen van je order ontvang je een bevestiging per e-mail met daarin alle details en de verwachte levertijd. Heb je vragen? Neem gerust contact op met de klantenservice.
-        </div>}
 
         <label className="mt-7 grid gap-2 text-sm text-white/60 md:max-w-xl">
           <span className="font-black text-white/70">{checkout.email}</span>
@@ -275,8 +276,8 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
         </div>
         <div className="mt-6 flex justify-between text-white/65"><span>{checkout.subtotal}</span><span>€{subtotal.toFixed(2)}</span></div>
         {normalizedDiscountCode && <div className="mt-3 flex justify-between gap-4 text-[#e7f0e2]"><span>{checkout.discountCode}</span><span className="truncate">{normalizedDiscountCode}</span></div>}
-        <div className="mt-3 flex justify-between text-white/65"><span>{checkout.shipping}</span><span>{hasManualItems ? 'Wordt verwerkt in order' : checkout.shippingInShopify}</span></div>
-        <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>{checkout.total}</span><span>€{subtotal.toFixed(2)}</span></div>
+        <div className="mt-3 flex justify-between text-white/65"><span>{checkout.shipping}</span><span>{hasManualItems ? `€${shippingTotal.toFixed(2)}` : checkout.shippingInShopify}</span></div>
+        <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>{checkout.total}</span><span>€{total.toFixed(2)}</span></div>
         {normalizedDiscountCode && <p className="mt-2 text-xs leading-5 text-white/42">{checkout.discountCalculated}</p>}
         <button disabled={state === 'submitting' || state === 'redirecting'} className="btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"><PackageCheck size={18} className="mr-2" />{state === 'submitting' ? checkout.starting : state === 'redirecting' ? checkout.redirecting : hasManualItems ? 'Order plaatsen' : checkout.pay}</button>
         {message && <p className={`mt-4 rounded-2xl border p-4 text-sm ${state === 'error' ? 'border-red-400/25 bg-red-400/10 text-red-100' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100'}`}>{message}</p>}

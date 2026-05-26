@@ -43,7 +43,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
 
   const cartImage = selectedMedia.type === 'image' ? selectedMedia.src : (selectedMedia.poster || selectedVariant?.image || product.hero)
   const cartName = selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name
-  const cartSlug = selectedVariant ? `${product.slug}__${selectedVariant.sku}` : product.slug
+  const cartSlug = product.slug
 
   return <div className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
     <div className="space-y-4">
@@ -88,7 +88,7 @@ export default function ProductMediaGallery({ product }: { product: Product }) {
         </div>}
 
         <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
-        <div className="mt-7 grid gap-3"><AddToCartButton product={{slug:cartSlug,name:cartName,price:product.price,hero:cartImage,variant:selectedVariant?.name,sku:selectedVariant?.sku,shopifyVariantId:selectedVariant?.shopifyVariantId || product.shopifyVariantId,shopifyVariantLegacyId:selectedVariant?.shopifyVariantLegacyId || product.shopifyVariantLegacyId}} /><WishlistButton productSlug={product.slug} productName={product.name} /></div>
+        <div className="mt-7 grid gap-3"><AddToCartButton product={{slug:cartSlug,name:cartName,price:selectedVariant?.price || product.price,estimatedShipping:product.estimatedShipping || product.supplier?.estimatedShipping || 0,hero:cartImage,variant:selectedVariant?.name,variantSku:selectedVariant?.sku,sku:selectedVariant?.sku,shopifyVariantId:selectedVariant?.shopifyVariantId || product.shopifyVariantId,shopifyVariantLegacyId:selectedVariant?.shopifyVariantLegacyId || product.shopifyVariantLegacyId}} /><WishlistButton productSlug={product.slug} productName={product.name} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Secure checkout ready</div>
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">Tracked shipping</div>

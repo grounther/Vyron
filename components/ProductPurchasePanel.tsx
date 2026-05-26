@@ -62,6 +62,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
     slug: product.slug,
     name: product.name,
     price: selectedVariant?.price || product.price,
+    estimatedShipping: product.estimatedShipping || product.supplier?.estimatedShipping || 0,
     hero: activeMedia.type === 'image' ? activeMedia.src : product.hero,
     variantName: selectedVariant?.name,
     variantSku: selectedVariant?.sku,

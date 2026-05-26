@@ -9,6 +9,7 @@ type CartProduct = {
   slug: string
   name: string
   price: number
+  estimatedShipping?: number
   hero: string
   variant?: string
   variantName?: string
