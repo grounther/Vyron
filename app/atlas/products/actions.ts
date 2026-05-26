@@ -120,9 +120,28 @@ function defaultWarehouse(countryCode: string) {
   return 'China'
 }
 
-function cjImportRedirect(params: Record<string, string>) {
+function atlasProductsRedirect(params: Record<string, string>) {
   const search = new URLSearchParams(params)
   redirect(`/atlas/products?${search.toString()}`)
+}
+
+function cjImportRedirect(params: Record<string, string>) {
+  atlasProductsRedirect(params)
+}
+
+function deleteEmptyOptionalFields<T extends Record<string, unknown>>(row: T, keys: string[]) {
+  for (const key of keys) {
+    const current = row[key]
+    if (
+      current === null ||
+      current === undefined ||
+      current === '' ||
+      (Array.isArray(current) && current.length === 0)
+    ) {
+      delete row[key]
+    }
+  }
+  return row
 }
 
 async function uploadProductImage(formData: FormData, slug: string) {
@@ -345,7 +364,7 @@ export async function saveProduct(formData: FormData) {
   const hero = uploadedUrl || value(formData, 'hero_image') || '/products/asorta-product-fallback.svg'
   const images = Array.from(new Set([hero, ...lines(formData, 'images')]))
 
-  const row = {
+  const row = deleteEmptyOptionalFields({
     slug,
     name,
     category: value(formData, 'category') || 'smart-utility',
@@ -383,10 +402,12 @@ export async function saveProduct(formData: FormData) {
     variants: jsonFromTextarea(formData, 'variants', []),
     videos: jsonFromTextarea(formData, 'videos', []),
     updated_at: new Date().toISOString(),
-  }
+  }, ['cj_pid', 'cj_product_sku', 'cj_source_url'])
 
   const { error } = await admin.from('products').upsert(row, { onConflict: 'slug' })
-  if (error) throw new Error(error.message)
+  if (error) {
+    atlasProductsRedirect({ save: 'error', save_message: error.message })
+  }
 
   revalidatePath('/')
   revalidatePath('/shop')

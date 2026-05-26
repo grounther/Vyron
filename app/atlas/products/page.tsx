@@ -45,6 +45,8 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
   const params = searchParams ? await searchParams : {}
   const importStatus = param(params.cj_import)
   const importMessage = param(params.cj_message)
+  const saveStatus = param(params.save)
+  const saveMessage = param(params.save_message)
   const cjConfigured = Boolean(process.env.CJ_API_KEY || process.env.CJ_ACCESS_TOKEN)
   const [rawProducts, previewProducts] = await Promise.all([getRawProducts(), getProducts()])
   const rows: RawProduct[] = rawProducts.length ? rawProducts : previewProducts.map((p): RawProduct => ({
@@ -95,6 +97,10 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
 
       {importStatus ? <div className={importStatus === 'success' ? 'mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100' : 'mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100'}>
         {importMessage || (importStatus === 'success' ? 'CJ import gelukt.' : 'CJ import mislukt.')}
+      </div> : null}
+
+      {saveStatus ? <div className={saveStatus === 'success' ? 'mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100' : 'mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100'}>
+        {saveMessage || (saveStatus === 'success' ? 'Product opgeslagen.' : 'Product opslaan mislukt.')}
       </div> : null}
 
       <CJImportFormClient categories={categories} cjConfigured={cjConfigured} action={importCJProduct} />
