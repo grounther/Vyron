@@ -117,7 +117,7 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={text(product.hero_image) || '/products/asorta-product-fallback.svg'} alt="" className="h-16 w-16 rounded-2xl object-cover opacity-85" />
-              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.cj_product_sku ? ` • CJ ${product.cj_product_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.supplier_sku ? ` • SKU ${product.supplier_sku}` : ''}{product.cj_product_sku ? ` • CJ ${product.cj_product_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
             </div>
             <div className="text-right"><p className="text-2xl font-black">€{Number(product.price || 0).toFixed(2)}</p><p className="text-xs text-white/45">Cost ± €{Number(product.estimated_cost || 0).toFixed(2)}</p></div>
           </div>
@@ -144,9 +144,10 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
       <Field label="Prijs" name="price" type="number" step="0.01" defaultValue={String(p.price || '')} required />
       <Field label="Compare at" name="compare_at" type="number" step="0.01" defaultValue={String(p.compare_at || '')} />
       <Field label="Estimated cost" name="estimated_cost" type="number" step="0.01" defaultValue={String(p.estimated_cost || '')} />
+      <Field label="Eigen SKU" name="supplier_sku" defaultValue={text(p.supplier_sku)} placeholder="bijv. ASORTA-WALLET-001" />
       <Field label="Badge" name="badge" defaultValue={text(p.badge, 'New')} />
       <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Status</span><select name="status" defaultValue={text(p.status, 'draft')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="draft">draft</option><option value="active">active</option><option value="launch">launch</option><option value="archived">archived</option></select></label>
-      <Field label="Warehouse" name="warehouse" defaultValue={text(p.warehouse, 'China')} />
+      <Field label="Warehouse" name="warehouse" defaultValue={text(p.warehouse, 'Eigen voorraad')} />
     </div>
 
     <section className="rounded-[1.4rem] border border-white/10 bg-white/[.025] p-4">
@@ -171,9 +172,10 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
     </div>
 
     <section className="rounded-[1.4rem] border border-white/10 bg-white/[.025] p-4">
-      <h3 className="mb-4 font-black">Supplier / CJ mapping</h3>
+      <h3 className="mb-4 font-black">Fulfillment / supplier mapping</h3>
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Supplier name" name="supplier_name" defaultValue={text(p.supplier_name)} />
+        <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Fulfillment type</span><select name="supplier" defaultValue={text(p.supplier, 'manual')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="manual">manual / eigen voorraad</option><option value="dsers">DSers</option><option value="cj">CJ</option></select></label>
+        <Field label="Supplier name" name="supplier_name" defaultValue={text(p.supplier_name, 'Eigen voorraad')} />
         <Field label="Supplier URL" name="supplier_url" defaultValue={text(p.supplier_url)} />
         <Field label="CJ product ID / PID" name="cj_product_id" defaultValue={text(p.cj_product_id)} />
         <Field label="CJ PID" name="cj_pid" defaultValue={text(p.cj_pid)} />

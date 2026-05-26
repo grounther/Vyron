@@ -51,10 +51,20 @@ function mapProductRow(row: ProductRow): Product {
   const specs = asStringArray(row.specs, [])
   const tags = asStringArray(row.tags, [])
   const boxItems = asStringArray(row.box_items, [])
-  const variants = asJsonArray<ProductVariant>(row.variants, [])
   const videos = asJsonArray<ProductVideo>(row.videos, [])
   const estimatedCost = asNumber(row.estimated_cost, 0)
   const price = asNumber(row.price, 0)
+  const storedVariants = asJsonArray<ProductVariant>(row.variants, [])
+  const fallbackSku = asString(row.supplier_sku, asString(row.cj_sku, ''))
+  const variants = storedVariants.length ? storedVariants : (fallbackSku ? [{
+    name: 'Standaard',
+    sku: fallbackSku,
+    price,
+    image: hero,
+    stock: undefined,
+    shopifyVariantId: asString(row.shopify_variant_id, ''),
+    shopifyVariantLegacyId: asString(row.shopify_variant_legacy_id, ''),
+  }] : [])
   const rawCompareAt = row.compare_at == null ? undefined : asNumber(row.compare_at)
   const compareAt = typeof rawCompareAt === 'number' && rawCompareAt > price ? rawCompareAt : undefined
 
@@ -78,7 +88,7 @@ function mapProductRow(row: ProductRow): Product {
   }
 
   const supplier: SupplierInfo = {
-    name: asString(row.supplier_name, 'ASORTA fulfillment'),
+    name: asString(row.supplier_name, asString(row.supplier, 'ASORTA fulfillment')), 
     productUrl: asString(row.supplier_url, ''),
     warehouse: asString(row.warehouse, 'Tracked delivery'),
     estimatedProductCost: estimatedCost,
@@ -87,7 +97,7 @@ function mapProductRow(row: ProductRow): Product {
     status: (asString(row.supplier_status, 'approved') as SupplierInfo['status']) || 'approved',
     notes: asString(row.supplier_notes, ''),
     productId: asString(row.shopify_product_id, asString(row.supplier_product_id, '')),
-    variantIds: [asString(row.shopify_variant_id, ''), asString(row.shopify_variant_legacy_id, '')].filter(Boolean),
+    variantIds: [asString(row.shopify_variant_id, ''), asString(row.shopify_variant_legacy_id, ''), fallbackSku].filter(Boolean),
     variants: variants.map((v) => v.name),
     processingTime: asString(row.processing_time, ''),
     deliveryTime: asString(row.delivery_time, ''),
@@ -127,8 +137,6 @@ function productQuery(client: any) {
     .from('products')
     .select('*')
     .in('status', ['active', 'launch'])
-    .not('shopify_product_id', 'is', null)
-    .not('shopify_variant_legacy_id', 'is', null)
 }
 
 export async function getProducts(): Promise<Product[]> {

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
 
-    if (body.provider === 'shopify' || process.env.CHECKOUT_PROVIDER === 'shopify') {
+    if (body.provider === 'shopify' || (!body.provider && process.env.CHECKOUT_PROVIDER === 'shopify')) {
       const result = await createShopifyCheckoutRedirect({
         items: body.items,
         email: body.email || body.shipping?.email,

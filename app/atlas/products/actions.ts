@@ -84,6 +84,22 @@ function unique(values: Array<string | undefined | null>) {
   return Array.from(new Set(values.map((v) => String(v || '').trim()).filter(Boolean)))
 }
 
+
+function variantsForManualProduct(formData: FormData, hero: string, price: number) {
+  const parsed = jsonFromTextarea<any[]>(formData, 'variants', [])
+  if (Array.isArray(parsed) && parsed.length) return parsed
+
+  const sku = value(formData, 'supplier_sku') || value(formData, 'cj_sku')
+  if (!sku) return []
+
+  return [{
+    name: 'Standaard',
+    sku,
+    price,
+    image: hero,
+  }]
+}
+
 function stockForVariant(variant: CJVariant) {
   return (variant.inventories || []).reduce((sum, inventory) => {
     const total =
@@ -364,14 +380,20 @@ export async function saveProduct(formData: FormData) {
   const hero = uploadedUrl || value(formData, 'hero_image') || '/products/asorta-product-fallback.svg'
   const images = Array.from(new Set([hero, ...lines(formData, 'images')]))
 
+  const price = numberOrNull(formData, 'price') || 0
+  const supplierSku = value(formData, 'supplier_sku')
+  const supplierName = value(formData, 'supplier_name') || 'Eigen voorraad'
+
   const row = deleteEmptyOptionalFields({
     slug,
     name,
     category: value(formData, 'category') || 'smart-utility',
-    price: numberOrNull(formData, 'price') || 0,
+    price,
     compare_at: numberOrNull(formData, 'compare_at'),
     estimated_cost: numberOrNull(formData, 'estimated_cost'),
-    supplier_name: value(formData, 'supplier_name'),
+    supplier: value(formData, 'supplier') || 'manual',
+    supplier_sku: supplierSku,
+    supplier_name: supplierName,
     supplier_url: value(formData, 'supplier_url'),
     cj_product_id: value(formData, 'cj_product_id'),
     cj_variant_id: value(formData, 'cj_variant_id'),
@@ -380,7 +402,7 @@ export async function saveProduct(formData: FormData) {
     cj_pid: value(formData, 'cj_pid'),
     cj_product_sku: value(formData, 'cj_product_sku'),
     cj_source_url: value(formData, 'cj_source_url'),
-    warehouse: value(formData, 'warehouse') || 'China',
+    warehouse: value(formData, 'warehouse') || 'Eigen voorraad',
     status: value(formData, 'status') || 'draft',
     hero_image: hero,
     images,
@@ -396,13 +418,13 @@ export async function saveProduct(formData: FormData) {
     supplier_notes: value(formData, 'supplier_notes'),
     margin_note: value(formData, 'margin_note'),
     estimated_shipping: numberOrNull(formData, 'estimated_shipping'),
-    supplier_status: value(formData, 'supplier_status') || 'testing',
+    supplier_status: value(formData, 'supplier_status') || 'manual',
     processing_time: value(formData, 'processing_time'),
     delivery_time: value(formData, 'delivery_time'),
-    variants: jsonFromTextarea(formData, 'variants', []),
+    variants: variantsForManualProduct(formData, hero, price),
     videos: jsonFromTextarea(formData, 'videos', []),
     updated_at: new Date().toISOString(),
-  }, ['cj_pid', 'cj_product_sku', 'cj_source_url'])
+  }, ['supplier', 'supplier_sku', 'cj_pid', 'cj_product_sku', 'cj_source_url'])
 
   const { error } = await admin.from('products').upsert(row, { onConflict: 'slug' })
   if (error) {
