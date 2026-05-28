@@ -815,16 +815,31 @@ body{
     linear-gradient(135deg,#030303 0%,#090b10 54%,#020202 100%);
   isolation:isolate;
 }
+.asorta-tcg-hero:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.78),rgba(0,0,0,.36) 42%,rgba(2,8,16,.60) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.62)),
+    url('/asorta-tcg-hero.jpeg') center/cover no-repeat;
+  filter:saturate(1.08) contrast(1.08);
+  opacity:.64;
+  transform:scale(1.02);
+}
 .asorta-tcg-hero:after{
   content:"";
   position:absolute;
   inset:0;
+  z-index:1;
   pointer-events:none;
   background:
     linear-gradient(90deg,rgba(255,255,255,.035),transparent 18%,transparent 82%,rgba(255,255,255,.035)),
     linear-gradient(180deg,rgba(255,255,255,.05),transparent 20%,rgba(0,0,0,.35));
 }
-.asorta-tcg-glow{position:absolute;pointer-events:none;border-radius:999px;filter:blur(56px);opacity:.55}
+.asorta-tcg-glow{position:absolute;z-index:2;pointer-events:none;border-radius:999px;filter:blur(56px);opacity:.55}
 .asorta-tcg-glow-gold{left:-9rem;top:5rem;height:19rem;width:19rem;background:rgba(245,190,82,.26)}
 .asorta-tcg-glow-blue{right:-8rem;top:8rem;height:22rem;width:22rem;background:rgba(70,181,255,.22)}
 .asorta-tcg-hero-card{
@@ -837,4 +852,4 @@ body{
 }
 .asorta-tcg-hero-card img{min-height:260px;max-height:520px;filter:saturate(1.05) contrast(1.03)}
 .category-tile img[src='/asorta-tcg-hero.jpeg']{filter:saturate(1.06) contrast(1.08) brightness(.78)}
-@media(max-width:640px){.asorta-tcg-hero-card img{min-height:210px}.asorta-tcg-hero{padding-top:.5rem}}
+@media(max-width:640px){.asorta-tcg-hero-card img{min-height:210px}.asorta-tcg-hero{padding-top:.5rem}.asorta-tcg-hero:before{background-position:center top;opacity:.56}}
