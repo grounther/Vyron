@@ -86,7 +86,7 @@ export default function TrackOrderLookupClient({ initialOrder = '', initialEmail
           <input
             value={orderNumber}
             onChange={(event) => setOrderNumber(event.target.value)}
-            placeholder="Bijvoorbeeld #1001 of SHOPIFY-1001"
+            placeholder="Bijvoorbeeld #1001 of ASORTA-1001"
             className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"
             required
           />

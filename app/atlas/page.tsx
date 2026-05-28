@@ -120,8 +120,8 @@ function productSummary(items: OrderItemRow[]) {
 }
 
 function supplierSummary(items: OrderItemRow[]) {
-  const suppliers = Array.from(new Set(items.map((item) => String(item.supplier || 'dsers')).filter(Boolean)))
-  return suppliers.length ? suppliers.join(', ') : 'dsers'
+  const suppliers = Array.from(new Set(items.map((item) => String(item.supplier || 'manual')).filter(Boolean)))
+  return suppliers.length ? suppliers.join(', ') : 'manual'
 }
 
 function legacyId(value: unknown) {
@@ -290,7 +290,7 @@ export default async function AtlasPage(){
         <div>
           <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Internal control</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Atlas</h1>
-          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor live orders, productkosten, winstindicatie, supplier status en Shopify/DSers monitoring.</p>
+          <p className="mt-4 max-w-2xl text-white/60">Intern ASORTA beheerpaneel voor live orders, productkosten, winstindicatie, voorraadstatus en verkoopmonitoring.</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/55"><ShieldCheck className="mb-2 text-[#b7c8ad]"/> Protected by Supabase Auth + admin allowlist.</div>
       </div>
@@ -303,12 +303,12 @@ export default async function AtlasPage(){
 
     <section className="mt-8 grid gap-4 md:grid-cols-4">
       <Link href="/atlas/pages" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><FileText className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Page Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer homepage teksten, promo slider content en support snippets.</p></Link>
-      <Link href="/atlas/products" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PackageSearch className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Product Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk Shopify launchproducten, varianten, DSers costs en marge-indicatie.</p></Link>
+      <Link href="/atlas/products" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PackageSearch className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Product Editor</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer Pokemon producten, eigen SKU’s, voorraad, prijzen en marge-indicatie.</p></Link>
       <Link href="/atlas/promotions" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Megaphone className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Acties</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer openingsacties, kortingsslides en promo placements.</p></Link>
       <Link href="/atlas/newsletter" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Mail className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Exclusive Drops</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer e-mail inschrijvingen, welcome mails en drop campagnes.</p></Link>
       <Link href="/atlas/recovery" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><ShoppingCart className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Cart Recovery</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk abandoned carts en verstuur recovery mails.</p></Link>
       <Link href="/atlas/support" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><MessageCircle className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Support Center</h2><p className="mt-2 text-sm leading-6 text-white/55">Live chats, klantdossiers, orders, tracking en klantenservice antwoorden beheren.</p></Link>
-      <Link href="/atlas/integrations" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PlugZap className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Integrations</h2><p className="mt-2 text-sm leading-6 text-white/55">Shopify input, DSers bridge, PayPal checkout en sync status.</p></Link>
+      <Link href="/atlas/integrations" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PlugZap className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Integrations</h2><p className="mt-2 text-sm leading-6 text-white/55">Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.</p></Link>
     </section>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
@@ -327,7 +327,7 @@ export default async function AtlasPage(){
           <Step title="Orders" text={`${metrics.orderCount} mirrored Shopify orders, ${metrics.pendingOrders} pending.`} />
           <Step title="Revenue" text={`${eur(metrics.paidRevenue)} paid revenue from Shopify/PayPal.`} />
           <Step title="Profit" text={`${eur(metrics.estimatedProfit)} estimated profit after product cost.`} />
-          <Step title="Fulfillment" text="DSers status updates come through Shopify order/fulfillment webhooks." />
+          <Step title="Fulfillment" text="Eigen voorraad wordt handmatig verwerkt; betaal- en verzendupdates blijven zichtbaar in Atlas." />
         </div>
       </div>
     </section>

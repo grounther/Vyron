@@ -212,7 +212,7 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
         <div>
           <p className="kicker">Customer Portal</p>
           <h2 className="mt-2 text-2xl font-black">Klantdossier</h2>
-          <p className="mt-2 text-sm leading-6 text-white/50">Zoek op ordernummer, e-mail, naam, telefoon, trackingnummer of CJ order ID.</p>
+          <p className="mt-2 text-sm leading-6 text-white/50">Zoek op ordernummer, e-mail, naam, telefoon of trackingnummer.</p>
         </div>
         <button type="button" onClick={() => loadPortal(query)} className="rounded-full border border-white/10 bg-white/[.04] p-2 text-white/45 transition hover:text-white" aria-label="Klantportaal verversen">
           <RefreshCw size={17} className={loading ? 'animate-spin' : ''} />
@@ -438,7 +438,7 @@ function OrderCard({ order, items, busy, onSave, onLink, canLink }: { order: Por
       <div className="mt-3 flex flex-wrap gap-2">
         <SmallStatus status={order.payment_status} />
         <SmallStatus status={order.fulfillment_status} />
-        {order.cj_order_id ? <span className="rounded-full border border-white/10 bg-white/[.04] px-2.5 py-1 text-[10px] font-black uppercase tracking-[.14em] text-white/45">CJ {shortId(order.cj_order_id, 10)}</span> : null}
+        {order.cj_order_id ? <span className="rounded-full border border-white/10 bg-white/[.04] px-2.5 py-1 text-[10px] font-black uppercase tracking-[.14em] text-white/45">Extern {shortId(order.cj_order_id, 10)}</span> : null}
       </div>
       {order.tracking_number || order.tracking_url ? (
         <div className="mt-3 rounded-2xl border border-[#b7c8ad]/15 bg-[#b7c8ad]/10 p-3 text-xs text-[#dbe9d4]">
@@ -464,7 +464,7 @@ function OrderCard({ order, items, busy, onSave, onLink, canLink }: { order: Por
           <input className="support-input h-10" value={fulfillmentStatus} onChange={(event: ChangeEvent<HTMLInputElement>) => setFulfillmentStatus(event.target.value)} placeholder="fulfillment_status" />
           <input className="support-input h-10" value={trackingNumber} onChange={(event: ChangeEvent<HTMLInputElement>) => setTrackingNumber(event.target.value)} placeholder="trackingnummer" />
           <input className="support-input h-10" value={trackingUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setTrackingUrl(event.target.value)} placeholder="tracking URL" />
-          <input className="support-input h-10" value={cjOrderId} onChange={(event: ChangeEvent<HTMLInputElement>) => setCjOrderId(event.target.value)} placeholder="CJ order ID" />
+          <input className="support-input h-10" value={cjOrderId} onChange={(event: ChangeEvent<HTMLInputElement>) => setCjOrderId(event.target.value)} placeholder="Externe order ID" />
           <button type="button" onClick={() => onSave({ paymentStatus, fulfillmentStatus, trackingNumber, trackingUrl, cjOrderId })} disabled={busy === 'updateOrder'} className="rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-black disabled:opacity-60">
             <Save size={14} className="mr-2 inline" /> Opslaan
           </button>

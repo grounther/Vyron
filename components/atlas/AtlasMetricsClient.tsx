@@ -111,10 +111,10 @@ function ProfitPanel({ metrics }: { metrics: AtlasMetrics }) {
       </div>
       <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/58">
         <h3 className="font-black text-white">Cost health</h3>
-        <p className="mt-2 leading-6">Producten zonder <code className="text-white/80">estimated_cost</code> geven een te hoge winst. Vul inkoopkosten in Atlas Product Editor of via Shopify/DSers sync.</p>
+        <p className="mt-2 leading-6">Producten zonder <code className="text-white/80">estimated_cost</code> geven een te hoge winst. Vul inkoopkosten in via de Atlas Product Editor.</p>
         <div className="mt-4 grid gap-2">
           <MiniStat label="Products without cost" value={String(metrics.productHealth.missingCost)}/>
-          <MiniStat label="Missing variant ID" value={String(metrics.productHealth.missingVariantId)}/>
+          <MiniStat label="Missing SKU/variant" value={String(metrics.productHealth.missingVariantId)}/>
         </div>
       </div>
     </div>
@@ -123,10 +123,10 @@ function ProfitPanel({ metrics }: { metrics: AtlasMetrics }) {
 
 function OrdersOverview({ orders }: { orders: AtlasOrderOverview[] }) {
   return <div className="card rounded-[2rem] p-5">
-    <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><div><h2 className="text-2xl font-black">Orders overview</h2><p className="mt-1 text-sm text-white/45">Live gekoppeld aan Shopify order webhooks.</p></div><span className="w-fit rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/50">{orders.length} recent</span></div>
+    <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><div><h2 className="text-2xl font-black">Orders overview</h2><p className="mt-1 text-sm text-white/45">Live gekoppeld aan orders en betaalupdates.</p></div><span className="w-fit rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/50">{orders.length} recent</span></div>
     <div className="overflow-x-auto"><table className="w-full min-w-[920px] text-left text-sm">
       <thead className="text-xs uppercase tracking-[.18em] text-white/35"><tr><th className="py-3">Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Est. profit</th><th>Payment</th><th>Fulfillment</th><th>Tracking</th></tr></thead>
-      <tbody>{orders.length ? orders.map((order) => <tr key={order.id} className="border-t border-white/10 text-white/70"><td className="py-4 font-black text-white"><div>{order.shopifyOrderName || order.orderNumber}</div><div className="mt-1 text-[11px] font-normal text-white/35">{dateTime(order.createdAt)}</div></td><td>{order.customerEmail}</td><td className="max-w-[280px] truncate" title={order.itemsSummary}>{order.itemsSummary}</td><td>€{order.total.toFixed(2)}</td><td className="font-black text-white">€{order.estimatedProfit.toFixed(2)}</td><td><Badge value={order.paymentStatus}/></td><td><Badge value={order.fulfillmentStatus}/></td><td>{order.trackingUrl ? <Link href={order.trackingUrl} target="_blank" className="inline-flex items-center gap-1 text-[#b7c8ad] hover:text-white">Track <ExternalLink size={13}/></Link> : order.trackingNumber || <span className="text-white/35">—</span>}</td></tr>) : <tr><td colSpan={8} className="py-8 text-center text-white/45">Nog geen Shopify orders ontvangen. Zodra Shopify webhooks binnenkomen, verschijnen orders hier live.</td></tr>}</tbody>
+      <tbody>{orders.length ? orders.map((order) => <tr key={order.id} className="border-t border-white/10 text-white/70"><td className="py-4 font-black text-white"><div>{order.shopifyOrderName || order.orderNumber}</div><div className="mt-1 text-[11px] font-normal text-white/35">{dateTime(order.createdAt)}</div></td><td>{order.customerEmail}</td><td className="max-w-[280px] truncate" title={order.itemsSummary}>{order.itemsSummary}</td><td>€{order.total.toFixed(2)}</td><td className="font-black text-white">€{order.estimatedProfit.toFixed(2)}</td><td><Badge value={order.paymentStatus}/></td><td><Badge value={order.fulfillmentStatus}/></td><td>{order.trackingUrl ? <Link href={order.trackingUrl} target="_blank" className="inline-flex items-center gap-1 text-[#b7c8ad] hover:text-white">Track <ExternalLink size={13}/></Link> : order.trackingNumber || <span className="text-white/35">—</span>}</td></tr>) : <tr><td colSpan={8} className="py-8 text-center text-white/45">Nog geen orders ontvangen. Zodra betaalde orders binnenkomen, verschijnen ze hier live.</td></tr>}</tbody>
     </table></div>
   </div>
 }

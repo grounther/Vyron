@@ -26,7 +26,7 @@ async function submitViaShopifyOrderBridge(payload: SupplierOrderPayload): Promi
       financial_status: 'paid',
       send_receipt: false,
       send_fulfillment_receipt: false,
-      note: `Created by Vyron site for DSers fulfillment. Source order: ${payload.orderNumber}`,
+      note: `Created by ASORTA site. Source order: ${payload.orderNumber}`,
       tags: 'vyron-site,dsers-bridge,paid-external-checkout',
       line_items: payload.items.map((item) => ({
         title: item.productName,

@@ -126,7 +126,7 @@ export async function syncShopifyProducts(admin: SupabaseClient, options: SyncOp
     provider: 'shopify',
     event: options.source || 'manual',
     status: 'success',
-    message: `Shopify sync imported/updated ${result.imported} products and created/updated ${result.mapped} DSers/Shopify variant mappings.`,
+    message: `Shopify sync imported/updated ${result.imported} products and created/updated ${result.mapped} variant mappings.`,
     payload: { slugs: result.slugs },
   }).then(() => undefined, () => undefined)
 

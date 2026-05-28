@@ -27,8 +27,8 @@ export async function POST(request: Request) {
     const result = await createOrderFromCheckout(admin, { items: body.items, shipping: body.shipping, source: 'site_checkout' })
 
     // Eigen voorraad gaat voorlopig via Shopify Draft Order invoice checkout, zodat
-    // PayPal gebruikt kan worden zonder dat het product als Shopify/DSers variant
-    // in de catalogus hoeft te bestaan. Mollie/iDEAL/Wero kan later alsnog worden
+    // PayPal gebruikt kan worden zonder losse productkoppeling in de catalogus.
+    // Mollie/iDEAL/Wero kan later alsnog worden
     // ingeschakeld door MOLLIE_API_KEY te zetten en deze providerkeuze aan te passen.
     if (canCreateManualShopifyDraftOrder()) {
       const draft = await createManualShopifyDraftOrder({

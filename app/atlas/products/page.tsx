@@ -3,9 +3,8 @@ import type React from 'react'
 import { assertAtlasAdmin } from '@/lib/atlas-auth'
 import { categories } from '@/lib/products'
 import { getProducts } from '@/lib/catalog'
-import { deleteProduct, importCJProduct, saveProduct } from './actions'
+import { deleteProduct, saveProduct } from './actions'
 import { PackagePlus, PackageSearch, Save, Trash2, UploadCloud } from 'lucide-react'
-import CJImportFormClient from './CJImportFormClient'
 
 export const metadata = { title: 'Atlas Products | ASORTA internal', robots: { index: false, follow: false } }
 
@@ -43,11 +42,8 @@ async function getRawProducts() {
 export default async function AtlasProducts({ searchParams }: { searchParams?: Promise<SearchParams> | SearchParams }){
   await assertAtlasAdmin('/atlas/products')
   const params = searchParams ? await searchParams : {}
-  const importStatus = param(params.cj_import)
-  const importMessage = param(params.cj_message)
   const saveStatus = param(params.save)
   const saveMessage = param(params.save_message)
-  const cjConfigured = Boolean(process.env.CJ_API_KEY || process.env.CJ_ACCESS_TOKEN)
   const [rawProducts, previewProducts] = await Promise.all([getRawProducts(), getProducts()])
   const rows: RawProduct[] = rawProducts.length ? rawProducts : previewProducts.map((p): RawProduct => ({
     slug: p.slug,
@@ -75,11 +71,6 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
     supplier_name: p.supplier?.name,
     supplier_url: p.supplier?.productUrl,
     warehouse: p.supplier?.warehouse,
-    cj_product_id: p.supplier?.productId,
-    cj_product_sku: p.supplier?.productId,
-    cj_spu: p.supplier?.productId,
-    cj_sku: p.supplier?.productId,
-    cj_variant_ids: p.supplier?.variantIds,
     supplier_status: p.supplier?.status,
     processing_time: p.supplier?.processingTime,
     delivery_time: p.supplier?.deliveryTime,
@@ -93,17 +84,13 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
         <div className="flex items-center gap-3"><PackageSearch className="text-[#b7c8ad]"/><div><p className="kicker">Atlas product editor</p><h1 className="text-4xl font-black">Products</h1></div></div>
         <div className="rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 px-4 py-3 text-sm font-bold text-[#dbe9d4]">Supabase Auth + admin_users beveiligd</div>
       </div>
-      <p className="mt-4 max-w-3xl text-white/55">Voeg producten toe, bewerk bestaande producten, importeer CJ producten via SPU/SKU en publiceer daarna gecontroleerd naar shop, categoriepagina’s en productpagina’s.</p>
+      <p className="mt-4 max-w-3xl text-white/55">Voeg eigen voorraad toe, beheer SKU’s, prijzen, voorraadtekst, afbeeldingen en publiceer gecontroleerd naar shop, categoriepagina’s en productpagina’s.</p>
 
-      {importStatus ? <div className={importStatus === 'success' ? 'mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100' : 'mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100'}>
-        {importMessage || (importStatus === 'success' ? 'CJ import gelukt.' : 'CJ import mislukt.')}
-      </div> : null}
 
       {saveStatus ? <div className={saveStatus === 'success' ? 'mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100' : 'mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100'}>
         {saveMessage || (saveStatus === 'success' ? 'Product opgeslagen.' : 'Product opslaan mislukt.')}
       </div> : null}
 
-      <CJImportFormClient categories={categories} cjConfigured={cjConfigured} action={importCJProduct} />
 
       <details className="mt-8 rounded-[1.5rem] border border-[#b7c8ad]/20 bg-[#b7c8ad]/[.06] p-4 md:p-5" open={!rawProducts.length}>
         <summary className="flex cursor-pointer items-center gap-2 text-lg font-black"><PackagePlus className="text-[#b7c8ad]"/> Nieuw product handmatig toevoegen</summary>
@@ -117,7 +104,7 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={text(product.hero_image) || '/products/asorta-product-fallback.svg'} alt="" className="h-16 w-16 rounded-2xl object-cover opacity-85" />
-              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.supplier_sku ? ` • SKU ${product.supplier_sku}` : ''}{product.cj_product_sku ? ` • CJ ${product.cj_product_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.supplier_sku ? ` • SKU ${product.supplier_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
             </div>
             <div className="text-right"><p className="text-2xl font-black">€{Number(product.price || 0).toFixed(2)}</p><p className="text-xs text-white/45">Cost ± €{Number(product.estimated_cost || 0).toFixed(2)}</p></div>
           </div>
@@ -172,24 +159,17 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
     </div>
 
     <section className="rounded-[1.4rem] border border-white/10 bg-white/[.025] p-4">
-      <h3 className="mb-4 font-black">Fulfillment / supplier mapping</h3>
+      <h3 className="mb-4 font-black">Eigen voorraad / verkoopinformatie</h3>
       <div className="grid gap-4 md:grid-cols-3">
-        <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Fulfillment type</span><select name="supplier" defaultValue={text(p.supplier, 'manual')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="manual">manual / eigen voorraad</option><option value="dsers">DSers</option><option value="cj">CJ</option></select></label>
-        <Field label="Supplier name" name="supplier_name" defaultValue={text(p.supplier_name, 'Eigen voorraad')} />
-        <Field label="Supplier URL" name="supplier_url" defaultValue={text(p.supplier_url)} />
-        <Field label="CJ product ID / PID" name="cj_product_id" defaultValue={text(p.cj_product_id)} />
-        <Field label="CJ PID" name="cj_pid" defaultValue={text(p.cj_pid)} />
-        <Field label="CJ SPU/Product SKU" name="cj_product_sku" defaultValue={text(p.cj_product_sku)} />
-        <Field label="CJ source URL" name="cj_source_url" defaultValue={text(p.cj_source_url)} />
-        <Field label="CJ variant ID" name="cj_variant_id" defaultValue={text(p.cj_variant_id)} />
-        <Field label="CJ SKU" name="cj_sku" defaultValue={text(p.cj_sku)} />
-        <Field label="Estimated shipping" name="estimated_shipping" type="number" step="0.01" defaultValue={String(p.estimated_shipping || '')} />
-        <Field label="Supplier status" name="supplier_status" defaultValue={text(p.supplier_status, 'testing')} />
-        <Field label="Processing time" name="processing_time" defaultValue={text(p.processing_time)} />
-        <Field label="Delivery time" name="delivery_time" defaultValue={text(p.delivery_time)} />
-        <Textarea label="CJ variant IDs, één per regel" name="cj_variant_ids" defaultValue={list(p.cj_variant_ids)} rows={4} />
-        <Textarea label="Supplier notes" name="supplier_notes" defaultValue={text(p.supplier_notes)} rows={4} />
-        <Textarea label="Margin note" name="margin_note" defaultValue={text(p.margin_note)} rows={4} />
+        <input type="hidden" name="supplier" value="manual" />
+        <Field label="Voorraadlocatie" name="warehouse" defaultValue={text(p.warehouse, 'Eigen voorraad')} />
+        <Field label="Inkoop/verkoop notitie" name="supplier_name" defaultValue={text(p.supplier_name, 'Eigen voorraad')} />
+        <Field label="Verzendkosten" name="estimated_shipping" type="number" step="0.01" defaultValue={String(p.estimated_shipping || '')} />
+        <Field label="Status voorraad" name="supplier_status" defaultValue={text(p.supplier_status, 'manual')} />
+        <Field label="Verwerkingstijd" name="processing_time" defaultValue={text(p.processing_time, '1-2 werkdagen')} />
+        <Field label="Levertijd" name="delivery_time" defaultValue={text(p.delivery_time, '1-3 werkdagen')} />
+        <Textarea label="Interne productnotities" name="supplier_notes" defaultValue={text(p.supplier_notes)} rows={4} />
+        <Textarea label="Marge / inkoopnotitie" name="margin_note" defaultValue={text(p.margin_note)} rows={4} />
       </div>
     </section>
 

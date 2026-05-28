@@ -112,7 +112,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
         <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{product.name}</h1>
         <p className="mt-4 text-lg leading-8 text-white/58">{product.short}</p>
         <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
-        <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Launch product • premium utility selection</div>
+        <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Eigen voorraad • origineel product</div>
 
         {variants.length > 0 && <div className="mt-7">
           <label className="mb-2 block text-xs font-black uppercase tracking-[.25em] text-white/40">Uitvoering</label>
@@ -121,7 +121,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
           </select>
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[.035] p-3 text-xs leading-5 text-white/50">
             <strong className="text-white/75">SKU:</strong> {selectedVariant?.sku || 'Pending'}
-            {typeof selectedVariant?.stock === 'number' && <><br/><strong className="text-white/75">Factory stock:</strong> ± {selectedVariant.stock.toLocaleString('nl-NL')}</>}
+            {typeof selectedVariant?.stock === 'number' && <><br/><strong className="text-white/75">Voorraad:</strong> ± {selectedVariant.stock.toLocaleString('nl-NL')}</>}
           </div>
         </div>}
 

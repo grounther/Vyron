@@ -163,7 +163,7 @@ Voor vragen, klachten, retouren of problemen met je bestelling neem je contact o
   f({ key: 'footer.shopTitle', label: 'Footer shop heading', value: 'Shop', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.supportTitle', label: 'Footer support heading', value: 'Support', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.paymentsTitle', label: 'Footer payments heading', value: 'Payments', type: 'text', group: 'Footer', page: 'Footer' }),
-  f({ key: 'footer.payments', label: 'Payment labels, one per line', value: 'PayPal\niDEAL | Wero\nCards\nApple Pay / Google Pay', type: 'textarea', group: 'Footer', page: 'Footer' }),
+  f({ key: 'footer.payments', label: 'Payment labels, one per line', value: 'PayPal beschikbaar\niDEAL / Mollie volgt later\nWero volgt later', type: 'textarea', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.copyright', label: 'Footer copyright', value: '© 2026 ASORTA. Trading Cards • Collectibles • Events.', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.trust1.title', label: 'Trust card 1 title', value: 'Secure checkout', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
   f({ key: 'footer.trust1.text', label: 'Trust card 1 text', value: 'Safe and encrypted checkout flow.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
@@ -179,30 +179,6 @@ Voor vragen, klachten, retouren of problemen met je bestelling neem je contact o
 
 export type SiteContentMap = Record<string, string>
 
-const rebrandOverrides: SiteContentMap = {
-  'homepage.hero.kicker': 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS',
-  'homepage.hero.text': 'Asorta. Alles voor jouw verzameling.',
-  'homepage.hero.primaryCta': 'Shop Pokemon',
-  'homepage.hero.secondaryCta': 'Markt voorraad',
-  'homepage.categories.kicker': 'Pokemon assortiment',
-  'homepage.categories.title': 'Shop Pokemon per categorie',
-  'homepage.featured.kicker': 'Uitgelicht',
-  'homepage.featured.title': 'Populaire Pokemon picks',
-  'homepage.catalog.kicker': 'Volledige voorraad',
-  'homepage.catalog.title': 'Pokemon sealed, singles en collectibles.',
-  'shop.kicker': 'ASORTA Pokemon Shop',
-  'shop.title': 'Pokemon voorraad online',
-  'shop.text': 'Bekijk de actuele Pokemon voorraad van ASORTA. Sealed producten, singles, accessoires en marktdeals uit eigen voorraad.',
-  'category.kicker': 'Pokemon collectie',
-  'category.empty': 'Nog geen Pokemon producten in deze categorie.',
-  'footer.brandText': 'Trading Cards • Collectibles • Events. Pokemon sealed producten, collectibles en eigen voorraad voor online verkoop en markten.',
-  'footer.trust2.title': 'Originele producten',
-  'footer.trust2.text': 'Sealed en zorgvuldig geselecteerd.',
-  'footer.trust3.title': 'Verzending & markten',
-  'footer.trust3.text': 'Online verzending en lokale verkoop.',
-  'footer.copyright': '© 2026 ASORTA. Trading Cards • Collectibles • Events.',
-  'site.shipping.message': 'Eigen voorraad wordt zorgvuldig verpakt en verzonden zodra de betaling rond is.',
-}
 
 export function defaultSiteContentMap(): SiteContentMap {
   return siteContentDefaults.reduce((acc, field) => {
@@ -215,14 +191,14 @@ export async function getSiteContent(): Promise<SiteContentMap> {
   const defaults = defaultSiteContentMap()
   const client = createAdminClient() || supabase
 
-  if (!client) return { ...defaults, ...rebrandOverrides }
+  if (!client) return defaults
 
   const { data, error } = await client
     .from('site_content')
     .select('key,value')
     .in('key', siteContentDefaults.map((field) => field.key))
 
-  if (error || !data) return { ...defaults, ...rebrandOverrides }
+  if (error || !data) return defaults
 
   for (const row of data) {
     if (typeof row.key === 'string' && row.key in defaults && typeof row.value === 'string' && row.value.trim()) {
@@ -230,7 +206,7 @@ export async function getSiteContent(): Promise<SiteContentMap> {
     }
   }
 
-  return { ...defaults, ...rebrandOverrides }
+  return defaults
 }
 
 export function groupSiteContentFields(fields = siteContentDefaults) {

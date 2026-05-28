@@ -40,7 +40,7 @@ export default async function AtlasPagesPage({ searchParams }: { searchParams?: 
         <div>
           <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Atlas editor</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Page Editor</h1>
-          <p className="mt-4 max-w-3xl text-white/60">Beheer alle klantgerichte teksten van de vaste ASORTA pagina’s. Productnamen, prijzen en productbeschrijvingen beheer je via Shopify/Product Editor; deze editor is voor pagina-copy, trust teksten, CTA’s, legal teksten en orderflow-teksten.</p>
+          <p className="mt-4 max-w-3xl text-white/60">Beheer alle klantgerichte teksten van de vaste ASORTA pagina’s. Productnamen, prijzen en productbeschrijvingen beheer je via de Product Editor; deze editor is voor pagina-copy, trust teksten, CTA’s, legal teksten en orderflow-teksten.</p>
         </div>
         <Link href="/atlas" className="rounded-full border border-white/12 px-5 py-3 text-sm font-black text-white/65 transition hover:bg-white/10 hover:text-white">Terug naar Atlas</Link>
       </div>
