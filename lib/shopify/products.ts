@@ -142,7 +142,7 @@ function categoryFor(product: ShopifyProductNode, fields: Record<string, string>
   if (explicit) return slugify(explicit)
   const tagCategory = product.tags?.find((tag) => tag.toLowerCase().startsWith('category:'))?.split(':')[1]
   const type = product.productType || tagCategory
-  return type ? slugify(type) : 'smart-utility'
+  return type ? slugify(type) : 'booster-packs'
 }
 
 function statusFor(product: ShopifyProductNode) {

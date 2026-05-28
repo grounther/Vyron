@@ -1,150 +1,69 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
-
-type HeroSlide = {
-  kicker: string
-  title: string
-  subtitle: string
-  text: string
-  image: string
-  href: string
-  cta: string
-  position?: string
-}
-
-const slides: HeroSlide[] = [
-  {
-    kicker: 'Premium gear',
-    title: 'Premium gear.',
-    subtitle: 'Built to perform.',
-    text: 'Tactical carry, automotive upgrades, gaming setups en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.',
-    image: '/products/asorta-urban-sling-pro/2.jpg',
-    href: '/product/asorta-urban-sling-pro',
-    cta: 'View Urban Sling Pro',
-    position: 'center center',
-  },
-  {
-    kicker: 'Automotive drop',
-    title: 'Upgrade your drive.',
-    subtitle: 'Clean cockpit utility.',
-    text: 'Premium mounts, lighting en daily-drive accessoires voor een strakkere cockpit en betere routine.',
-    image: '/products/drivecharge/1_1c3d32e3-9eb6-47f9-b217-e2911571c64a.jpg',
-    href: '/category/automotive',
-    cta: 'Explore automotive',
-    position: 'center center',
-  },
-  {
-    kicker: 'Openingsactie',
-    title: 'Launch offer.',
-    subtitle: '10% on every order.',
-    text: 'Vier de ASORTA launch met tijdelijke openingskorting op de volledige collectie.',
-    image: '/products/asorta-drivecharge-mount/13.jpg',
-    href: '/shop',
-    cta: 'Shop launch offer',
-    position: 'center center',
-  },
-  {
-    kicker: 'Creator setup',
-    title: 'Sharper setups.',
-    subtitle: 'Better utility.',
-    text: 'Desk, gaming en creator gear voor een strakke setup met premium functionaliteit.',
-    image: '/products/asorta-wavemic-rgb/1.jpg',
-    href: '/category/gaming',
-    cta: 'Explore setup gear',
-    position: 'center top',
-  },
-]
+import { ArrowRight, BadgeCheck, CalendarDays, PackageCheck, ShieldCheck } from 'lucide-react'
 
 export default function HomeHeroSlider({
-  kicker = 'TACTICAL • AUTOMOTIVE • GAMING • UTILITY',
-  text = 'Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.',
-  primaryCta = 'Explore Collection',
-  secondaryCta = 'Best Sellers',
+  kicker = 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS',
+  text = 'ASORTA wordt jouw plek voor Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk of iets direct uit eigen voorraad komt.',
+  primaryCta = 'Shop Pokemon',
+  secondaryCta = 'Markt voorraad',
 }: {
   kicker?: string
   text?: string
   primaryCta?: string
   secondaryCta?: string
 }) {
-  const [active, setActive] = useState(0)
-  const slide = slides[active]
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActive((current) => (current + 1) % slides.length)
-    }, 6800)
-    return () => clearInterval(timer)
-  }, [])
-
-  const go = (direction: number) => {
-    setActive((current) => (current + direction + slides.length) % slides.length)
-  }
+  const trust = [
+    { icon: ShieldCheck, title: 'Origineel sealed', text: 'Geen gewogen of geopende packs.' },
+    { icon: PackageCheck, title: 'Eigen voorraad', text: 'Voorraad die ASORTA zelf beheert.' },
+    { icon: CalendarDays, title: 'Markten & events', text: 'Ook verkrijgbaar op braderieen en beurzen.' },
+  ]
 
   return (
-    <section className="asorta-flagship noise">
-      <div className="asorta-flagship-orb asorta-flagship-orb-blue" />
-      <div className="asorta-flagship-orb asorta-flagship-orb-red" />
-      <div className="asorta-flagship-lines" />
+    <section className="asorta-tcg-hero noise">
+      <div className="asorta-tcg-glow asorta-tcg-glow-gold" />
+      <div className="asorta-tcg-glow asorta-tcg-glow-blue" />
+      <div className="mx-auto grid min-h-[680px] max-w-7xl items-center gap-10 px-4 py-12 sm:px-5 lg:grid-cols-[.92fr_1.08fr] lg:py-16">
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.045] px-4 py-2 text-[11px] font-black uppercase tracking-[.28em] text-white/55">
+            <span className="h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(252,211,77,.75)]" />
+            {kicker}
+          </div>
+          <h1 className="mt-6 text-5xl font-black leading-[.92] tracking-[-.055em] text-white sm:text-6xl md:text-7xl xl:text-8xl">
+            Pokemon markt.<br />Online shop.<br />Eigen voorraad.
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-white/62 sm:text-lg">{text}</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/shop" className="btn-primary">
+              {primaryCta} <ArrowRight className="ml-2" size={18} />
+            </Link>
+            <Link href="/category/market-deals" className="btn-secondary">{secondaryCta}</Link>
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {trust.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="rounded-2xl border border-white/10 bg-black/28 p-4 backdrop-blur">
+                <Icon size={20} className="text-amber-200/80" />
+                <h3 className="mt-3 text-sm font-black">{title}</h3>
+                <p className="mt-1 text-xs leading-5 text-white/45">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <div className="asorta-flagship-copy">
-        <p className="asorta-flagship-kicker">{kicker}</p>
-        <h1 className="asorta-hero-title-image-wrap" aria-label="ASORTA — JUST WHAT YOU NEED.">
-          <img src="/asorta-title-metal.png" alt="ASORTA — JUST WHAT YOU NEED." className="asorta-hero-title-image" />
-        </h1>
-        <p className="asorta-flagship-text">{text}</p>
-        <div className="asorta-flagship-actions">
-          <Link href="/shop" className="btn-primary">
-            {primaryCta} <ArrowRight className="ml-2" size={18} />
-          </Link>
-          <Link href="#featured" className="btn-secondary">{secondaryCta}</Link>
+        <div className="relative z-10">
+          <div className="asorta-tcg-hero-card">
+            <img src="/asorta-tcg-hero.jpeg" alt="ASORTA Trading Cards Collectibles Events" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 rounded-[1.7rem] ring-1 ring-inset ring-white/14" />
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {['Pokemon boosters', 'Elite Trainer Boxes', 'Mystery packs'].map((label) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-white/[.035] px-4 py-3 text-center text-xs font-black uppercase tracking-[.18em] text-white/55">
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      <div className="asorta-flagship-split" />
-
-      <div className="asorta-flagship-scene">
-        {slides.map((item, index) => (
-          <img
-            key={item.title}
-            src={item.image}
-            alt=""
-            className={`asorta-flagship-image ${index === active ? 'active' : ''}`}
-            style={{ objectPosition: item.position || 'center center' }}
-          />
-        ))}
-        <div className="asorta-flagship-grade" />
-
-        <button type="button" onClick={() => go(-1)} className="asorta-flagship-arrow asorta-flagship-arrow-left" aria-label="Vorige slide">
-          <ArrowLeft size={22} />
-        </button>
-        <button type="button" onClick={() => go(1)} className="asorta-flagship-arrow asorta-flagship-arrow-right" aria-label="Volgende slide">
-          <ArrowRight size={22} />
-        </button>
-
-        <div className="asorta-flagship-card">
-          <p>{slide.kicker}</p>
-          <h2>{slide.title}</h2>
-          <span>{slide.subtitle}</span>
-        </div>
-        <div className="asorta-flagship-dots">
-          {slides.map((_, index) => (
-            <button key={index} type="button" onClick={() => setActive(index)} className={index === active ? 'active' : ''} aria-label={`Ga naar slide ${index + 1}`} />
-          ))}
-        </div>
-      </div>
-
-      <div className="asorta-mobile-slide-card asorta-mobile-flagship-card">
-        <img src={slide.image} alt={slide.title} style={{ objectPosition: slide.position || 'center center' }} />
-        <div>
-          <p>{slide.kicker}</p>
-          <h2>{slide.title}</h2>
-          <span>{slide.text}</span>
-          <Link href={slide.href}>{slide.cta} <ArrowRight size={16} /></Link>
-        </div>
-      </div>
+      <BadgeCheck className="pointer-events-none absolute bottom-10 right-10 hidden text-white/10 lg:block" size={78} />
     </section>
   )
 }

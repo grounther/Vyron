@@ -10,15 +10,15 @@ import { getActiveActions, getPrimaryAction } from '@/lib/actions'
 import ActionBanner from '@/components/ActionBanner'
 import ExclusiveDropsSignup from '@/components/ExclusiveDropsSignup'
 import type { ReactNode } from 'react'
-import { ArrowRight, Car, Gamepad2, Laptop, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Gift, PackageCheck, ShieldCheck, Sparkles, Star } from 'lucide-react'
 
 const categoryVisuals: Record<string, {image:string; line:string; icon: ReactNode}> = {
-  tactical: { image: '/products/urban-sling/2_ffc916c0-7b8f-4b11-a8a7-c2e014a62fe7.jpg', line: 'Built for performance', icon: <ShieldCheck size={22}/> },
-  automotive: { image: '/products/drivecharge/1_1c3d32e3-9eb6-47f9-b217-e2911571c64a.jpg', line: 'Upgrade your drive', icon: <Car size={22}/> },
-  'desk-setup': { image: '/products/monitor-lightbar-ultra.svg', line: 'Organized & productive', icon: <Laptop size={22}/> },
-  gaming: { image: '/products/wavemic/1_a09d4f0d-2641-4a83-9da9-58e22e5d8d55.jpg', line: 'Elevate your game', icon: <Gamepad2 size={22}/> },
-  'smart-utility': { image: '/products/drivecharge/13_99d408a4-2bbd-41f4-a3e8-0fc05e190202.jpg', line: 'Smarter everyday', icon: <PackageCheck size={22}/> },
-  outdoor: { image: '/products/gps/1_f6ad23a2-5a67-4fd1-8c98-803f658e6409.jpg', line: 'Ready for travel', icon: <Sparkles size={22}/> },
+  'booster-packs': { image: '/asorta-tcg-hero.jpeg', line: 'Losse sealed packs', icon: <PackageCheck size={22}/> },
+  'elite-trainer-boxes': { image: '/asorta-tcg-hero.jpeg', line: "ETB\'s en premium boxen", icon: <ShieldCheck size={22}/> },
+  'collection-boxes': { image: '/asorta-tcg-hero.jpeg', line: 'Tins, boxes en gift sets', icon: <Gift size={22}/> },
+  singles: { image: '/asorta-tcg-hero.jpeg', line: 'Hits en binder cards', icon: <Star size={22}/> },
+  accessories: { image: '/asorta-tcg-hero.jpeg', line: 'Sleeves, binders, toploaders', icon: <BadgeCheck size={22}/> },
+  'market-deals': { image: '/asorta-tcg-hero.jpeg', line: 'Bundles voor markten', icon: <Sparkles size={22}/> },
 }
 
 export default async function Home(){
@@ -56,12 +56,12 @@ export default async function Home(){
   <section id="featured" className="mx-auto max-w-7xl px-4 py-10 sm:px-5 sm:py-12">
     <div className="mb-7 flex items-end justify-between gap-4">
       <div><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#7aa6b8] shadow-[0_0_18px_rgba(122,166,184,.8)]"/><p className="kicker">{content['homepage.featured.kicker']}</p></div><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.featured.title']}</h2></div>
-      <Link href="/shop" className="hidden items-center gap-2 text-sm font-black text-white/58 transition hover:text-white md:inline-flex">View all <ArrowRight size={16}/></Link>
+      <Link href="/shop" className="hidden items-center gap-2 text-sm font-black text-white/58 transition hover:text-white md:inline-flex">Bekijk alles <ArrowRight size={16}/></Link>
     </div>
     <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">{featured.map(p=><ProductCard key={p.slug} p={p}/>)}</div>
   </section>
 
-  <section className="mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">{content['homepage.catalog.kicker']}</p><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.catalog.title']}</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">View all</Link></div><div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
+  <section className="mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-16"><div className="flex items-end justify-between gap-4"><div><p className="kicker">{content['homepage.catalog.kicker']}</p><h2 className="mt-2 text-3xl font-black md:text-5xl">{content['homepage.catalog.title']}</h2></div><Link href="/shop" className="hidden rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/10 md:inline-flex">Bekijk alles</Link></div><div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">{products.slice(0,8).map(p=><ProductCard key={p.slug} p={p}/>)}</div></section>
 
   <ExclusiveDropsSignup
     kicker={content['homepage.insiders.kicker']}

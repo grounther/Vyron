@@ -6,7 +6,7 @@ import { ArrowRight, Tag } from 'lucide-react'
 
 const slides = [
   {kicker:'Launch Deal',title:'Launch picks now live.',text:'Ontdek de eerste ASORTA utility producten met tracked shipping en premium productpagina’s.',href:'/shop',cta:'Shop launch picks'},
-  {kicker:'Automotive Focus',title:'Upgrade your daily drive.',text:'DriveCharge en AmbientDrive brengen clean utility en sfeer naar je interieur.',href:'/category/automotive',cta:'View automotive'},
+  {kicker:'Markt Deals',title:'Pokemon deals voor online en op locatie.',text:'Bundles, losse boosters en acties die ook meegaan naar markten en braderieen.',href:'/category/market-deals',cta:'Bekijk deals'},
   {kicker:'Atlas Ready',title:'Built to scale.',text:'Promo slides worden straks via Atlas beheerd zodat acties live aangepast kunnen worden.',href:'/atlas-access',cta:'Atlas access'}
 ]
 export default function PromoSlider(){

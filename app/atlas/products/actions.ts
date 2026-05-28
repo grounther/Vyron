@@ -237,7 +237,7 @@ export async function importCJProduct(formData: FormData) {
     const customDescription = value(formData, 'cj_import_description')
     const description = customDescription || stripHtml(product.description).slice(0, 2200)
     const variantIds = unique((product.variants || []).map((variant) => variant.vid))
-    const selectedCategory = value(formData, 'cj_import_category') || 'smart-utility'
+    const selectedCategory = value(formData, 'cj_import_category') || 'booster-packs'
 
     const row = {
       slug,
@@ -387,7 +387,7 @@ export async function saveProduct(formData: FormData) {
   const row = deleteEmptyOptionalFields({
     slug,
     name,
-    category: value(formData, 'category') || 'smart-utility',
+    category: value(formData, 'category') || 'booster-packs',
     price,
     compare_at: numberOrNull(formData, 'compare_at'),
     estimated_cost: numberOrNull(formData, 'estimated_cost'),
@@ -406,7 +406,7 @@ export async function saveProduct(formData: FormData) {
     status: value(formData, 'status') || 'draft',
     hero_image: hero,
     images,
-    badge: value(formData, 'badge') || 'New',
+    badge: value(formData, 'badge') || 'Eigen voorraad',
     short_description: value(formData, 'short_description'),
     description: value(formData, 'description'),
     features: lines(formData, 'features'),

@@ -804,3 +804,37 @@ body{
   .product-img{height:128px}
   .asorta-header-logo{height:28px}
 }
+
+/* ASORTA Pokemon / TCG rebrand */
+.asorta-tcg-hero{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 14% 22%,rgba(245,190,82,.16),transparent 30%),
+    radial-gradient(circle at 86% 24%,rgba(78,181,255,.16),transparent 34%),
+    linear-gradient(135deg,#030303 0%,#090b10 54%,#020202 100%);
+  isolation:isolate;
+}
+.asorta-tcg-hero:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.035),transparent 18%,transparent 82%,rgba(255,255,255,.035)),
+    linear-gradient(180deg,rgba(255,255,255,.05),transparent 20%,rgba(0,0,0,.35));
+}
+.asorta-tcg-glow{position:absolute;pointer-events:none;border-radius:999px;filter:blur(56px);opacity:.55}
+.asorta-tcg-glow-gold{left:-9rem;top:5rem;height:19rem;width:19rem;background:rgba(245,190,82,.26)}
+.asorta-tcg-glow-blue{right:-8rem;top:8rem;height:22rem;width:22rem;background:rgba(70,181,255,.22)}
+.asorta-tcg-hero-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:1.7rem;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);
+  box-shadow:0 34px 120px rgba(0,0,0,.58),0 0 70px rgba(70,181,255,.12),0 0 70px rgba(245,190,82,.10);
+}
+.asorta-tcg-hero-card img{min-height:260px;max-height:520px;filter:saturate(1.05) contrast(1.03)}
+.category-tile img[src='/asorta-tcg-hero.jpeg']{filter:saturate(1.06) contrast(1.08) brightness(.78)}
+@media(max-width:640px){.asorta-tcg-hero-card img{min-height:210px}.asorta-tcg-hero{padding-top:.5rem}}

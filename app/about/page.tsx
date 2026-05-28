@@ -3,8 +3,8 @@ import { BadgeCheck, PackageCheck, ShieldCheck, Sparkles, Truck } from 'lucide-r
 import { getSiteContent, splitParagraphs } from '@/lib/site-content'
 
 export const metadata = {
-  title: 'Over ASORTA | Smart utility producten',
-  description: 'Lees meer over ASORTA: een Nederlandse webshop voor praktische smart utility, automotive, desk setup en everyday carry producten.',
+  title: 'Over ASORTA | Pokemon TCG & Collectibles',
+  description: 'Lees meer over ASORTA: een Nederlandse Pokemon TCG shop voor trading cards, collectibles, sealed producten en markten/events.',
 }
 
 export default async function AboutPage() {

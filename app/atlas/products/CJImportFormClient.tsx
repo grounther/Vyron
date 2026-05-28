@@ -51,7 +51,7 @@ export default function CJImportFormClient({ categories, cjConfigured, action }:
   const [countryCode, setCountryCode] = useState('CN')
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
-  const [category, setCategory] = useState('smart-utility')
+  const [category, setCategory] = useState('booster-packs')
   const [price, setPrice] = useState('')
   const [compareAt, setCompareAt] = useState('')
   const [shipping, setShipping] = useState('')

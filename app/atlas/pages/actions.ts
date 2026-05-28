@@ -104,7 +104,7 @@ export async function saveSiteContent(formData: FormData) {
     revalidatePath(path)
   }
 
-  for (const slug of ['smart-utility', 'automotive', 'desk-setup', 'tactical', 'outdoor', 'gaming']) {
+  for (const slug of ['booster-packs', 'elite-trainer-boxes', 'collection-boxes', 'singles', 'accessories', 'market-deals']) {
     revalidatePath(`/category/${slug}`)
   }
 

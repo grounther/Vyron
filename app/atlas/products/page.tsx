@@ -140,12 +140,12 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
     <div className="grid gap-4 md:grid-cols-3">
       <Field label="Naam" name="name" defaultValue={text(p.name)} required />
       <Field label="Slug" name="slug" defaultValue={text(p.slug)} placeholder="wordt automatisch gemaakt als leeg" />
-      <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Categorie</span><select name="category" defaultValue={text(p.category, 'smart-utility')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]">{categories.map((c)=><option key={c.slug} value={c.slug}>{c.name}</option>)}</select></label>
+      <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Categorie</span><select name="category" defaultValue={text(p.category, 'booster-packs')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]">{categories.map((c)=><option key={c.slug} value={c.slug}>{c.name}</option>)}</select></label>
       <Field label="Prijs" name="price" type="number" step="0.01" defaultValue={String(p.price || '')} required />
       <Field label="Compare at" name="compare_at" type="number" step="0.01" defaultValue={String(p.compare_at || '')} />
       <Field label="Estimated cost" name="estimated_cost" type="number" step="0.01" defaultValue={String(p.estimated_cost || '')} />
-      <Field label="Eigen SKU" name="supplier_sku" defaultValue={text(p.supplier_sku)} placeholder="bijv. ASORTA-WALLET-001" />
-      <Field label="Badge" name="badge" defaultValue={text(p.badge, 'New')} />
+      <Field label="Eigen SKU" name="supplier_sku" defaultValue={text(p.supplier_sku)} placeholder="bijv. AS-PKM-BOOST-001" />
+      <Field label="Badge" name="badge" defaultValue={text(p.badge, 'Eigen voorraad')} />
       <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Status</span><select name="status" defaultValue={text(p.status, 'draft')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="draft">draft</option><option value="active">active</option><option value="launch">launch</option><option value="archived">archived</option></select></label>
       <Field label="Warehouse" name="warehouse" defaultValue={text(p.warehouse, 'Eigen voorraad')} />
     </div>

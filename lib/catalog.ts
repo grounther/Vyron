@@ -106,7 +106,7 @@ function mapProductRow(row: ProductRow): Product {
   return {
     slug,
     name: asString(row.name, 'Untitled Shopify product'),
-    category: asString(row.category, 'smart-utility'),
+    category: asString(row.category, 'booster-packs'),
     price,
     compareAt,
     cost: estimatedCost,

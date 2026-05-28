@@ -45,11 +45,11 @@ export default function Header(){
   const dict = getDictionary(locale)
   const links = useMemo(() => [
     [dict.nav.shop, '/shop'],
-    [dict.nav.tactical, '/category/tactical'],
-    [dict.nav.automotive, '/category/automotive'],
-    [dict.nav.desk, '/category/desk-setup'],
-    [dict.nav.gaming, '/category/gaming'],
-    [dict.nav.smartUtility, '/category/smart-utility'],
+    [dict.nav.boosterPacks, '/category/booster-packs'],
+    [dict.nav.eliteTrainerBoxes, '/category/elite-trainer-boxes'],
+    [dict.nav.collectionBoxes, '/category/collection-boxes'],
+    [dict.nav.marketDeals, '/category/market-deals'],
+    [dict.nav.accessories, '/category/accessories'],
     [dict.nav.account, '/account'],
   ] as const, [dict])
   const count=cartCount(items)

@@ -9,10 +9,10 @@ import { organizationJsonLd, stringifyJsonLd, websiteJsonLd } from '@/lib/seo/st
 
 export const metadata: Metadata = {
   title: {
-    default: 'ASORTA | Smart utility products',
+    default: 'ASORTA | Pokemon TCG, Collectibles & Events',
     template: '%s | ASORTA',
   },
-  description: 'ASORTA is een premium modern utility shop voor slimme dagelijkse producten, automotive upgrades, desk setup, gaming, tactical carry en outdoor essentials.',
+  description: 'ASORTA is een Pokemon TCG shop voor trading cards, collectibles, sealed producten, eigen voorraad en markt/events verkoop.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://asorta.nl'),
   icons: { icon: '/asorta-icon.png', apple: '/asorta-icon.png' },
   alternates: { canonical: '/' },
@@ -31,19 +31,19 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
   openGraph: {
-    title: 'ASORTA | Smart utility products',
-    description: 'Premium utility products geselecteerd op bruikbaarheid, uitstraling en kwaliteit.',
+    title: 'ASORTA | Pokemon TCG, Collectibles & Events',
+    description: 'Pokemon TCG, sealed producten, collectibles en marktdeals uit eigen voorraad.',
     url: 'https://asorta.nl',
     siteName: 'ASORTA',
     type: 'website',
     locale: 'nl_NL',
-    images: [{ url: '/asorta-icon.png', width: 512, height: 512, alt: 'ASORTA' }],
+    images: [{ url: '/asorta-tcg-hero.jpeg', width: 1536, height: 768, alt: 'ASORTA Trading Cards Collectibles Events' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ASORTA | Smart utility products',
-    description: 'Premium utility products geselecteerd op bruikbaarheid, uitstraling en kwaliteit.',
-    images: ['/asorta-icon.png'],
+    title: 'ASORTA | Pokemon TCG, Collectibles & Events',
+    description: 'Pokemon TCG, sealed producten, collectibles en marktdeals uit eigen voorraad.',
+    images: ['/asorta-tcg-hero.jpeg'],
   },
 }
 

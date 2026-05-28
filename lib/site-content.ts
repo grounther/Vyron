@@ -16,16 +16,16 @@ function f(field: SiteContentField): SiteContentField {
 }
 
 export const siteContentDefaults: SiteContentField[] = [
-  f({ key: 'homepage.hero.kicker', label: 'Hero category line', value: 'TACTICAL • AUTOMOTIVE • GAMING • UTILITY', type: 'text', group: 'Hero', page: 'Homepage' }),
-  f({ key: 'homepage.hero.text', label: 'Hero body text', value: 'Premium gear voor modern carry, automotive upgrades, gaming setups, desk organization en smart daily utility — geselecteerd op kwaliteit, uitstraling en echte bruikbaarheid.', type: 'textarea', group: 'Hero', page: 'Homepage' }),
-  f({ key: 'homepage.hero.primaryCta', label: 'Hero primary button', value: 'Explore Collection', type: 'text', group: 'Hero', page: 'Homepage' }),
-  f({ key: 'homepage.hero.secondaryCta', label: 'Hero secondary button', value: 'Best Sellers', type: 'text', group: 'Hero', page: 'Homepage' }),
-  f({ key: 'homepage.categories.kicker', label: 'Categories kicker', value: 'Browse categories', type: 'text', group: 'Categories section', page: 'Homepage' }),
-  f({ key: 'homepage.categories.title', label: 'Categories title', value: 'Shop by category', type: 'text', group: 'Categories section', page: 'Homepage' }),
-  f({ key: 'homepage.featured.kicker', label: 'Featured kicker', value: 'Best sellers', type: 'text', group: 'Featured section', page: 'Homepage' }),
-  f({ key: 'homepage.featured.title', label: 'Featured title', value: 'Launch products', type: 'text', group: 'Featured section', page: 'Homepage' }),
-  f({ key: 'homepage.catalog.kicker', label: 'Catalog kicker', value: 'Full Launch Catalog', type: 'text', group: 'Catalog section', page: 'Homepage' }),
-  f({ key: 'homepage.catalog.title', label: 'Catalog title', value: 'Just what you need.', type: 'text', group: 'Catalog section', page: 'Homepage' }),
+  f({ key: 'homepage.hero.kicker', label: 'Hero category line', value: 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS', type: 'text', group: 'Hero', page: 'Homepage' }),
+  f({ key: 'homepage.hero.text', label: 'Hero body text', value: 'Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk wat uit eigen voorraad komt.', type: 'textarea', group: 'Hero', page: 'Homepage' }),
+  f({ key: 'homepage.hero.primaryCta', label: 'Hero primary button', value: 'Shop Pokemon', type: 'text', group: 'Hero', page: 'Homepage' }),
+  f({ key: 'homepage.hero.secondaryCta', label: 'Hero secondary button', value: 'Markt voorraad', type: 'text', group: 'Hero', page: 'Homepage' }),
+  f({ key: 'homepage.categories.kicker', label: 'Categories kicker', value: 'Pokemon assortiment', type: 'text', group: 'Categories section', page: 'Homepage' }),
+  f({ key: 'homepage.categories.title', label: 'Categories title', value: 'Shop Pokemon per categorie', type: 'text', group: 'Categories section', page: 'Homepage' }),
+  f({ key: 'homepage.featured.kicker', label: 'Featured kicker', value: 'Uitgelicht', type: 'text', group: 'Featured section', page: 'Homepage' }),
+  f({ key: 'homepage.featured.title', label: 'Featured title', value: 'Populaire Pokemon picks', type: 'text', group: 'Featured section', page: 'Homepage' }),
+  f({ key: 'homepage.catalog.kicker', label: 'Catalog kicker', value: 'Volledige voorraad', type: 'text', group: 'Catalog section', page: 'Homepage' }),
+  f({ key: 'homepage.catalog.title', label: 'Catalog title', value: 'Pokemon sealed, singles en collectibles.', type: 'text', group: 'Catalog section', page: 'Homepage' }),
   f({ key: 'homepage.insiders.kicker', label: 'Insiders kicker', value: 'ASORTA Insiders', type: 'text', group: 'Newsletter block', page: 'Homepage' }),
   f({ key: 'homepage.insiders.title', label: 'Insiders title', value: 'Exclusive drops, early access.', type: 'text', group: 'Newsletter block', page: 'Homepage' }),
   f({ key: 'homepage.insiders.text', label: 'Insiders text', value: 'Schrijf je in voor exclusieve drops, early access en tijdelijke ASORTA kortingen. Geen spam — alleen updates die waarde hebben.', type: 'textarea', group: 'Newsletter block', page: 'Homepage' }),
@@ -38,30 +38,30 @@ export const siteContentDefaults: SiteContentField[] = [
   f({ key: 'homepage.insiders.consent', label: 'Newsletter consent text', value: 'Door je in te schrijven ga je akkoord met ASORTA updates. Uitschrijven kan altijd.', type: 'textarea', group: 'Newsletter block', page: 'Homepage' }),
   f({ key: 'homepage.insiders.chips', label: 'Newsletter chips, one per line', value: 'Early access\nDrop alerts\nLaunch discounts', type: 'textarea', group: 'Newsletter block', page: 'Homepage' }),
 
-  f({ key: 'shop.kicker', label: 'Shop kicker', value: 'ASORTA Catalog', type: 'text', group: 'Hero', page: 'Shop page' }),
-  f({ key: 'shop.title', label: 'Shop title', value: 'Just what you need.', type: 'text', group: 'Hero', page: 'Shop page' }),
-  f({ key: 'shop.text', label: 'Shop body text', value: 'Een curated launch catalog met premium utility producten. Zoek, filter en vind snel wat past bij jouw setup, auto, carry of daily routine.', type: 'textarea', group: 'Hero', page: 'Shop page' }),
+  f({ key: 'shop.kicker', label: 'Shop kicker', value: 'ASORTA Pokemon Shop', type: 'text', group: 'Hero', page: 'Shop page' }),
+  f({ key: 'shop.title', label: 'Shop title', value: 'Pokemon sealed, singles en collectibles.', type: 'text', group: 'Hero', page: 'Shop page' }),
+  f({ key: 'shop.text', label: 'Shop body text', value: 'Bekijk de actuele Pokemon voorraad van ASORTA. Sealed producten, singles, accessoires en marktdeals uit eigen voorraad.', type: 'textarea', group: 'Hero', page: 'Shop page' }),
 
-  f({ key: 'category.kicker', label: 'Category kicker', value: 'Collection', type: 'text', group: 'Category template', page: 'Category pages' }),
-  f({ key: 'category.empty', label: 'Empty category text', value: 'Nog geen producten in deze categorie.', type: 'text', group: 'Category template', page: 'Category pages' }),
+  f({ key: 'category.kicker', label: 'Category kicker', value: 'Pokemon collectie', type: 'text', group: 'Category template', page: 'Category pages' }),
+  f({ key: 'category.empty', label: 'Empty category text', value: 'Nog geen Pokemon producten in deze categorie.', type: 'text', group: 'Category template', page: 'Category pages' }),
 
   f({ key: 'about.kicker', label: 'About kicker', value: 'ASORTA', type: 'text', group: 'Hero', page: 'About page' }),
   f({ key: 'about.title', label: 'About title', value: 'Over ASORTA', type: 'text', group: 'Hero', page: 'About page' }),
-  f({ key: 'about.body', label: 'About body', value: `ASORTA is een Nederlandse webshop voor praktische smart utility producten, automotive accessoires, desk setup upgrades en everyday carry gear.
+  f({ key: 'about.body', label: 'About body', value: `ASORTA is een Nederlandse Pokemon TCG shop voor trading cards, collectibles, sealed producten en verkoop op markten, braderieen en events.
 
-Onze collectie wordt samengesteld op bruikbaarheid, duidelijke productinformatie en een veilige checkoutflow. We selecteren producten op praktische waarde, uitstraling en geschiktheid voor dagelijks gebruik.
+Onze collectie bestaat uit eigen voorraad: booster packs, Elite Trainer Boxes, collection boxes, singles, accessoires en marktdeals. We focussen op duidelijke productinformatie, betrouwbare voorraad en een veilige checkoutflow.
 
 Na je bestelling ontvang je een orderbevestiging per e-mail. Zodra tracking beschikbaar is, ontvang je automatisch een verzendupdate.`, type: 'textarea', group: 'Hero', page: 'About page' }),
   f({ key: 'about.primaryCta', label: 'Primary CTA', value: 'Bekijk collectie', type: 'text', group: 'Hero', page: 'About page' }),
   f({ key: 'about.secondaryCta', label: 'Secondary CTA', value: 'Contact support', type: 'text', group: 'Hero', page: 'About page' }),
-  f({ key: 'about.value1.title', label: 'Value card 1 title', value: 'Curated products', type: 'text', group: 'Value cards', page: 'About page' }),
-  f({ key: 'about.value1.text', label: 'Value card 1 text', value: 'We selecteren praktische producten op bruikbaarheid, uitstraling en duidelijke informatie.', type: 'textarea', group: 'Value cards', page: 'About page' }),
+  f({ key: 'about.value1.title', label: 'Value card 1 title', value: 'Originele producten', type: 'text', group: 'Value cards', page: 'About page' }),
+  f({ key: 'about.value1.text', label: 'Value card 1 text', value: 'We verkopen Pokemon producten uit eigen voorraad en letten scherp op originaliteit, staat en duidelijke informatie.', type: 'textarea', group: 'Value cards', page: 'About page' }),
   f({ key: 'about.value2.title', label: 'Value card 2 title', value: 'Veilige checkout', type: 'text', group: 'Value cards', page: 'About page' }),
   f({ key: 'about.value2.text', label: 'Value card 2 text', value: 'Bestellen verloopt via een beveiligde betaalomgeving.', type: 'textarea', group: 'Value cards', page: 'About page' }),
   f({ key: 'about.value3.title', label: 'Value card 3 title', value: 'Tracking-first', type: 'text', group: 'Value cards', page: 'About page' }),
   f({ key: 'about.value3.text', label: 'Value card 3 text', value: 'Je ontvangt tracking zodra je pakket is aangemeld voor verzending.', type: 'textarea', group: 'Value cards', page: 'About page' }),
   f({ key: 'about.bottom.title', label: 'Bottom block title', value: 'Waarom transparantie belangrijk is', type: 'text', group: 'Bottom block', page: 'About page' }),
-  f({ key: 'about.bottom.text', label: 'Bottom block text', value: 'Duidelijke informatie over bestellen, contact, verzending, retouren en voorwaarden helpt klanten begrijpen wat ze kunnen verwachten. Daarom houden we deze pagina’s zichtbaar, actueel en klantgericht.', type: 'textarea', group: 'Bottom block', page: 'About page' }),
+  f({ key: 'about.bottom.text', label: 'Bottom block text', value: 'Bij Pokemon producten draait alles om vertrouwen. Daarom houden we productstaat, voorraad, verzending, retouren en contactmogelijkheden zo duidelijk mogelijk.', type: 'textarea', group: 'Bottom block', page: 'About page' }),
 
   f({ key: 'contact.title', label: 'Contact title', value: 'Contact', type: 'text', group: 'Contact page', page: 'Contact page' }),
   f({ key: 'contact.text', label: 'Contact intro', value: 'Heb je een vraag over je bestelling, verzending, retour of productinformatie? Neem contact op met ASORTA Support. Vermeld bij ordervragen altijd je ordernummer en het e-mailadres waarmee je hebt besteld.', type: 'textarea', group: 'Contact page', page: 'Contact page' }),
@@ -79,7 +79,7 @@ Na je bestelling ontvang je een orderbevestiging per e-mail. Zodra tracking besc
   f({ key: 'contact.response.text', label: 'Response text', value: 'We reageren zo snel mogelijk. Voor ordervragen: vermeld je ordernummer en het e-mailadres waarmee je hebt besteld.', type: 'textarea', group: 'Contact support blocks', page: 'Contact page' }),
 
   f({ key: 'faq.title', label: 'FAQ title', value: 'Veelgestelde vragen', type: 'text', group: 'FAQ page', page: 'FAQ page' }),
-  f({ key: 'faq.items', label: 'FAQ items: vraag | antwoord per regel', value: `Wat is ASORTA? | ASORTA is een webshop voor praktische smart utility producten, automotive accessoires, desk setup upgrades en everyday carry gear.
+  f({ key: 'faq.items', label: 'FAQ items: vraag | antwoord per regel', value: `Wat is ASORTA? | ASORTA is een Pokemon TCG shop voor trading cards, collectibles, sealed producten en markt/events verkoop.
 Hoe werkt betalen? | Je rekent af via een beveiligde betaalomgeving. Beschikbare betaalmethodes kunnen per moment verschillen.
 Hoe volg ik mijn bestelling? | Gebruik de pagina Order volgen met je ordernummer en het e-mailadres waarmee je hebt besteld.
 Wanneer ontvang ik tracking? | Tracking is beschikbaar zodra je pakket is aangemeld voor verzending. Je ontvangt dan automatisch een verzendupdate per e-mail.
@@ -159,25 +159,50 @@ Voor vragen, klachten, retouren of problemen met je bestelling neem je contact o
   f({ key: 'account.loyalty.text', label: 'Loyalty block text', value: 'ASORTA loyalty is voorbereid voor punten, tiers, exclusive drops en member-only korting.', type: 'textarea', group: 'Account page', page: 'Account page' }),
   f({ key: 'account.continue', label: 'Continue shopping button', value: 'Continue shopping', type: 'text', group: 'Account page', page: 'Account page' }),
 
-  f({ key: 'footer.brandText', label: 'Footer brand text', value: 'Practical smart utility, automotive and everyday carry products with a clean shopping experience.', type: 'textarea', group: 'Footer', page: 'Footer' }),
+  f({ key: 'footer.brandText', label: 'Footer brand text', value: 'Trading Cards • Collectibles • Events. Pokemon sealed producten, collectibles en eigen voorraad voor online verkoop en markten.', type: 'textarea', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.shopTitle', label: 'Footer shop heading', value: 'Shop', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.supportTitle', label: 'Footer support heading', value: 'Support', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.paymentsTitle', label: 'Footer payments heading', value: 'Payments', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.payments', label: 'Payment labels, one per line', value: 'PayPal\niDEAL | Wero\nCards\nApple Pay / Google Pay', type: 'textarea', group: 'Footer', page: 'Footer' }),
-  f({ key: 'footer.copyright', label: 'Footer copyright', value: '© 2026 ASORTA. Premium utility ecommerce.', type: 'text', group: 'Footer', page: 'Footer' }),
+  f({ key: 'footer.copyright', label: 'Footer copyright', value: '© 2026 ASORTA. Trading Cards • Collectibles • Events.', type: 'text', group: 'Footer', page: 'Footer' }),
   f({ key: 'footer.trust1.title', label: 'Trust card 1 title', value: 'Secure checkout', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
   f({ key: 'footer.trust1.text', label: 'Trust card 1 text', value: 'Safe and encrypted checkout flow.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
-  f({ key: 'footer.trust2.title', label: 'Trust card 2 title', value: 'Curated products', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
-  f({ key: 'footer.trust2.text', label: 'Trust card 2 text', value: 'Selected for practical daily use.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
-  f({ key: 'footer.trust3.title', label: 'Trust card 3 title', value: 'Tracked shipping', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
-  f({ key: 'footer.trust3.text', label: 'Trust card 3 text', value: 'Tracking updates when available.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
+  f({ key: 'footer.trust2.title', label: 'Trust card 2 title', value: 'Originele producten', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
+  f({ key: 'footer.trust2.text', label: 'Trust card 2 text', value: 'Sealed en zorgvuldig geselecteerd.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
+  f({ key: 'footer.trust3.title', label: 'Trust card 3 title', value: 'Verzending & markten', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
+  f({ key: 'footer.trust3.text', label: 'Trust card 3 text', value: 'Online verzending en lokale verkoop.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
   f({ key: 'footer.trust4.title', label: 'Trust card 4 title', value: 'Support', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
   f({ key: 'footer.trust4.text', label: 'Trust card 4 text', value: 'Help with orders and product questions.', type: 'text', group: 'Footer trust cards', page: 'Footer' }),
 
-  f({ key: 'site.shipping.message', label: 'Global shipping message', value: 'Estimated delivery: 6–12 business days with tracked shipping.', type: 'text', group: 'Global snippets', page: 'Global' }),
+  f({ key: 'site.shipping.message', label: 'Global shipping message', value: 'Eigen voorraad wordt zorgvuldig verpakt en verzonden zodra de betaling rond is.', type: 'text', group: 'Global snippets', page: 'Global' }),
 ]
 
 export type SiteContentMap = Record<string, string>
+
+const rebrandOverrides: SiteContentMap = {
+  'homepage.hero.kicker': 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS',
+  'homepage.hero.text': 'Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk wat uit eigen voorraad komt.',
+  'homepage.hero.primaryCta': 'Shop Pokemon',
+  'homepage.hero.secondaryCta': 'Markt voorraad',
+  'homepage.categories.kicker': 'Pokemon assortiment',
+  'homepage.categories.title': 'Shop Pokemon per categorie',
+  'homepage.featured.kicker': 'Uitgelicht',
+  'homepage.featured.title': 'Populaire Pokemon picks',
+  'homepage.catalog.kicker': 'Volledige voorraad',
+  'homepage.catalog.title': 'Pokemon sealed, singles en collectibles.',
+  'shop.kicker': 'ASORTA Pokemon Shop',
+  'shop.title': 'Pokemon voorraad online',
+  'shop.text': 'Bekijk de actuele Pokemon voorraad van ASORTA. Sealed producten, singles, accessoires en marktdeals uit eigen voorraad.',
+  'category.kicker': 'Pokemon collectie',
+  'category.empty': 'Nog geen Pokemon producten in deze categorie.',
+  'footer.brandText': 'Trading Cards • Collectibles • Events. Pokemon sealed producten, collectibles en eigen voorraad voor online verkoop en markten.',
+  'footer.trust2.title': 'Originele producten',
+  'footer.trust2.text': 'Sealed en zorgvuldig geselecteerd.',
+  'footer.trust3.title': 'Verzending & markten',
+  'footer.trust3.text': 'Online verzending en lokale verkoop.',
+  'footer.copyright': '© 2026 ASORTA. Trading Cards • Collectibles • Events.',
+  'site.shipping.message': 'Eigen voorraad wordt zorgvuldig verpakt en verzonden zodra de betaling rond is.',
+}
 
 export function defaultSiteContentMap(): SiteContentMap {
   return siteContentDefaults.reduce((acc, field) => {
@@ -190,14 +215,14 @@ export async function getSiteContent(): Promise<SiteContentMap> {
   const defaults = defaultSiteContentMap()
   const client = createAdminClient() || supabase
 
-  if (!client) return defaults
+  if (!client) return { ...defaults, ...rebrandOverrides }
 
   const { data, error } = await client
     .from('site_content')
     .select('key,value')
     .in('key', siteContentDefaults.map((field) => field.key))
 
-  if (error || !data) return defaults
+  if (error || !data) return { ...defaults, ...rebrandOverrides }
 
   for (const row of data) {
     if (typeof row.key === 'string' && row.key in defaults && typeof row.value === 'string' && row.value.trim()) {
@@ -205,7 +230,7 @@ export async function getSiteContent(): Promise<SiteContentMap> {
     }
   }
 
-  return defaults
+  return { ...defaults, ...rebrandOverrides }
 }
 
 export function groupSiteContentFields(fields = siteContentDefaults) {
