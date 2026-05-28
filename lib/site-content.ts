@@ -181,7 +181,7 @@ export type SiteContentMap = Record<string, string>
 
 const rebrandOverrides: SiteContentMap = {
   'homepage.hero.kicker': 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS',
-  'homepage.hero.text': 'Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk wat uit eigen voorraad komt.',
+  'homepage.hero.text': 'Asorta. Alles voor jouw verzameling.',
   'homepage.hero.primaryCta': 'Shop Pokemon',
   'homepage.hero.secondaryCta': 'Markt voorraad',
   'homepage.categories.kicker': 'Pokemon assortiment',
