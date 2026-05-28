@@ -17,7 +17,7 @@ function f(field: SiteContentField): SiteContentField {
 
 export const siteContentDefaults: SiteContentField[] = [
   f({ key: 'homepage.hero.kicker', label: 'Hero category line', value: 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS', type: 'text', group: 'Hero', page: 'Homepage' }),
-  f({ key: 'homepage.hero.text', label: 'Hero body text', value: 'Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk wat uit eigen voorraad komt.', type: 'textarea', group: 'Hero', page: 'Homepage' }),
+  f({ key: 'homepage.hero.text', label: 'Hero body text', value: 'Asorta. Alles voor jouw verzameling.', type: 'textarea', group: 'Hero', page: 'Homepage' }),
   f({ key: 'homepage.hero.primaryCta', label: 'Hero primary button', value: 'Shop Pokemon', type: 'text', group: 'Hero', page: 'Homepage' }),
   f({ key: 'homepage.hero.secondaryCta', label: 'Hero secondary button', value: 'Markt voorraad', type: 'text', group: 'Hero', page: 'Homepage' }),
   f({ key: 'homepage.categories.kicker', label: 'Categories kicker', value: 'Pokemon assortiment', type: 'text', group: 'Categories section', page: 'Homepage' }),
