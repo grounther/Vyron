@@ -5,7 +5,7 @@ import HotDealsCarousel from './HotDealsCarousel'
 
 export default function HomeHeroSlider({
   kicker = 'POKEMON TCG • SEALED • COLLECTIBLES • EVENTS',
-  text = 'ASORTA wordt jouw plek voor Pokemon kaarten, sealed producten, collectibles en marktdeals. Online bestellen, lokaal kopen op markten en braderieen, en altijd duidelijk of iets direct uit eigen voorraad komt.',
+  text = '',
   primaryCta = 'Shop Pokemon',
   secondaryCta = 'Markt voorraad',
   hotDeals = [],
@@ -36,7 +36,7 @@ export default function HomeHeroSlider({
               {kicker}
             </div>
             <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[.92] tracking-[-.055em] text-white sm:text-6xl md:text-7xl xl:text-[5.2rem]">
-              Pokemon markt.<br />Online shop.<br />Eigen voorraad.
+              Asorta TCG & meer.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/72 sm:text-lg">{text}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
