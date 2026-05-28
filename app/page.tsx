@@ -31,6 +31,7 @@ export default async function Home(){
     text={content['homepage.hero.text']}
     primaryCta={content['homepage.hero.primaryCta']}
     secondaryCta={content['homepage.hero.secondaryCta']}
+    hotDeals={featured.length ? featured : products.slice(0, 6)}
   />
 
   <ActionBanner action={homeAction} />
