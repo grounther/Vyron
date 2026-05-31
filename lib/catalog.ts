@@ -19,6 +19,13 @@ function asString(value: unknown, fallback = '') {
   return typeof value === 'string' && value.trim() ? value : fallback
 }
 
+function asBoolean(value: unknown, fallback = false) {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value !== 0
+  if (typeof value === 'string') return ['true', '1', 'yes', 'on'].includes(value.toLowerCase())
+  return fallback
+}
+
 function asStringArray(value: unknown, fallback: string[] = []) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean)
   if (typeof value === 'string') {
@@ -54,6 +61,9 @@ function mapProductRow(row: ProductRow): Product {
   const videos = asJsonArray<ProductVideo>(row.videos, [])
   const estimatedCost = asNumber(row.estimated_cost, 0)
   const price = asNumber(row.price, 0)
+  const inventoryOnline = asNumber(row.inventory_online, 0)
+  const inventoryMarket = asNumber(row.inventory_market, 0)
+  const inventoryTotal = asNumber(row.inventory_total, inventoryOnline + inventoryMarket)
   const storedVariants = asJsonArray<ProductVariant>(row.variants, [])
   const fallbackSku = asString(row.supplier_sku, asString(row.cj_sku, ''))
   const variants = storedVariants.length ? storedVariants : (fallbackSku ? [{
@@ -130,6 +140,14 @@ function mapProductRow(row: ProductRow): Product {
     shopifyProductId: asString(row.shopify_product_id, ''),
     shopifyVariantId: asString(row.shopify_variant_id, ''),
     shopifyVariantLegacyId: asString(row.shopify_variant_legacy_id, ''),
+    inventoryOnline,
+    inventoryMarket,
+    inventoryTotal,
+    sellOnline: asBoolean(row.sell_online, true),
+    sellMarket: asBoolean(row.sell_market, false),
+    hotDeal: asBoolean(row.hot_deal, false),
+    conditionLabel: asString(row.condition_label, 'Sealed'),
+    sealedStatus: asString(row.sealed_status, 'Origineel sealed'),
   }
 }
 
@@ -140,7 +158,7 @@ function productQuery(client: any) {
     .in('status', ['active', 'launch'])
 }
 
-export async function getProducts(): Promise<Product[]> {
+async function getMappedPublicProducts(): Promise<Product[]> {
   const client = createAdminClient() || supabase
   if (!client) return []
 
@@ -149,6 +167,16 @@ export async function getProducts(): Promise<Product[]> {
   if (error || !data?.length) return []
 
   return (data as ProductRow[]).map((row: ProductRow) => mapProductRow(row))
+}
+
+export async function getProducts(): Promise<Product[]> {
+  const items = await getMappedPublicProducts()
+  return items.filter((p) => p.sellOnline !== false)
+}
+
+export async function getMarketProducts(): Promise<Product[]> {
+  const items = await getMappedPublicProducts()
+  return items.filter((p) => p.sellMarket || (typeof p.inventoryMarket === 'number' && p.inventoryMarket > 0))
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
@@ -169,8 +197,8 @@ export async function byCategory(slug: string): Promise<Product[]> {
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const items = await getProducts()
-  const preferred = items.filter((p) => (typeof p.badge === 'string' && ['Launch Pick', 'High Priority', 'Smart Car', 'Bestseller', 'Shopify Sync'].includes(p.badge)) || (typeof p.compareAt === 'number' && p.compareAt > p.price))
-  return preferred.length ? preferred.slice(0, 4) : items.slice(0, 4)
+  const preferred = items.filter((p) => p.hotDeal || (typeof p.badge === 'string' && ['Hot Deal', 'Market Deal', 'Bestseller', 'Launch Pick', 'Eigen voorraad'].includes(p.badge)) || (typeof p.compareAt === 'number' && p.compareAt > p.price))
+  return preferred.length ? preferred.slice(0, 6) : items.slice(0, 6)
 }
 
 // Intentionally do not expose old hardcoded products as catalog data.

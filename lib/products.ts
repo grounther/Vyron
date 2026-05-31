@@ -78,6 +78,14 @@ export type Product = {
   shopifyVariantLegacyId?: string
   shopifyHandle?: string
   status?: string
+  inventoryOnline?: number
+  inventoryMarket?: number
+  inventoryTotal?: number
+  sellOnline?: boolean
+  sellMarket?: boolean
+  hotDeal?: boolean
+  conditionLabel?: string
+  sealedStatus?: string
 }
 
 export const categories: Category[] = [

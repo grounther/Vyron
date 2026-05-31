@@ -8,6 +8,17 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) || '').trim()
 }
 
+function boolValue(formData: FormData, key: string) {
+  return formData.get(key) === 'on'
+}
+
+function intOrNull(formData: FormData, key: string) {
+  const raw = value(formData, key)
+  if (!raw) return null
+  const parsed = Number.parseInt(raw, 10)
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : null
+}
+
 function numberOrNull(formData: FormData, key: string) {
   const raw = value(formData, key)
   if (!raw) return null
@@ -109,6 +120,9 @@ export async function saveProduct(formData: FormData) {
   const images = Array.from(new Set([hero, ...lines(formData, 'images')]))
 
   const price = numberOrNull(formData, 'price') || 0
+  const inventoryOnline = intOrNull(formData, 'inventory_online')
+  const inventoryMarket = intOrNull(formData, 'inventory_market')
+  const inventoryTotal = intOrNull(formData, 'inventory_total') ?? ((inventoryOnline || 0) + (inventoryMarket || 0))
   const supplierSku = value(formData, 'supplier_sku')
   const supplierName = value(formData, 'supplier_name') || 'Eigen voorraad'
 
@@ -123,6 +137,14 @@ export async function saveProduct(formData: FormData) {
     supplier_sku: supplierSku,
     supplier_name: supplierName,
     supplier_url: value(formData, 'supplier_url'),
+    inventory_online: inventoryOnline ?? 0,
+    inventory_market: inventoryMarket ?? 0,
+    inventory_total: inventoryTotal,
+    sell_online: boolValue(formData, 'sell_online'),
+    sell_market: boolValue(formData, 'sell_market'),
+    hot_deal: boolValue(formData, 'hot_deal'),
+    condition_label: value(formData, 'condition_label') || 'Sealed',
+    sealed_status: value(formData, 'sealed_status') || 'Origineel sealed',
     warehouse: value(formData, 'warehouse') || 'Eigen voorraad',
     status: value(formData, 'status') || 'draft',
     hero_image: hero,
