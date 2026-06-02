@@ -853,3 +853,34 @@ body{
 .asorta-tcg-hero-card img{min-height:260px;max-height:520px;filter:saturate(1.05) contrast(1.03)}
 .category-tile img[src='/asorta-tcg-hero.jpeg']{filter:saturate(1.06) contrast(1.08) brightness(.78)}
 @media(max-width:640px){.asorta-tcg-hero-card img{min-height:210px}.asorta-tcg-hero{padding-top:.5rem}.asorta-tcg-hero:before{background-position:center top;opacity:.56}}
+
+/* ASORTA support form readability fix */
+select.support-input,
+input.support-input,
+textarea.support-input{
+  color:#fff;
+  caret-color:#fff;
+}
+
+select.support-input{
+  background-color:rgba(0,0,0,.55);
+  color:#fff;
+  line-height:1.25;
+}
+
+select.support-input option{
+  background:#0b0b0b;
+  color:#fff;
+}
+
+.support-input.h-10,
+.support-input.h-11,
+.support-input.h-12{
+  padding-top:0;
+  padding-bottom:0;
+  line-height:1.25;
+}
+
+textarea.support-input{
+  line-height:1.45;
+}
