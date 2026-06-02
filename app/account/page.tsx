@@ -5,6 +5,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { Heart, Package, Trophy, User } from 'lucide-react'
 import { getSiteContent } from '@/lib/site-content'
 import AccountWishlistClient from '@/components/AccountWishlistClient'
+import TcgPackOpener from '@/components/TcgPackOpener'
+import { getTcgState } from '@/lib/tcg-game-server'
 
 export const metadata = { title: 'Account | ASORTA' }
 
@@ -20,15 +22,40 @@ export default async function AccountPage() {
   let loyalty: any = null
   let wishlistCount = 0
   let wishlistItems: any[] = []
+  let tcgPackCount = 0
+  let tcgCollectionCount = 0
 
   if (admin) {
     const { data: adminUser } = await admin.from('admin_users').select('email').eq('email', user.email).eq('active', true).maybeSingle()
     isAdmin = Boolean(adminUser)
 
-    const { data: customer } = await admin.from('customers').select('id').eq('email', user.email).maybeSingle()
+    const email = user.email.toLowerCase().trim()
+    const { data: customer } = await admin.from('customers').select('id').eq('email', email).maybeSingle()
     if (customer?.id) {
-      const { data: orderRows } = await admin.from('orders').select('order_number,total,payment_status,fulfillment_status,created_at,tracking_url').eq('customer_id', customer.id).order('created_at', { ascending: false }).limit(8)
+      const { data: orderRows } = await admin
+        .from('orders')
+        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_url')
+        .or(`customer_id.eq.${customer.id},customer_email.eq.${email}`)
+        .order('created_at', { ascending: false })
+        .limit(8)
       orders = orderRows || []
+    } else {
+      const { data: orderRows } = await admin
+        .from('orders')
+        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_url')
+        .eq('customer_email', email)
+        .order('created_at', { ascending: false })
+        .limit(8)
+      orders = orderRows || []
+    }
+
+    try {
+      const tcgState = await getTcgState(admin, user)
+      tcgPackCount = tcgState.availablePackCount
+      tcgCollectionCount = tcgState.collection.reduce((sum: number, card: any) => sum + Number(card.quantity || 0), 0)
+    } catch {
+      tcgPackCount = 0
+      tcgCollectionCount = 0
     }
 
     const { data: loyaltyRow } = await admin.from('customer_loyalty').select('*').eq('auth_user_id', user.id).maybeSingle()
@@ -72,6 +99,21 @@ export default async function AccountPage() {
         <AccountStat icon={<Heart />} label="Wishlist" value={String(wishlistCount)} />
         <AccountStat icon={<Trophy />} label="Points" value={String(points)} />
         <AccountStat icon={<User />} label="Tier" value={tier.toUpperCase()} />
+      </section>
+
+      <section className="mt-8 card rounded-[2rem] p-6">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.25em] text-[#f6d36c]">ASORTA TCG minigame</p>
+            <h2 className="mt-2 text-2xl font-black">Perfect Order & Chaos Rising</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">Verzamel virtuele kaarten uit beide series. Bij elke aankoop met je account verdien je een pakje.</p>
+          </div>
+          <div className="text-right text-sm text-white/45">
+            <p><strong className="text-white">{tcgPackCount}</strong> pakje(s) klaar</p>
+            <p><strong className="text-white">{tcgCollectionCount}</strong> kaarten verzameld</p>
+          </div>
+        </div>
+        <TcgPackOpener initialPackCount={tcgPackCount} />
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">

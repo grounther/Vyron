@@ -1,6 +1,10 @@
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import { getSiteContent } from '@/lib/site-content'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getTcgState } from '@/lib/tcg-game-server'
+import TcgPackOpener from '@/components/TcgPackOpener'
 
 export const metadata = { title: 'Order received | ASORTA' }
 
@@ -12,5 +16,31 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     ? content['checkout.success.textWithOrder'].replace('{order}', String(order))
     : content['checkout.success.text']
 
-  return <main className="mx-auto max-w-3xl px-4 py-16 md:px-6"><div className="card rounded-[2rem] p-8 text-center md:p-12"><CheckCircle2 className="mx-auto text-emerald-300" size={54} /><p className="kicker mt-6">{content['checkout.success.kicker']}</p><h1 className="mt-3 text-4xl font-black md:text-6xl">{content['checkout.success.title']}</h1><p className="mt-4 text-white/58">{text}</p><Link href="/shop" className="btn-primary mt-8">{content['checkout.success.button']}</Link></div></main>
+  let packCount = 0
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const admin = createAdminClient()
+    if (user?.id && user.email && admin) {
+      const state = await getTcgState(admin, user)
+      packCount = state.availablePackCount
+    }
+  } catch {
+    packCount = 0
+  }
+
+  return <main className="mx-auto max-w-3xl px-4 py-16 md:px-6">
+    <div className="card rounded-[2rem] p-8 text-center md:p-12">
+      <CheckCircle2 className="mx-auto text-emerald-300" size={54} />
+      <p className="kicker mt-6">{content['checkout.success.kicker']}</p>
+      <h1 className="mt-3 text-4xl font-black md:text-6xl">{content['checkout.success.title']}</h1>
+      <p className="mt-4 text-white/58">{text}</p>
+      {packCount > 0 ? (
+        <div className="mt-8 text-left">
+          <TcgPackOpener initialPackCount={packCount} autoOpen />
+        </div>
+      ) : null}
+      <Link href="/shop" className="btn-primary mt-8">{content['checkout.success.button']}</Link>
+    </div>
+  </main>
 }
