@@ -207,7 +207,7 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
   const customer = portal?.customer || null
 
   return (
-    <aside className="card rounded-[2rem] p-5 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-auto">
+    <aside className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="kicker">Customer Portal</p>

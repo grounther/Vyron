@@ -1,7 +1,7 @@
 'use client'
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown, Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
 import type { AtlasSupportConversation, AtlasSupportMessage, AtlasSupportSnapshot } from '@/lib/support-admin'
 import CustomerPortalPanel from './CustomerPortalPanel'
 
@@ -213,15 +213,9 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
         </div>
       </section>
 
-      <section className="mt-8 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)_430px]">
-        <div className="card rounded-[2rem] p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-black">Gesprekken</h2>
-              <p className="text-xs text-white/35">{openCount} open · {conversations.length} totaal</p>
-            </div>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/45">{conversations.length}</span>
-          </div>
+      <section className="mt-8 grid gap-4">
+        <SupportAccordion title="Gesprekken" subtitle={`${openCount} open · ${conversations.length} totaal`} count={conversations.length} defaultOpen>
+          <div className="p-4">
           <div className="grid max-h-[680px] gap-2 overflow-auto pr-1">
             {conversations.length ? (
               conversations.map((conversation) => (
@@ -245,9 +239,11 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
               <p className="rounded-2xl border border-white/10 bg-white/[.025] p-5 text-sm text-white/50">Nog geen supportgesprekken.</p>
             )}
           </div>
-        </div>
+          </div>
+        </SupportAccordion>
 
-        <div className="card rounded-[2rem] p-5">
+        <SupportAccordion title="Gesprek detail" subtitle={selected ? `${selected.customer_name || 'Customer'} · ${selected.customer_email || 'geen e-mail'}` : 'Selecteer een supportgesprek'} defaultOpen>
+          <div className="p-5">
           {selected ? (
             <>
               <div className="flex flex-col gap-4 border-b border-white/10 pb-5 md:flex-row md:items-start md:justify-between">
@@ -331,17 +327,20 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </SupportAccordion>
 
-        <CustomerPortalPanel
-          selectedConversation={selected ? {
-            id: selected.id,
-            customer_name: selected.customer_name,
-            customer_email: selected.customer_email,
-            subject: selected.subject,
-          } : null}
-          onSupportRefresh={manualRefresh}
-        />
+        <SupportAccordion title="Klantdossier" subtitle="Zoeken, orders, supporthistorie, cart, wishlist en loyalty" defaultOpen={false}>
+          <CustomerPortalPanel
+            selectedConversation={selected ? {
+              id: selected.id,
+              customer_name: selected.customer_name,
+              customer_email: selected.customer_email,
+              subject: selected.subject,
+            } : null}
+            onSupportRefresh={manualRefresh}
+          />
+        </SupportAccordion>
       </section>
 
       <button
@@ -352,6 +351,40 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
         <RefreshCw size={14} /> Handmatig verversen
       </button>
     </main>
+  )
+}
+
+function SupportAccordion({
+  title,
+  subtitle,
+  count,
+  defaultOpen = false,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  count?: number
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  return (
+    <details open={defaultOpen} className="group card overflow-hidden rounded-[2rem]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[.035] [&::-webkit-details-marker]:hidden">
+        <div className="min-w-0">
+          <h2 className="text-xl font-black">{title}</h2>
+          {subtitle ? <p className="mt-1 text-xs text-white/38">{subtitle}</p> : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {typeof count === 'number' ? <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/45">{count}</span> : null}
+          <span className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/55 transition group-open:rotate-180">
+            <ChevronDown size={18} />
+          </span>
+        </div>
+      </summary>
+      <div className="border-t border-white/10">
+        {children}
+      </div>
+    </details>
   )
 }
 
