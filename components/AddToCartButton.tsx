@@ -17,7 +17,6 @@ type CartProduct = {
   sku?: string
   shopifyVariantId?: string
   shopifyVariantLegacyId?: string
-  inventoryOnline?: number
 }
 
 function cartCount(items: any[]) {
@@ -28,7 +27,7 @@ function lineKey(item: Partial<CartProduct>) {
   return [item.slug, item.shopifyVariantId || item.shopifyVariantLegacyId || item.variantSku || item.sku || 'default'].join('::')
 }
 
-export default function AddToCartButton({ product, disabled = false, disabledLabel = 'Niet online beschikbaar' }: { product: CartProduct; disabled?: boolean; disabledLabel?: string }) {
+export default function AddToCartButton({ product }: { product: CartProduct }) {
   const [show, setShow] = useState(false)
   const [count, setCount] = useState(0)
 
@@ -39,7 +38,6 @@ export default function AddToCartButton({ product, disabled = false, disabledLab
   }, [show])
 
   function add() {
-    if (disabled) return
     const key = 'asorta_cart'
     const current = JSON.parse(localStorage.getItem(key) || '[]')
     const productKey = lineKey(product)
@@ -56,7 +54,7 @@ export default function AddToCartButton({ product, disabled = false, disabledLab
   }
 
   return <>
-    <button onClick={add} disabled={disabled} className={`btn-primary w-full py-4 text-base md:text-lg ${disabled ? 'cursor-not-allowed opacity-55' : ''}`}><ShoppingCart size={20} strokeWidth={2.8} className="mr-2" /> {disabled ? disabledLabel : 'Add to Cart'}</button>
+    <button onClick={add} className="btn-primary w-full py-4 text-base md:text-lg"><ShoppingCart size={20} strokeWidth={2.8} className="mr-2" /> Add to Cart</button>
     <div className={`pointer-events-none fixed right-4 top-[5.2rem] z-[80] w-[calc(100vw-2rem)] max-w-md transition-all duration-500 ease-out ${show ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
       <div className="relative overflow-hidden rounded-3xl border border-[#5B6653]/45 bg-zinc-950/94 p-3 shadow-[0_30px_90px_rgba(0,0,0,.72)] backdrop-blur-xl">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(91,102,83,.22),transparent_42%)]" />

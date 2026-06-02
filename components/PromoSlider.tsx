@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, Tag } from 'lucide-react'
 
 const slides = [
-  {kicker:'Hot Deal',title:'Pokemon picks nu live.',text:'Ontdek sealed producten, singles en marktdeals uit eigen voorraad.',href:'/shop',cta:'Shop Pokemon'},
+  {kicker:'Launch Deal',title:'Launch picks now live.',text:'Ontdek de eerste ASORTA utility producten met tracked shipping en premium productpagina’s.',href:'/shop',cta:'Shop launch picks'},
   {kicker:'Markt Deals',title:'Pokemon deals voor online en op locatie.',text:'Bundles, losse boosters en acties die ook meegaan naar markten en braderieen.',href:'/category/market-deals',cta:'Bekijk deals'},
   {kicker:'Atlas Ready',title:'Built to scale.',text:'Promo slides worden straks via Atlas beheerd zodat acties live aangepast kunnen worden.',href:'/atlas-access',cta:'Atlas access'}
 ]

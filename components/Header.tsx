@@ -45,7 +45,6 @@ export default function Header(){
   const dict = getDictionary(locale)
   const links = useMemo(() => [
     [dict.nav.shop, '/shop'],
-    ['Markten', '/market'],
     [dict.nav.boosterPacks, '/category/booster-packs'],
     [dict.nav.eliteTrainerBoxes, '/category/elite-trainer-boxes'],
     [dict.nav.collectionBoxes, '/category/collection-boxes'],

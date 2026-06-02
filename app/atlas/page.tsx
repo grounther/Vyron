@@ -311,7 +311,7 @@ export default async function AtlasPage(){
       <Link href="/atlas/integrations" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PlugZap className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Integrations</h2><p className="mt-2 text-sm leading-6 text-white/55">Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.</p></Link>
     </section>
 
-    <section className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
+    <section className="mt-8 grid gap-6">
       <div className="card rounded-[2rem] p-5">
         <div className="mb-5 flex items-center justify-between"><h2 className="text-2xl font-black">Orders overview</h2><span className="rounded-full bg-[#b7c8ad]/10 px-3 py-1 text-xs font-black text-[#dbe9d4]">live Supabase</span></div>
         <div className="overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm">
@@ -322,7 +322,7 @@ export default async function AtlasPage(){
 
       <div className="card rounded-[2rem] p-5">
         <h2 className="text-2xl font-black">Live status</h2>
-        <div className="mt-5 grid gap-3 text-sm text-white/60">
+        <div className="mt-5 grid gap-3 text-sm text-white/60 md:grid-cols-2 xl:grid-cols-5">
           <Step title="Catalog" text={`${metrics.activeProducts} active Shopify-synced products.`} />
           <Step title="Orders" text={`${metrics.orderCount} mirrored Shopify orders, ${metrics.pendingOrders} pending.`} />
           <Step title="Revenue" text={`${eur(metrics.paidRevenue)} paid revenue from Shopify/PayPal.`} />

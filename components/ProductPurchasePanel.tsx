@@ -68,10 +68,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
     variantSku: selectedVariant?.sku,
     shopifyVariantId: selectedVariant?.shopifyVariantId,
     shopifyVariantLegacyId: selectedVariant?.shopifyVariantLegacyId,
-    inventoryOnline: product.inventoryOnline,
   }
-  const onlineStock = typeof product.inventoryOnline === 'number' ? product.inventoryOnline : undefined
-  const soldOutOnline = onlineStock === 0
 
   return <section className="grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
     <div className="space-y-4">
@@ -115,11 +112,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
         <h1 className="text-balance text-3xl font-black tracking-tight md:text-5xl">{product.name}</h1>
         <p className="mt-4 text-lg leading-8 text-white/58">{product.short}</p>
         <div className="mt-6 flex items-end gap-3"><span className="text-4xl font-black">€{product.price.toFixed(2)}</span>{typeof product.compareAt === 'number' && product.compareAt > product.price && <span className="pb-1 text-white/35 line-through">€{product.compareAt.toFixed(2)}</span>}</div>
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> {product.sealedStatus || 'Origineel sealed'} • {soldOutOnline ? 'online uitverkocht' : 'eigen voorraad'}</div>
-        <div className="mt-3 grid gap-2 text-xs text-white/52 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-3"><strong className="text-white/75">Online voorraad:</strong><br/>{typeof onlineStock === 'number' ? onlineStock : 'Beschikbaar'}</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-3"><strong className="text-white/75">Marktvoorraad:</strong><br/>{typeof product.inventoryMarket === 'number' ? product.inventoryMarket : 'Op aanvraag'}</div>
-        </div>
+        <div className="mt-5 flex items-center gap-2 text-sm text-white/55"><Star size={16} className="fill-white/80"/> Eigen voorraad • origineel product</div>
 
         {variants.length > 0 && <div className="mt-7">
           <label className="mb-2 block text-xs font-black uppercase tracking-[.25em] text-white/40">Uitvoering</label>
@@ -132,11 +125,11 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
           </div>
         </div>}
 
-        <div className="mt-7"><AddToCartButton product={cartProduct} disabled={soldOutOnline} disabledLabel="Online uitverkocht" /></div>
+        <div className="mt-7"><AddToCartButton product={cartProduct} /></div>
         <div className="mt-6 grid gap-3 text-sm text-white/62">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Lock size={18}/> Veilige checkout</div>
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><Truck size={18}/> {product.shippingInfo}</div>
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Originele producten; sealed wordt niet geopend, gewogen of opnieuw verpakt</div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4"><ShieldCheck size={18}/> Veilige orderverwerking met trackingupdates</div>
         </div>
       </div>
     </aside>

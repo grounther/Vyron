@@ -45,18 +45,18 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
     <ActionBanner action={productAction} compact />
 
     <section className="mt-12 grid gap-5 lg:grid-cols-3">
-      <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Productinformatie</p><h2 className="mt-2 text-2xl font-black">Pokemon TCG uit eigen voorraad.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>
-      <div className="card rounded-[1.7rem] p-6"><p className="kicker">Verzending</p><h3 className="mt-2 text-xl font-black">Verzending vanuit Nederland</h3><p className="mt-4 text-sm leading-6 text-white/58">{p.shippingInfo}</p></div>
+      <div className="card rounded-[1.7rem] p-6 lg:col-span-2"><p className="kicker">Product Story</p><h2 className="mt-2 text-2xl font-black">Modern utility, premium positioned.</h2><p className="mt-4 leading-7 text-white/58">{p.description}</p></div>
+      <div className="card rounded-[1.7rem] p-6"><p className="kicker">Shipping</p><h3 className="mt-2 text-xl font-black">Tracked delivery</h3><p className="mt-4 text-sm leading-6 text-white/58">{p.shippingInfo}</p></div>
     </section>
 
     <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-      <Info title="Belangrijkste punten" items={p.features}/>
-      <Info title="Specificaties" items={p.specs}/>
-      <Info title="In de bestelling" items={p.boxItems || ['Product zoals geselecteerd','Zorgvuldig verpakt','Tracking zodra beschikbaar']}/>
+      <Info title="Key Features" items={p.features}/>
+      <Info title="Specs" items={p.specs}/>
+      <Info title="What's in the box" items={p.boxItems || ['Product as selected','Supplier packaging','Tracked shipment']}/>
       <div className="card rounded-[1.7rem] p-6"><PackageCheck/><h3 className="mt-4 font-black">Support & returns</h3><p className="mt-3 text-sm leading-6 text-white/55">Heb je vragen over dit product of je bestelling? ASORTA Support helpt je met productinformatie, tracking en retouraanvragen.</p></div>
     </section>
 
-    {related.length>0 && <section className="mt-16"><p className="kicker">Meer Pokemon picks</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Meer in {p.category.replace('-',' ')}</h2><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{related.map(x=><ProductCard key={x.slug} p={x}/>)}</div></section>}
+    {related.length>0 && <section className="mt-16"><p className="kicker">Related Utility</p><h2 className="mt-2 text-3xl font-black md:text-5xl">More in {p.category.replace('-',' ')}</h2><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{related.map(x=><ProductCard key={x.slug} p={x}/>)}</div></section>}
   </main>
 }
 function Info({title,items}:{title:string;items:string[]}){return <div className="card rounded-[1.7rem] p-6"><BadgeCheck/><h3 className="mt-4 font-black">{title}</h3><ul className="mt-3 grid gap-2 text-sm leading-6 text-white/55">{items.map(i=><li key={i}>• {i}</li>)}</ul></div>}

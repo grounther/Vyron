@@ -104,7 +104,7 @@ export default async function AtlasProducts({ searchParams }: { searchParams?: P
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={text(product.hero_image) || '/products/asorta-product-fallback.svg'} alt="" className="h-16 w-16 rounded-2xl object-cover opacity-85" />
-              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.supplier_sku ? ` • SKU ${product.supplier_sku}` : ''} • online {Number(product.inventory_online || 0)} / markt {Number(product.inventory_market || 0)}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{product.category} • {product.status || 'draft'}{product.supplier_sku ? ` • SKU ${product.supplier_sku}` : ''}</p><h2 className="text-xl font-black">{product.name}</h2><p className="text-sm text-white/45">/{product.slug}</p></div>
             </div>
             <div className="text-right"><p className="text-2xl font-black">€{Number(product.price || 0).toFixed(2)}</p><p className="text-xs text-white/45">Cost ± €{Number(product.estimated_cost || 0).toFixed(2)}</p></div>
           </div>
@@ -132,16 +132,9 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
       <Field label="Compare at" name="compare_at" type="number" step="0.01" defaultValue={String(p.compare_at || '')} />
       <Field label="Estimated cost" name="estimated_cost" type="number" step="0.01" defaultValue={String(p.estimated_cost || '')} />
       <Field label="Eigen SKU" name="supplier_sku" defaultValue={text(p.supplier_sku)} placeholder="bijv. AS-PKM-BOOST-001" />
-      <Field label="Online voorraad" name="inventory_online" type="number" min="0" step="1" defaultValue={String(p.inventory_online ?? '')} />
-      <Field label="Marktvoorraad" name="inventory_market" type="number" min="0" step="1" defaultValue={String(p.inventory_market ?? '')} />
-      <Field label="Totaal voorraad" name="inventory_total" type="number" min="0" step="1" defaultValue={String(p.inventory_total ?? '')} placeholder="automatisch online + markt" />
       <Field label="Badge" name="badge" defaultValue={text(p.badge, 'Eigen voorraad')} />
-      <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Status</span><select name="status" defaultValue={text(p.status, 'draft')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="draft">draft</option><option value="active">active</option><option value="launch">launch</option><option value="sold_out">sold_out</option><option value="archived">archived</option></select></label>
-      <Field label="Conditie label" name="condition_label" defaultValue={text(p.condition_label, 'Sealed')} />
-      <Field label="Sealed status" name="sealed_status" defaultValue={text(p.sealed_status, 'Origineel sealed')} />
-      <CheckField label="Online verkoopbaar" name="sell_online" defaultChecked={p.sell_online !== false} />
-      <CheckField label="Mee naar markten" name="sell_market" defaultChecked={Boolean(p.sell_market)} />
-      <CheckField label="Hot Deal tonen" name="hot_deal" defaultChecked={Boolean(p.hot_deal)} />
+      <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">Status</span><select name="status" defaultValue={text(p.status, 'draft')} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"><option value="draft">draft</option><option value="active">active</option><option value="launch">launch</option><option value="archived">archived</option></select></label>
+      <Field label="Warehouse" name="warehouse" defaultValue={text(p.warehouse, 'Eigen voorraad')} />
     </div>
 
     <section className="rounded-[1.4rem] border border-white/10 bg-white/[.025] p-4">
@@ -190,11 +183,6 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
 
 function Field({ label, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label:string }){
   return <label className="grid gap-2"><span className="text-xs font-black uppercase tracking-[.20em] text-white/38">{label}</span><input {...props} className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-[#b7c8ad]" /></label>
-}
-
-
-function CheckField({ label, name, defaultChecked = false }: { label: string; name: string; defaultChecked?: boolean }){
-  return <label className="flex min-h-[3.2rem] items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-black text-white/70"><input type="checkbox" name={name} defaultChecked={defaultChecked} className="h-4 w-4 accent-[#b7c8ad]" /> {label}</label>
 }
 
 function Textarea({ label, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label:string }){
