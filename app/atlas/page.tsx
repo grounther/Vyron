@@ -322,7 +322,7 @@ export default async function AtlasPage(){
 
       <div className="card rounded-[2rem] p-5">
         <h2 className="text-2xl font-black">Live status</h2>
-        <div className="mt-5 grid gap-3 text-sm text-white/60 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-5 grid gap-3 text-sm text-white/60 sm:grid-cols-2 xl:grid-cols-5">
           <Step title="Catalog" text={`${metrics.activeProducts} active Shopify-synced products.`} />
           <Step title="Orders" text={`${metrics.orderCount} mirrored Shopify orders, ${metrics.pendingOrders} pending.`} />
           <Step title="Revenue" text={`${eur(metrics.paidRevenue)} paid revenue from Shopify/PayPal.`} />
