@@ -130,7 +130,7 @@ function orderNumber() {
   return `AS-${stamp}-${random}`
 }
 
-export async function createOrderFromCheckout(admin: SupabaseClient, input: { items: unknown; shipping: unknown; source?: string }) {
+export async function createOrderFromCheckout(admin: SupabaseClient, input: { items: unknown; shipping: unknown; source?: string; authUserId?: string }) {
   const items = normalizeCheckoutItems(input.items)
   if (!items.length) throw new Error('Cart is leeg.')
 
@@ -189,12 +189,13 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
       total,
       estimated_cost: estimatedCost,
       estimated_profit: estimatedProfit,
-      payment_provider: process.env.PAYMENT_PROVIDER || 'mollie',
+      payment_provider: process.env.PAYMENT_PROVIDER || 'paypal',
       payment_status: 'pending',
       fulfillment_status: 'pending_payment',
       currency: 'EUR',
       shipping_address: shipping,
       billing_address: shipping,
+      auth_user_id: input.authUserId || null,
       raw: { source: input.source || 'site_checkout' },
     })
     .select('*')

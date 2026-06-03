@@ -114,8 +114,8 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
   const dict = getDictionary(locale)
   const checkout = { ...dict.checkout, ...copy }
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0), [items])
-  const hasManualItems = useMemo(() => items.some((item) => !hasShopifyVariant(item)), [items])
-  const shippingTotal = useMemo(() => hasManualItems ? items.reduce((sum, item) => sum + Number(item.estimatedShipping || 0) * Number(item.qty || 0), 0) : 0, [hasManualItems, items])
+  const hasManualItems = true
+  const shippingTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.estimatedShipping || 0) * Number(item.qty || 0), 0), [items])
   const total = subtotal + shippingTotal
   const normalizedDiscountCode = useMemo(() => normalizeDiscountCode(discountCode), [discountCode])
 
@@ -157,18 +157,14 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
       shopifyVariantLegacyId: item.shopifyVariantLegacyId,
     }))
 
-    const response = await fetch(hasManualItems ? '/api/checkout' : '/api/checkout/shopify', {
+    const response = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(hasManualItems ? {
-        provider: 'site',
+      body: JSON.stringify({
+        provider: 'paypal',
         email,
         items: checkoutItems,
         shipping: { ...shipping, email },
-        discountCode: code,
-      } : {
-        email,
-        items: checkoutItems,
         discountCode: code,
       }),
     })
@@ -182,8 +178,6 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
 
     if (body.checkoutUrl) {
       setState('redirecting')
-      localStorage.removeItem('asorta_cart')
-      setItems([])
       window.location.href = body.checkoutUrl
       return
     }
@@ -216,7 +210,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="jij@email.nl"
-            required={hasManualItems}
+            required
             className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]"
           />
           <span className="text-xs leading-5 text-white/40">{checkout.emailHelp}</span>

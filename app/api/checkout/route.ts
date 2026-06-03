@@ -2,56 +2,56 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrderFromCheckout } from '@/lib/checkout/orders'
 import { createMolliePayment, hasMollieConfig } from '@/lib/checkout/mollie'
-import { createShopifyCheckoutRedirect } from '@/lib/shopify/checkout'
-import { canCreateManualShopifyDraftOrder, createManualShopifyDraftOrder } from '@/lib/shopify/manual-draft-order'
+import { createPayPalOrder, hasPayPalConfig } from '@/lib/checkout/paypal'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
-
-    if (body.provider === 'shopify' || (!body.provider && process.env.CHECKOUT_PROVIDER === 'shopify')) {
-      const result = await createShopifyCheckoutRedirect({
-        items: body.items,
-        email: body.email || body.shipping?.email,
-        discountCode: body.discountCode || body.discount_code || body.discount?.code,
-        client: createAdminClient(),
-      })
-      return NextResponse.json({ ok: true, paymentProvider: 'shopify_paypal', checkoutUrl: result.checkoutUrl })
-    }
-
     const admin = createAdminClient()
     if (!admin) return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY ontbreekt. Checkout is fail-closed.' }, { status: 503 })
 
-    const result = await createOrderFromCheckout(admin, { items: body.items, shipping: body.shipping, source: 'site_checkout' })
+    let authUserId = ''
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      authUserId = user?.id || ''
+    } catch {
+      authUserId = ''
+    }
 
-    // Eigen voorraad gaat voorlopig via Shopify Draft Order invoice checkout, zodat
-    // PayPal gebruikt kan worden zonder losse productkoppeling in de catalogus.
-    // Mollie/iDEAL/Wero kan later alsnog worden
-    // ingeschakeld door MOLLIE_API_KEY te zetten en deze providerkeuze aan te passen.
-    if (canCreateManualShopifyDraftOrder()) {
-      const draft = await createManualShopifyDraftOrder({
-        order: result.order,
-        items: result.items,
-        shipping: result.shipping,
-        discountCode: body.discountCode || body.discount_code || body.discount?.code,
-      })
+    const provider = String(body.provider || process.env.CHECKOUT_PROVIDER || process.env.PAYMENT_PROVIDER || 'paypal').toLowerCase()
 
+    if (!((provider === 'mollie' || provider === 'ideal' || provider === 'wero') && hasMollieConfig()) && !hasPayPalConfig()) {
+      return NextResponse.json({
+        error: 'PayPal is nog niet geconfigureerd. Voeg PAYPAL_CLIENT_ID en PAYPAL_CLIENT_SECRET toe in Vercel Environment Variables.',
+      }, { status: 503 })
+    }
+
+    const result = await createOrderFromCheckout(admin, {
+      items: body.items,
+      shipping: body.shipping,
+      source: 'site_checkout',
+      authUserId,
+    })
+
+    if (authUserId) {
+      await admin.from('orders').update({ auth_user_id: authUserId, updated_at: new Date().toISOString() }).eq('id', result.order.id)
+    }
+
+    if ((provider === 'mollie' || provider === 'ideal' || provider === 'wero') && hasMollieConfig()) {
+      const payment = await createMolliePayment(result.order)
       await admin
         .from('orders')
-        .update({
-          payment_id: draft.id,
-          payment_provider: 'shopify_paypal',
-          payment_status: 'open',
-          updated_at: new Date().toISOString(),
-        })
+        .update({ payment_id: payment.id, payment_provider: 'mollie', payment_status: payment.status || 'open', updated_at: new Date().toISOString() })
         .eq('id', result.order.id)
 
       return NextResponse.json({
         ok: true,
-        paymentProvider: 'shopify_paypal',
-        checkoutUrl: draft.invoiceUrl,
+        paymentProvider: 'mollie',
+        checkoutUrl: payment._links?.checkout?.href || null,
         order: {
           id: result.order.id,
           orderNumber: result.order.order_number,
@@ -60,30 +60,22 @@ export async function POST(request: Request) {
       })
     }
 
-    if (!hasMollieConfig()) {
-      return NextResponse.json({
-        ok: true,
-        paymentProvider: 'manual',
-        checkoutUrl: `/checkout/success?order=${encodeURIComponent(result.order.order_number)}&payment=manual`,
-        message: 'Order aangemaakt. PayPal/Shopify draft checkout is nog niet geconfigureerd voor eigen voorraad.',
-        order: {
-          id: result.order.id,
-          orderNumber: result.order.order_number,
-          total: result.order.total,
-        },
-      })
-    }
-
-    const payment = await createMolliePayment(result.order)
+    const paypal = await createPayPalOrder(result.order, result.items, result.shipping)
     await admin
       .from('orders')
-      .update({ payment_id: payment.id, payment_provider: 'mollie', payment_status: payment.status || 'open', updated_at: new Date().toISOString() })
+      .update({
+        payment_id: paypal.id,
+        payment_provider: 'paypal',
+        payment_status: 'open',
+        fulfillment_status: 'pending_payment',
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', result.order.id)
 
     return NextResponse.json({
       ok: true,
-      paymentProvider: 'mollie',
-      checkoutUrl: payment._links?.checkout?.href || null,
+      paymentProvider: 'paypal',
+      checkoutUrl: paypal.approvalUrl,
       order: {
         id: result.order.id,
         orderNumber: result.order.order_number,
