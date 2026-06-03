@@ -1,5 +1,14 @@
 export type TcgSeriesKey = 'perfect-order' | 'chaos-rising'
-export type TcgRarity = 'common' | 'uncommon' | 'rare' | 'reverse_holo' | 'holo' | 'ultra_rare' | 'secret_rare'
+export type TcgRarity =
+  | 'common'
+  | 'uncommon'
+  | 'rare'
+  | 'reverse_holo'
+  | 'holo'
+  | 'full_art'
+  | 'ultra_rare'
+  | 'secret_rare'
+  | 'gold_rare'
 
 export type TcgCard = {
   id: string
@@ -11,120 +20,131 @@ export type TcgCard = {
   rarity: TcgRarity
   variant: string
   flavor: string
+  artStyle: string
+  collectorTitle: string
 }
 
-export const tcgSeries: Array<{ key: TcgSeriesKey; name: string; short: string; accent: string; description: string }> = [
+export const tcgSeries: Array<{ key: TcgSeriesKey; name: string; short: string; accent: string; description: string; totalCards: number }> = [
   {
     key: 'perfect-order',
     name: 'Perfect Order',
-    short: 'Order, licht en premium pulls',
+    short: 'Licht, balans en premium pulls',
     accent: 'gold',
-    description: 'Een ASORTA collector-serie met strak georganiseerde energie, guardians en premium hits.',
+    totalCards: 120,
+    description: 'Een eigen ASORTA collector-serie met lichtenergie, guardians, symmetrie en master-set chase cards.',
   },
   {
     key: 'chaos-rising',
     name: 'Chaos Rising',
     short: 'Storm, schaduw en wilde pulls',
     accent: 'blue',
-    description: 'Een ASORTA collector-serie met stormenergie, chaos beasts en zeldzame holo-pulls.',
+    totalCards: 120,
+    description: 'Een eigen ASORTA collector-serie met stormenergie, rift beasts, neon chaos en zeldzame holo-pulls.',
   },
 ]
 
-const perfectOrderBase = [
-  ['po-001', '001/036', 'Asorta Squire', 'Normal', 'common', 'Een starterkaart voor iedere verzamelaar.'],
-  ['po-002', '002/036', 'Bronze Cub', 'Earth', 'common', 'Klein, loyaal en verrassend stevig.'],
-  ['po-003', '003/036', 'Market Scout', 'Wind', 'common', 'Vindt altijd de beste deal op de markt.'],
-  ['po-004', '004/036', 'Binder Sprite', 'Light', 'common', 'Beschermt kaarten tegen krassen en chaos.'],
-  ['po-005', '005/036', 'Pack Keeper', 'Metal', 'common', 'Bewaakt sealed voorraad met perfecte precisie.'],
-  ['po-006', '006/036', 'Order Fox', 'Fire', 'common', 'Snel, slim en altijd op tijd.'],
-  ['po-007', '007/036', 'Crystal Pup', 'Water', 'common', 'Glanzend maar nog niet zeldzaam.'],
-  ['po-008', '008/036', 'Sleeve Imp', 'Dark', 'common', 'Past in iedere binder-pocket.'],
-  ['po-009', '009/036', 'Toploader Toad', 'Earth', 'common', 'Staat stevig voor je hits.'],
-  ['po-010', '010/036', 'Tiny Guardian', 'Light', 'common', 'Een kleine wachter met groot hart.'],
-  ['po-011', '011/036', 'Vault Lynx', 'Metal', 'uncommon', 'Sluipt tussen sealed dozen door.'],
-  ['po-012', '012/036', 'Golden Courier', 'Wind', 'uncommon', 'Brengt iedere pull veilig thuis.'],
-  ['po-013', '013/036', 'Gemscale Drake', 'Dragon', 'uncommon', 'Zijn schubben lijken op perfect gesorteerde kaarten.'],
-  ['po-014', '014/036', 'Lumen Vulpes', 'Light', 'uncommon', 'Laat holo-randen oplichten in het donker.'],
-  ['po-015', '015/036', 'Box Sentinel', 'Metal', 'uncommon', 'Wacht over Elite Trainer Boxes.'],
-  ['po-016', '016/036', 'Order Mage', 'Psychic', 'uncommon', 'Legt elke verzameling op nummer.'],
-  ['po-017', '017/036', 'Mint Keeper', 'Grass', 'uncommon', 'Zorgt dat kaarten mint blijven.'],
-  ['po-018', '018/036', 'Clean Cut Griffin', 'Wind', 'uncommon', 'Scheurt packs open met perfecte lijn.'],
-  ['po-019', '019/036', 'Perfect Hydra', 'Dragon', 'rare', 'Drie koppen, één perfecte strategie.'],
-  ['po-020', '020/036', 'Archive Phoenix', 'Fire', 'rare', 'Herrijst uit oude binders en sealed dozen.'],
-  ['po-021', '021/036', 'Prism Stag', 'Light', 'rare', 'Elke hoorn breekt licht in holo-kleuren.'],
-  ['po-022', '022/036', 'Atlas Guardian', 'Metal', 'rare', 'De bewaker van het ASORTA archief.'],
-  ['po-023', '023/036', 'Crown Seraph', 'Light', 'holo', 'Een holo-hit die orde brengt in elke collectie.'],
-  ['po-024', '024/036', 'Royal Packmaster', 'Normal', 'holo', 'Opent nooit packs, maar bewaart ze perfect.'],
-  ['po-025', '025/036', 'Aurora Judge', 'Psychic', 'holo', 'Weegt geen packs, maar wel beslissingen.'],
-  ['po-026', '026/036', 'Golden Dragon', 'Dragon', 'ultra_rare', 'De signature hit van Perfect Order.'],
-  ['po-027', '027/036', 'Collector King', 'Light', 'ultra_rare', 'Ziet iedere missende kaart in één oogopslag.'],
-  ['po-028', '028/036', 'Perfect Order Emblem', 'Item', 'secret_rare', 'Een geheime kaart met ASORTA-energie.'],
-  ['po-029', '029/036', 'Market Crown', 'Item', 'secret_rare', 'Alleen de scherpste jagers vinden deze kaart.'],
-  ['po-030', '030/036', 'Order Rift', 'Stadium', 'rare', 'Een portaal naar premium voorraad.'],
-  ['po-031', '031/036', 'Holo Binder', 'Item', 'uncommon', 'Laat zelfs commons bijzonder voelen.'],
-  ['po-032', '032/036', 'Sealed Promise', 'Support', 'rare', 'Niet geopend, niet gewogen, niet opnieuw verpakt.'],
-  ['po-033', '033/036', 'Perfect Pull', 'Support', 'holo', 'De kaart waar iedere collector op hoopt.'],
-  ['po-034', '034/036', 'Asorta Crest', 'Item', 'common', 'Het teken van jouw verzameling.'],
-  ['po-035', '035/036', 'Order Storm', 'Stadium', 'uncommon', 'Rustig aan de buitenkant, sterk van binnen.'],
-  ['po-036', '036/036', 'Master Set Seal', 'Item', 'secret_rare', 'De droom van elke set-builder.'],
-] as const
+const rarityPlan: Array<[TcgRarity, number]> = [
+  ['common', 44],
+  ['uncommon', 32],
+  ['rare', 18],
+  ['reverse_holo', 10],
+  ['holo', 8],
+  ['full_art', 4],
+  ['ultra_rare', 2],
+  ['secret_rare', 1],
+  ['gold_rare', 1],
+]
 
-const chaosRisingBase = [
-  ['cr-001', '001/036', 'Chaos Cub', 'Dark', 'common', 'Klein, wild en moeilijk te sorteren.'],
-  ['cr-002', '002/036', 'Storm Kitten', 'Lightning', 'common', 'Rent dwars door de binder heen.'],
-  ['cr-003', '003/036', 'Rift Rat', 'Dark', 'common', 'Duikt op waar kaarten verdwijnen.'],
-  ['cr-004', '004/036', 'Spark Imp', 'Lightning', 'common', 'Geeft iedere pack opening spanning.'],
-  ['cr-005', '005/036', 'Smoke Pup', 'Fire', 'common', 'Laat een spoor van rook en glitter achter.'],
-  ['cr-006', '006/036', 'Wild Sprite', 'Grass', 'common', 'Past nooit netjes in de rij.'],
-  ['cr-007', '007/036', 'Night Scout', 'Dark', 'common', 'Zoekt hits in de schaduw.'],
-  ['cr-008', '008/036', 'Rogue Sleeve', 'Item', 'common', 'Beschermt kaarten op zijn eigen manier.'],
-  ['cr-009', '009/036', 'Thunder Moth', 'Lightning', 'common', 'Fladdert rond bij iedere holo-flash.'],
-  ['cr-010', '010/036', 'Market Goblin', 'Dark', 'common', 'Wil altijd net nog één pack.'],
-  ['cr-011', '011/036', 'Chaos Lynx', 'Dark', 'uncommon', 'Verplaatst kaarten wanneer niemand kijkt.'],
-  ['cr-012', '012/036', 'Storm Herald', 'Lightning', 'uncommon', 'Kondigt een zeldzame pull aan.'],
-  ['cr-013', '013/036', 'Blue Flame Drake', 'Fire', 'uncommon', 'Brandt met koude, blauwe vlammen.'],
-  ['cr-014', '014/036', 'Rift Serpent', 'Dragon', 'uncommon', 'Glijdt tussen twee series door.'],
-  ['cr-015', '015/036', 'Pack Reaper', 'Dark', 'uncommon', 'Laat alleen de kaarten over.'],
-  ['cr-016', '016/036', 'Neon Wraith', 'Psychic', 'uncommon', 'Verschijnt als het licht de kaart raakt.'],
-  ['cr-017', '017/036', 'Breaker Beetle', 'Metal', 'uncommon', 'Breekt door elke slechte pull-streak.'],
-  ['cr-018', '018/036', 'Chaos Keeper', 'Dark', 'uncommon', 'Bewaker van rommelige mastersets.'],
-  ['cr-019', '019/036', 'Storm Hydra', 'Dragon', 'rare', 'Elke kop trekt een andere kaart.'],
-  ['cr-020', '020/036', 'Blue Lion', 'Lightning', 'rare', 'De stormkoning van Chaos Rising.'],
-  ['cr-021', '021/036', 'Shadow Phoenix', 'Fire', 'rare', 'Herrijst uit mislukte pulls.'],
-  ['cr-022', '022/036', 'Rift Titan', 'Dark', 'rare', 'Een monster dat zelfs sealed dozen laat trillen.'],
-  ['cr-023', '023/036', 'Thunder Crown', 'Lightning', 'holo', 'Een holo-hit met elektrische randen.'],
-  ['cr-024', '024/036', 'Chaos Dragon', 'Dragon', 'holo', 'Zijn vleugels kleuren blauw en zwart.'],
-  ['cr-025', '025/036', 'Void Collector', 'Psychic', 'holo', 'Verzamelt de kaarten die anderen missen.'],
-  ['cr-026', '026/036', 'Storm Lion EX', 'Lightning', 'ultra_rare', 'De signature hit van Chaos Rising.'],
-  ['cr-027', '027/036', 'Rift Dragon EX', 'Dragon', 'ultra_rare', 'Scheurt de lucht open bij elke aanval.'],
-  ['cr-028', '028/036', 'Chaos Rising Emblem', 'Item', 'secret_rare', 'Een geheime kaart met stormenergie.'],
-  ['cr-029', '029/036', 'Blue Thunder Seal', 'Item', 'secret_rare', 'Zeldzaam, luid en onmogelijk te negeren.'],
-  ['cr-030', '030/036', 'Chaos Gate', 'Stadium', 'rare', 'Iedere opening kan alle kanten op.'],
-  ['cr-031', '031/036', 'Wild Pull', 'Support', 'uncommon', 'Een kaart voor gokkers en collectors.'],
-  ['cr-032', '032/036', 'Storm Warning', 'Support', 'rare', 'Waarschuwt voor aankomende hits.'],
-  ['cr-033', '033/036', 'Blue Holo Burst', 'Support', 'holo', 'Een flits voordat de kaart zichtbaar wordt.'],
-  ['cr-034', '034/036', 'Chaos Crest', 'Item', 'common', 'Het teken van een wilde verzameling.'],
-  ['cr-035', '035/036', 'Rising Storm', 'Stadium', 'uncommon', 'De lucht wordt donker, de pulls worden beter.'],
-  ['cr-036', '036/036', 'Master Chaos Seal', 'Item', 'secret_rare', 'Alleen voor echte completionists.'],
-] as const
+const typeCycle = ['Flame', 'Aqua', 'Terra', 'Volt', 'Frost', 'Shadow', 'Light', 'Arcane', 'Beast', 'Dragon', 'Metal', 'Wind']
 
-function cardFromRow(row: readonly [string, string, string, string, string, string], series: TcgSeriesKey, seriesName: string): TcgCard {
-  return {
-    id: row[0],
-    number: row[1],
-    series,
-    seriesName,
-    name: row[2],
-    type: row[3],
-    rarity: row[4] as TcgRarity,
-    variant: row[4] as TcgRarity,
-    flavor: row[5],
+const perfectOrderNames = [
+  'Aurelith Squire','Lunacrest Cub','Ivory Scout','Solvayne Sprite','Order Keeper','Golden Fox','Crystal Pup','Sleeve Imp','Toploader Toad','Tiny Guardian',
+  'Vault Lynx','Golden Courier','Gemscale Drake','Lumen Vulpes','Box Sentinel','Order Mage','Mint Keeper','Clean Cut Griffin','Perfect Hydra','Archive Phoenix',
+  'Prism Stag','Atlas Guardian','Crown Seraph','Royal Packmaster','Aurora Judge','Golden Dragon','Collector King','Perfect Order Emblem','Market Crown','Order Rift',
+  'Holo Binder','Sealed Promise','Perfect Pull','Asorta Crest','Order Storm','Master Set Seal','Aurelith Warden','Lunacrest Oracle','Ivory Paladin','Solvayne Monk',
+  'Order Finch','Golden Stag','Crystal Mender','Sleeve Scribe','Toploader Knight','Tiny Archivist','Vault Panther','Golden Postmaster','Gemscale Wyvern','Lumen Moth',
+  'Box Monarch','Order Alchemist','Mint Dryad','Clean Cut Falcon','Perfect Basilisk','Archive Roc','Prism Elk','Atlas Colossus','Crown Valkyrie','Royal Sorter',
+  'Aurora Arbiter','Golden Wyrm','Collector Prince','Order Keystone','Market Halo','Order Gate','Holo Index','Sealed Oath','Perfect Spark','Asorta Banner',
+  'Order Cascade','Master Seal Guardian','Aurelith Champion','Lunacrest Seer','Ivory Commander','Solvayne Sage','Order Hare','Golden Pegasus','Crystal Otter','Sleeve Adept',
+  'Toploader Golem','Tiny Cartographer','Vault Tiger','Golden Runner','Gemscale Leviathan','Lumen Unicorn','Box Aegis','Order Chronomancer','Mint Treant','Clean Cut Harrier',
+  'Perfect Chimera','Archive Thunderbird','Prism Antelope','Atlas Titan','Crown Archon','Royal Vaultmaster','Aurora Magistrate','Golden Elder Dragon','Collector Emperor','Perfect Order Sigil',
+  'Market Sun Crown','Order Nexus','Holo Master Binder','Sealed Covenant','Perfect Revelation','Asorta Royal Crest','Order Aurora','Master Set Crown','Aurelith Ascendant','Lunacrest Ascendant',
+  'Ivoryon Full Art','Solvayne Full Art','Aurelith Gold Seal','Lunacrest Secret Gate','Perfect Order Masterpiece','Golden Dragon Full Art','Collector King Full Art','Crown Seraph Full Art','Master Set Gold Seal','Perfect Order Crown Rare',
+]
+
+const chaosRisingNames = [
+  'Chaos Cub','Storm Kitten','Rift Rat','Spark Imp','Smoke Pup','Wild Sprite','Night Scout','Rogue Sleeve','Thunder Moth','Market Goblin',
+  'Chaos Lynx','Storm Herald','Blue Flame Drake','Rift Serpent','Pack Reaper','Neon Wraith','Breaker Beetle','Chaos Keeper','Storm Hydra','Blue Lion',
+  'Shadow Phoenix','Rift Titan','Thunder Crown','Chaos Dragon','Void Collector','Storm Lion EX','Rift Dragon EX','Chaos Rising Emblem','Blue Thunder Seal','Chaos Gate',
+  'Wild Pull','Storm Warning','Blue Holo Burst','Chaos Crest','Rising Storm','Master Chaos Seal','Vexigar Pup','Noctyra Scout','Ruinflare Imp','Voltshade Sprite',
+  'Kharvox Cub','Chaorune Fox','Dravok Rat','Riftwing Moth','Neon Goblin','Stormclaw Lynx','Void Herald','Bluefire Drake','Shadow Serpent','Pack Phantom',
+  'Neon Reaper','Breaker Hornet','Chaos Warden','Storm Basilisk','Blue Mane Lion','Shadow Roc','Rift Colossus','Thunder Diadem','Chaos Wyvern','Void Oracle',
+  'Storm Lion Prime','Rift Dragon Prime','Chaos Keystone','Blue Static Seal','Rift Gate','Wild Gamble','Storm Siren','Blue Burst Nova','Chaos Banner','Rising Tempest',
+  'Master Rift Seal','Vexigar Alpha','Noctyra Shade','Ruinflare Rogue','Voltshade Phantom','Kharvox Brute','Chaorune Trickster','Dravok Scavenger','Riftwing Harpy','Neon Gremlin',
+  'Stormclaw Panther','Void Prophet','Bluefire Wyrm','Shadow Leviathan','Pack Banshee','Neon Revenant','Breaker Scarab','Chaos Monarch','Storm Chimera','Blue Mane Emperor',
+  'Shadow Thunderbird','Rift Behemoth','Thunder Crowned King','Chaos Dragon Overdrive','Void Collector Prime','Storm Lion Full Art','Rift Dragon Full Art','Chaos Rising Sigil','Blue Thunder Crown','Chaos Nexus',
+  'Wild Pull Max','Storm Warning Full Art','Blue Holo Supernova','Chaos Royal Crest','Rising Chaos Wave','Master Chaos Crown','Vexigar Ascendant','Noctyra Ascendant','Ruinflare Full Art','Voltshade Full Art',
+  'Chaos Dragon Gold Seal','Storm Lion Secret Gate','Chaos Rising Masterpiece','Rift Dragon Full Art','Void Collector Full Art','Thunder Crown Full Art','Master Chaos Gold Seal','Chaos Rising Crown Rare','Blue Lion Gold Rare','Rift Titan Secret Rare',
+]
+
+const perfectFlavors = [
+  'Een lichtwezen dat iedere verzameling strak op nummer houdt.',
+  'Beschermt sealed voorraad met kalme precisie.',
+  'Verschijnt wanneer een collector zijn master set bijna compleet heeft.',
+  'Laat holo-randen oplichten zonder chaos te veroorzaken.',
+  'Een kaart uit de orde-lijn van ASORTA, gemaakt voor completionists.',
+]
+
+const chaosFlavors = [
+  'Een wild wezen dat elke pack opening spannender maakt.',
+  'Scheurt door de stilte met neon stormenergie.',
+  'Verschijnt precies wanneer de pull-streak begint te kantelen.',
+  'Laat riftlicht achter op iedere holo-rand.',
+  'Een kaart uit de chaos-lijn van ASORTA, gemaakt voor jagers op chase cards.',
+]
+
+function rarityAtIndex(index: number): TcgRarity {
+  let current = 0
+  for (const [rarity, count] of rarityPlan) {
+    current += count
+    if (index < current) return rarity
   }
+  return 'common'
+}
+
+function artStyleFor(series: TcgSeriesKey, rarity: TcgRarity, index: number) {
+  const finish = rarityLabel(rarity)
+  if (series === 'perfect-order') {
+    return `${finish} frame met witgouden licht, symmetrische runes en premium collector-glans #${index + 1}`
+  }
+  return `${finish} frame met neonblauwe storm, paarse rift-energie en chaotische foil-glans #${index + 1}`
+}
+
+function buildSeriesCards(series: TcgSeriesKey, names: string[], seriesName: string, flavors: string[]): TcgCard[] {
+  return names.slice(0, 120).map((name, index) => {
+    const rarity = rarityAtIndex(index)
+    const number = `${String(index + 1).padStart(3, '0')}/120`
+    const prefix = series === 'perfect-order' ? 'po' : 'cr'
+    const type = typeCycle[index % typeCycle.length]
+    return {
+      id: `${prefix}-${String(index + 1).padStart(3, '0')}`,
+      number,
+      series,
+      seriesName,
+      name,
+      type,
+      rarity,
+      variant: rarity,
+      flavor: flavors[index % flavors.length],
+      artStyle: artStyleFor(series, rarity, index),
+      collectorTitle: `${seriesName} ${number}`,
+    }
+  })
 }
 
 export const tcgCardCatalog: TcgCard[] = [
-  ...perfectOrderBase.map((row) => cardFromRow(row, 'perfect-order', 'Perfect Order')),
-  ...chaosRisingBase.map((row) => cardFromRow(row, 'chaos-rising', 'Chaos Rising')),
+  ...buildSeriesCards('perfect-order', perfectOrderNames, 'Perfect Order', perfectFlavors),
+  ...buildSeriesCards('chaos-rising', chaosRisingNames, 'Chaos Rising', chaosFlavors),
 ]
 
 export function getSeries(key: string | null | undefined) {
@@ -142,13 +162,43 @@ export function rarityLabel(rarity: string) {
     rare: 'Rare',
     reverse_holo: 'Reverse Holo',
     holo: 'Holo',
+    full_art: 'Full Art',
     ultra_rare: 'Ultra Rare',
     secret_rare: 'Secret Rare',
+    gold_rare: 'Gold Rare',
   }
   return labels[rarity] || rarity
 }
 
 export function rarityRank(rarity: string) {
-  const ranks: Record<string, number> = { common: 1, uncommon: 2, rare: 3, reverse_holo: 4, holo: 5, ultra_rare: 6, secret_rare: 7 }
+  const ranks: Record<string, number> = {
+    common: 1,
+    uncommon: 2,
+    rare: 3,
+    reverse_holo: 4,
+    holo: 5,
+    full_art: 6,
+    ultra_rare: 7,
+    secret_rare: 8,
+    gold_rare: 9,
+  }
   return ranks[rarity] || 0
+}
+
+export function cardVisualClass(card: Pick<TcgCard, 'series' | 'rarity'>) {
+  const base = card.series === 'perfect-order'
+    ? 'from-amber-200/25 via-slate-100/10 to-black'
+    : 'from-sky-400/25 via-fuchsia-500/10 to-black'
+  const rarityGlow: Record<string, string> = {
+    common: 'border-white/10',
+    uncommon: 'border-emerald-300/35',
+    rare: 'border-sky-300/45',
+    reverse_holo: 'border-fuchsia-300/50 shadow-[0_0_40px_rgba(217,70,239,.16)]',
+    holo: 'border-amber-200/60 shadow-[0_0_45px_rgba(251,191,36,.18)]',
+    full_art: 'border-violet-200/70 shadow-[0_0_55px_rgba(167,139,250,.22)]',
+    ultra_rare: 'border-cyan-100/75 shadow-[0_0_65px_rgba(125,211,252,.24)]',
+    secret_rare: 'border-yellow-100/85 shadow-[0_0_75px_rgba(250,204,21,.28)]',
+    gold_rare: 'border-yellow-200 shadow-[0_0_90px_rgba(250,204,21,.38)]',
+  }
+  return `${rarityGlow[card.rarity] || rarityGlow.common} ${base}`
 }

@@ -141,15 +141,17 @@ function generatePack(seriesKey: TcgSeriesKey) {
   const cards = getCardsForSeries(seriesKey)
   const result: TcgCard[] = []
 
-  for (let i = 0; i < 6; i += 1) result.push(pickCard(cards, 'common'))
-  for (let i = 0; i < 3; i += 1) result.push(pickCard(cards, weightedPick<TcgRarity>([['uncommon', 86], ['rare', 12], ['reverse_holo', 2]])))
+  for (let i = 0; i < 5; i += 1) result.push(pickCard(cards, 'common'))
+  for (let i = 0; i < 3; i += 1) result.push(pickCard(cards, weightedPick<TcgRarity>([['uncommon', 84], ['rare', 13], ['reverse_holo', 3]])))
+  result.push(pickCard(cards, weightedPick<TcgRarity>([['reverse_holo', 62], ['holo', 26], ['rare', 12]])))
 
   const hitRarity = weightedPick<TcgRarity>([
-    ['rare', 58],
-    ['reverse_holo', 18],
-    ['holo', 16],
-    ['ultra_rare', 6],
-    ['secret_rare', 2],
+    ['rare', 46],
+    ['holo', 26],
+    ['full_art', 12],
+    ['ultra_rare', 9],
+    ['secret_rare', 5],
+    ['gold_rare', 2],
   ])
   result.push(pickCard(cards, hitRarity))
 

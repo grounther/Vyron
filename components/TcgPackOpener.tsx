@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Sparkles, X } from 'lucide-react'
-import { rarityLabel, tcgSeries, type TcgCard, type TcgSeriesKey } from '@/lib/tcg-game'
+import { cardVisualClass, rarityLabel, tcgSeries, type TcgCard, type TcgSeriesKey } from '@/lib/tcg-game'
 
 type PulledCard = TcgCard & { packSlot?: number; pullId?: string }
 
@@ -15,15 +15,6 @@ type TcgPackOpenerProps = {
 
 type Stage = 'idle' | 'choose' | 'tear' | 'opening' | 'reveal' | 'done'
 
-const rarityClass: Record<string, string> = {
-  common: 'border-white/10 from-slate-500/20 to-black',
-  uncommon: 'border-emerald-300/35 from-emerald-500/25 to-black',
-  rare: 'border-sky-300/40 from-sky-500/25 to-black',
-  reverse_holo: 'border-fuchsia-300/45 from-fuchsia-500/25 to-black',
-  holo: 'border-amber-200/55 from-amber-400/25 to-black',
-  ultra_rare: 'border-violet-200/60 from-violet-500/30 to-black',
-  secret_rare: 'border-yellow-100/80 from-yellow-300/35 to-black',
-}
 
 export default function TcgPackOpener({ initialPackCount, compact = false, autoOpen = false }: TcgPackOpenerProps) {
   const [packCount, setPackCount] = useState(initialPackCount)
@@ -242,13 +233,14 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
                 </div>
                 <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   {cards.map((card) => (
-                    <div key={card.pullId || `${card.id}-${card.packSlot}`} className={`rounded-[1.35rem] border bg-gradient-to-br p-3 ${rarityClass[card.rarity] || rarityClass.common}`}>
+                    <div key={card.pullId || `${card.id}-${card.packSlot}`} className={`rounded-[1.35rem] border bg-gradient-to-br p-3 ${cardVisualClass(card)}`}>
                       <div className="grid aspect-[.72] place-items-center rounded-2xl border border-white/10 bg-black/35 p-3 text-center">
                         <div>
                           <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/45">{card.number}</p>
                           <h3 className="mt-3 text-lg font-black leading-tight">{card.name}</h3>
                           <p className="mt-2 text-xs text-white/45">{card.type}</p>
                           <p className="mt-4 rounded-full border border-white/10 bg-white/[.05] px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-white/70">{rarityLabel(card.rarity)}</p>
+                          <p className="mt-2 text-[10px] leading-4 text-white/38">{card.artStyle}</p>
                         </div>
                       </div>
                     </div>

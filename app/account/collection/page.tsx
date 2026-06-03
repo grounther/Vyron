@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getTcgState } from '@/lib/tcg-game-server'
-import { rarityLabel, tcgCardCatalog, tcgSeries } from '@/lib/tcg-game'
+import { cardVisualClass, rarityLabel, tcgCardCatalog, tcgSeries } from '@/lib/tcg-game'
 import TcgPackOpener from '@/components/TcgPackOpener'
 
 export const metadata = { title: 'Mijn ASORTA collectie | ASORTA' }
@@ -74,11 +74,12 @@ export default async function AccountCollectionPage() {
                   const qty = variants.reduce((sum, row) => sum + Number(row.quantity || 0), 0)
                   return (
                     <div key={card.id} className={`rounded-[1.3rem] border p-3 ${isOwned ? 'border-white/12 bg-white/[.04]' : 'border-white/5 bg-black/35 opacity-45'}`}>
-                      <div className="grid aspect-[.72] place-items-center rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_50%_35%,rgba(246,211,108,.12),transparent_35%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.2))] p-3 text-center">
+                      <div className={`grid aspect-[.72] place-items-center rounded-2xl border bg-gradient-to-br p-3 text-center ${isOwned ? cardVisualClass(card) : 'border-white/10 bg-black/30'}`}>
                         <div>
                           <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/35">{card.number}</p>
                           <h3 className="mt-3 text-sm font-black leading-tight">{isOwned ? card.name : '???'}</h3>
                           <p className="mt-2 text-[11px] text-white/45">{isOwned ? card.type : 'Niet gevonden'}</p>
+                          {isOwned ? <p className="mt-3 line-clamp-3 text-[10px] leading-4 text-white/38">{card.flavor}</p> : null}
                         </div>
                       </div>
                       <p className="mt-3 text-[10px] font-black uppercase tracking-[.16em] text-white/35">{rarityLabel(card.rarity)}</p>
