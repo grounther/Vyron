@@ -176,6 +176,48 @@ export type PortalNote = {
   updated_at: string | null
 }
 
+
+export type PortalPackCredit = {
+  id: string
+  customer_id: string | null
+  auth_user_id: string | null
+  customer_email: string | null
+  order_id: string | null
+  order_number: string | null
+  source: string
+  status: string
+  series_chosen: string | null
+  opened_at: string | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type PortalPackOpening = {
+  id: string
+  credit_id: string | null
+  customer_id: string | null
+  auth_user_id: string | null
+  customer_email: string | null
+  series_key: string
+  created_at: string | null
+}
+
+export type PortalPackEvent = {
+  id: string
+  customer_id: string | null
+  auth_user_id: string | null
+  customer_email: string | null
+  credit_id: string | null
+  order_id: string | null
+  event_type: string
+  source: string | null
+  series_key: string | null
+  quantity: number | null
+  reason: string | null
+  created_by: string | null
+  created_at: string | null
+}
+
 export type SupportCustomerPortal = {
   query: string
   matchedBy: string[]
@@ -192,6 +234,9 @@ export type SupportCustomerPortal = {
   loyaltyTiers: PortalLoyaltyTier[]
   loyaltyEvents: PortalLoyaltyEvent[]
   notes: PortalNote[]
+  packCredits: PortalPackCredit[]
+  packOpenings: PortalPackOpening[]
+  packEvents: PortalPackEvent[]
   metrics: {
     totalOrders: number
     totalSpent: number
@@ -201,6 +246,10 @@ export type SupportCustomerPortal = {
     wishlist: number
     loyaltyPoints: number
     loyaltyTier: string
+    packsTotal: number
+    packsAvailable: number
+    packsOpened: number
+    packsVoid: number
   }
   warnings: string[]
   serverTime: string
@@ -218,6 +267,9 @@ const loyaltySelect = 'id, customer_id, auth_user_id, points, lifetime_spend, ti
 const loyaltyTierSelect = 'tier_key, name, min_points, min_lifetime_spend, reward_label, active, position'
 const loyaltyEventSelect = 'id, customer_id, customer_email, order_id, event_type, delta_points, previous_points, new_points, tier_before, tier_after, reason, created_by, created_at'
 const noteSelect = 'id, customer_id, customer_email, order_id, conversation_id, note_type, note, created_by, created_at, updated_at'
+const packCreditSelect = 'id, customer_id, auth_user_id, customer_email, order_id, order_number, source, status, series_chosen, opened_at, created_at, updated_at'
+const packOpeningSelect = 'id, credit_id, customer_id, auth_user_id, customer_email, series_key, created_at'
+const packEventSelect = 'id, customer_id, auth_user_id, customer_email, credit_id, order_id, event_type, source, series_key, quantity, reason, created_by, created_at'
 
 function clean(value: unknown, limit = 180) {
   return typeof value === 'string' ? value.trim().slice(0, limit) : ''
@@ -494,7 +546,7 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
 
   orders.forEach((order) => add(orderIds, order.id))
 
-  const [orderItems, conversationsByEmail, conversationsByCustomer, ticketsByEmail, ticketsByCustomer, archives, cartsByEmail, cartsByCustomer, wishlistByCustomer, loyaltyByCustomer, loyaltyEventsByCustomer, loyaltyTiers, notesByCustomer, notesByEmail, notesByOrder] = await Promise.all([
+  const [orderItems, conversationsByEmail, conversationsByCustomer, ticketsByEmail, ticketsByCustomer, archives, cartsByEmail, cartsByCustomer, wishlistByCustomer, loyaltyByCustomer, loyaltyEventsByCustomer, loyaltyTiers, notesByCustomer, notesByEmail, notesByOrder, packCreditsByCustomer, packCreditsByEmail, packOpeningsByCustomer, packOpeningsByEmail, packEventsByCustomer, packEventsByEmail] = await Promise.all([
     orderIds.size ? safeRows<PortalOrderItem>(warnings, 'Orderregels', admin.from('order_items').select(orderItemSelect).in('order_id', Array.from(orderIds)).order('created_at', { ascending: true }).limit(240)) : Promise.resolve([]),
     emails.size ? safeRows<PortalSupportConversation>(warnings, 'Supportgesprekken op e-mail', admin.from('support_conversations').select(conversationSelect).in('customer_email', Array.from(emails)).order('last_message_at', { ascending: false }).limit(40)) : Promise.resolve([]),
     customerIds.size ? safeRows<PortalSupportConversation>(warnings, 'Supportgesprekken op klant-ID', admin.from('support_conversations').select(conversationSelect).in('linked_customer_id', Array.from(customerIds)).order('last_message_at', { ascending: false }).limit(40)) : Promise.resolve([]),
@@ -510,6 +562,12 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
     customerIds.size ? safeRows<PortalNote>(warnings, 'Interne notities op klant-ID', admin.from('support_customer_notes').select(noteSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
     emails.size ? safeRows<PortalNote>(warnings, 'Interne notities op e-mail', admin.from('support_customer_notes').select(noteSelect).in('customer_email', Array.from(emails)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
     orderIds.size ? safeRows<PortalNote>(warnings, 'Interne notities op order-ID', admin.from('support_customer_notes').select(noteSelect).in('order_id', Array.from(orderIds)).order('created_at', { ascending: false }).limit(50)) : Promise.resolve([]),
+    customerIds.size ? safeRows<PortalPackCredit>(warnings, 'TCG pakjes op klant-ID', admin.from('customer_pack_credits').select(packCreditSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(120)) : Promise.resolve([]),
+    emails.size ? safeRows<PortalPackCredit>(warnings, 'TCG pakjes op e-mail', admin.from('customer_pack_credits').select(packCreditSelect).in('customer_email', Array.from(emails)).order('created_at', { ascending: false }).limit(120)) : Promise.resolve([]),
+    customerIds.size ? safeRows<PortalPackOpening>(warnings, 'TCG openingen op klant-ID', admin.from('customer_pack_openings').select(packOpeningSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(120)) : Promise.resolve([]),
+    emails.size ? safeRows<PortalPackOpening>(warnings, 'TCG openingen op e-mail', admin.from('customer_pack_openings').select(packOpeningSelect).in('customer_email', Array.from(emails)).order('created_at', { ascending: false }).limit(120)) : Promise.resolve([]),
+    customerIds.size ? safeRows<PortalPackEvent>(warnings, 'TCG pakjeslog op klant-ID', admin.from('customer_pack_events').select(packEventSelect).in('customer_id', Array.from(customerIds)).order('created_at', { ascending: false }).limit(160)) : Promise.resolve([]),
+    emails.size ? safeRows<PortalPackEvent>(warnings, 'TCG pakjeslog op e-mail', admin.from('customer_pack_events').select(packEventSelect).in('customer_email', Array.from(emails)).order('created_at', { ascending: false }).limit(160)) : Promise.resolve([]),
   ])
 
   let searchConversations: PortalSupportConversation[] = []
@@ -535,6 +593,12 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
   const carts = uniqueById(cartsByEmail, cartsByCustomer).sort((a, b) => String(b.last_activity_at || b.created_at || '').localeCompare(String(a.last_activity_at || a.created_at || '')))
   const notes = uniqueById(notesByCustomer, notesByEmail, notesByOrder).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
   const loyalty = loyaltyByCustomer[0] || null
+  const packCredits = uniqueById(packCreditsByCustomer, packCreditsByEmail).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+  const packOpenings = uniqueById(packOpeningsByCustomer, packOpeningsByEmail).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+  const packEvents = uniqueById(packEventsByCustomer, packEventsByEmail).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+  const packsAvailable = packCredits.filter((credit) => credit.status === 'available').length
+  const packsOpened = packCredits.filter((credit) => credit.status === 'opened').length
+  const packsVoid = packCredits.filter((credit) => credit.status === 'void').length
 
   const customer = customers.find((item) => item.source === 'customers') || customers[0] || inferCustomerFromSupport(selectedConversation)
   const totalSpent = orders.reduce((sum, order) => sum + Number(order.total || 0), 0)
@@ -556,6 +620,9 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
     loyaltyTiers: loyaltyTiers || [],
     loyaltyEvents: loyaltyEventsByCustomer || [],
     notes,
+    packCredits,
+    packOpenings,
+    packEvents,
     metrics: {
       totalOrders: orders.length,
       totalSpent,
@@ -565,6 +632,10 @@ export async function getSupportCustomerPortal(admin: SupabaseAdmin, input: { qu
       wishlist: wishlistByCustomer.length,
       loyaltyPoints: Number(loyalty?.points || 0),
       loyaltyTier: loyalty?.tier || 'n.v.t.',
+      packsTotal: packCredits.length,
+      packsAvailable,
+      packsOpened,
+      packsVoid,
     },
     warnings: uniq(warnings).slice(0, 10),
     serverTime: new Date().toISOString(),
@@ -648,6 +719,64 @@ export async function updateCustomerLoyalty(
   if (eventError) throw new Error(eventError.message || 'Loyalty log opslaan lukte niet.')
 
   return { customerId: customer.id, previousPoints, nextPoints, previousTier, nextTier }
+}
+
+
+export async function grantCustomerPackCredits(
+  admin: SupabaseAdmin,
+  input: {
+    customerId?: string | null
+    customerEmail?: string | null
+    customerName?: string | null
+    quantity?: number
+    reason?: string | null
+    createdBy?: string | null
+  },
+) {
+  const customer = await findOrCreateCustomer(admin, {
+    customerId: input.customerId,
+    email: input.customerEmail,
+    name: input.customerName,
+  })
+
+  const quantity = Math.max(1, Math.min(25, Math.round(Number(input.quantity || 1))))
+  const now = new Date().toISOString()
+  const reason = clean(input.reason, 500) || 'Handmatig toegekend via Atlas Support'
+  const customerEmail = lowerEmail(customer.email || input.customerEmail) || null
+
+  const rows = Array.from({ length: quantity }, () => ({
+    customer_id: customer.id,
+    auth_user_id: customer.auth_user_id || null,
+    customer_email: customerEmail,
+    source: 'manual_support',
+    status: 'available',
+    updated_at: now,
+  }))
+
+  const { data: credits, error } = await admin
+    .from('customer_pack_credits')
+    .insert(rows)
+    .select('id')
+
+  if (error) throw new Error(error.message || 'Pakjes toekennen lukte niet.')
+
+  const eventRows = (credits || []).map((credit: { id: string }) => ({
+    customer_id: customer.id,
+    auth_user_id: customer.auth_user_id || null,
+    customer_email: customerEmail,
+    credit_id: credit.id,
+    event_type: 'manual_grant',
+    source: 'atlas_support',
+    quantity: 1,
+    reason,
+    created_by: input.createdBy || 'Atlas',
+  }))
+
+  if (eventRows.length) {
+    await admin.from('customer_pack_events').insert(eventRows).then(() => undefined, () => undefined)
+  }
+
+  return { customerId: customer.id, quantity: eventRows.length }
 }
 
 export async function linkSupportConversation(

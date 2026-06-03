@@ -78,6 +78,8 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
   const [loyaltyTier, setLoyaltyTier] = useState('auto')
   const [loyaltySpend, setLoyaltySpend] = useState('')
   const [loyaltyReason, setLoyaltyReason] = useState('')
+  const [packQuantity, setPackQuantity] = useState('1')
+  const [packReason, setPackReason] = useState('')
 
   const orderItemsByOrder = useMemo(() => {
     const grouped: Record<string, PortalOrderItem[]> = {}
@@ -202,6 +204,28 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
     })
     setLoyaltyPoints('')
     setLoyaltyReason('')
+  }
+
+  async function grantPacks(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!portal) return
+
+    const quantity = Number(packQuantity || 1)
+    if (!Number.isFinite(quantity) || quantity < 1) {
+      setError('Vul een geldig aantal pakjes in.')
+      return
+    }
+
+    await portalPatch({
+      action: 'grantPackCredits',
+      customerId: portal.customer?.id || null,
+      customerEmail: portal.customer?.email || selectedConversation?.customer_email || query || null,
+      customerName: portal.customer?.full_name || selectedConversation?.customer_name || null,
+      quantity,
+      reason: packReason,
+    })
+    setPackQuantity('1')
+    setPackReason('')
   }
 
   const customer = portal?.customer || null
@@ -367,6 +391,62 @@ export default function CustomerPortalPanel({ selectedConversation, onSupportRef
                   </div>
                 ) : null}
               </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="flex items-center gap-2 font-black"><PackageCheck size={16} className="text-[#b7c8ad]" /> Minigame pakjes</p>
+                    <p className="mt-2 text-sm text-white/50">
+                      {portal.metrics.packsTotal} totaal · {portal.metrics.packsAvailable} ongeopend · {portal.metrics.packsOpened} geopend
+                    </p>
+                    {!portal.customer?.auth_user_id ? <p className="mt-2 text-xs leading-5 text-amber-100/80">Let op: geen gekoppeld account gevonden. Pakjes worden op e-mail/klant gezet en worden zichtbaar zodra het account gekoppeld is.</p> : null}
+                  </div>
+                  <span className="rounded-full border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[.14em] text-[#dbe9d4]">audit log</span>
+                </div>
+
+                <form onSubmit={grantPacks} className="mt-4 grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
+                    <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Aantal pakjes
+                      <input value={packQuantity} onChange={(event: ChangeEvent<HTMLInputElement>) => setPackQuantity(event.target.value)} inputMode="numeric" className="support-input h-11 text-sm normal-case tracking-normal" placeholder="bijv. 1" />
+                    </label>
+                    <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Reden / audit note
+                      <input value={packReason} onChange={(event: ChangeEvent<HTMLInputElement>) => setPackReason(event.target.value)} className="support-input h-11 text-sm normal-case tracking-normal" placeholder="Bijv. betaalde order zonder reward, servicecorrectie..." />
+                    </label>
+                  </div>
+                  <button type="submit" disabled={busy === 'grantPackCredits'} className="rounded-full border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 px-4 py-3 text-xs font-black uppercase tracking-[.14em] text-[#dbe9d4] transition hover:bg-[#b7c8ad]/15 disabled:opacity-60">
+                    {busy === 'grantPackCredits' ? 'Pakjes toekennen...' : 'Pakjes toekennen aan klant'}
+                  </button>
+                </form>
+
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Pakjesstatus</p>
+                    <div className="mt-3 grid gap-2">
+                      {portal.packCredits.slice(0, 8).map((credit) => (
+                        <div key={credit.id} className="rounded-xl border border-white/10 bg-white/[.025] p-3 text-xs text-white/50">
+                          <div className="flex items-center justify-between gap-3"><span className="font-black text-white/70">{credit.status === 'available' ? 'Ongeopend' : credit.status === 'opened' ? 'Geopend' : 'Void'}</span><span>{formatDate(credit.created_at)}</span></div>
+                          <p className="mt-1">{credit.source || 'source n.v.t.'}{credit.order_number ? ` · order ${credit.order_number}` : ''}{credit.series_chosen ? ` · ${credit.series_chosen}` : ''}</p>
+                          {credit.opened_at ? <p className="mt-1 text-white/35">Geopend: {formatDate(credit.opened_at)}</p> : null}
+                        </div>
+                      ))}
+                      {!portal.packCredits.length ? <p className="text-sm text-white/45">Nog geen pakjes gevonden.</p> : null}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Pakjeslog</p>
+                    <div className="mt-3 grid gap-2">
+                      {portal.packEvents.slice(0, 10).map((event) => (
+                        <div key={event.id} className="rounded-xl border border-white/10 bg-white/[.025] p-3 text-xs text-white/50">
+                          <div className="flex items-center justify-between gap-3"><span className="font-black text-white/70">{event.event_type}</span><span>{formatDate(event.created_at)}</span></div>
+                          <p className="mt-1">{event.reason || event.source || 'Geen reden'} · {event.created_by || 'system'}</p>
+                        </div>
+                      ))}
+                      {!portal.packEvents.length ? <p className="text-sm text-white/45">Nog geen pakjeslog gevonden.</p> : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {portal.carts.slice(0, 3).map((cart) => (
                 <div key={cart.id} className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
                   <div className="flex items-center justify-between gap-3">

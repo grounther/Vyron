@@ -35,6 +35,15 @@ export async function ensureTcgCustomer(admin: SupabaseClient, user: User): Prom
     .single()
 
   if (error || !data?.id) throw new Error(error?.message || 'Klantprofiel kon niet worden geladen.')
+
+  // Claim manually granted credits that were added by support before auth_user_id was known.
+  await admin
+    .from('customer_pack_credits')
+    .update({ auth_user_id: user.id, customer_id: data.id, updated_at: new Date().toISOString() })
+    .eq('customer_email', email)
+    .is('auth_user_id', null)
+    .then(() => undefined, () => undefined)
+
   return { customer: data as CustomerContext['customer'] }
 }
 
@@ -63,6 +72,38 @@ export async function syncPackCreditsForPaidOrders(admin: SupabaseClient, user: 
   if (!rows.length) return 0
   const { error } = await admin.from('customer_pack_credits').upsert(rows, { onConflict: 'order_id' })
   if (error) return 0
+
+  const orderIds = rows.map((row: { order_id: string }) => row.order_id).filter(Boolean)
+  const { data: credits } = await admin
+    .from('customer_pack_credits')
+    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source')
+    .in('order_id', orderIds)
+
+  const creditIds = (credits || []).map((credit: any) => credit.id).filter(Boolean)
+  const { data: existingEvents } = creditIds.length
+    ? await admin.from('customer_pack_events').select('credit_id').in('credit_id', creditIds).eq('event_type', 'grant')
+    : { data: [] as any[] }
+  const logged = new Set((existingEvents || []).map((event: any) => String(event.credit_id)))
+  const missingEvents = (credits || []).filter((credit: any) => !logged.has(String(credit.id)))
+
+  if (missingEvents.length) {
+    await admin
+      .from('customer_pack_events')
+      .insert(missingEvents.map((credit: any) => ({
+        customer_id: credit.customer_id,
+        auth_user_id: credit.auth_user_id,
+        customer_email: credit.customer_email,
+        credit_id: credit.id,
+        order_id: credit.order_id,
+        event_type: 'grant',
+        source: credit.source,
+        quantity: 1,
+        reason: credit.order_number ? `Automatisch pakje voor betaalde order ${credit.order_number}` : 'Automatisch pakje voor betaalde order',
+        created_by: 'system',
+      })))
+      .then(() => undefined, () => undefined)
+  }
+
   return rows.length
 }
 
@@ -147,6 +188,22 @@ export async function openTcgPack(admin: SupabaseClient, user: User, seriesKey: 
     .eq('status', 'available')
 
   if (updateCreditError) throw new Error(updateCreditError.message)
+
+  await admin
+    .from('customer_pack_events')
+    .insert({
+      customer_id: customer.id,
+      auth_user_id: user.id,
+      customer_email: customer.email,
+      credit_id: credit.id,
+      event_type: 'opened',
+      source: 'account_minigame',
+      series_key: seriesKey,
+      quantity: 1,
+      reason: `Klant opende ${series.name}`,
+      created_by: 'customer',
+    })
+    .then(() => undefined, () => undefined)
 
   const openingRows = cards.map((card) => ({
     customer_id: customer.id,

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cleanText, requireAtlasAdminApi } from '@/lib/support-admin'
-import { getSupportCustomerPortal, linkSupportConversation, updateCustomerLoyalty, updateSupportOrder } from '@/lib/support-customer-portal'
+import { getSupportCustomerPortal, grantCustomerPackCredits, linkSupportConversation, updateCustomerLoyalty, updateSupportOrder } from '@/lib/support-customer-portal'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,6 +43,15 @@ export async function PATCH(request: Request) {
         points: Number(body.points || 0),
         lifetimeSpend: body.lifetimeSpend === null || body.lifetimeSpend === undefined || body.lifetimeSpend === '' ? null : Number(body.lifetimeSpend),
         tier: typeof body.tier === 'string' ? body.tier : null,
+        reason: typeof body.reason === 'string' ? body.reason : null,
+        createdBy: user.email,
+      })
+    } else if (action === 'grantPackCredits') {
+      await grantCustomerPackCredits(admin, {
+        customerId: cleanText(body.customerId, 80) || null,
+        customerEmail: typeof body.customerEmail === 'string' ? body.customerEmail : undefined,
+        customerName: typeof body.customerName === 'string' ? body.customerName : undefined,
+        quantity: Number(body.quantity || 1),
         reason: typeof body.reason === 'string' ? body.reason : null,
         createdBy: user.email,
       })
