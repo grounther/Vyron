@@ -73,6 +73,8 @@ Na je bestelling ontvang je een orderbevestiging per e-mail. Zodra tracking besc
   f({ key: 'contact.info.kicker', label: 'Info block kicker', value: 'Contact info', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
   f({ key: 'contact.info.title', label: 'Info block title', value: 'Liever via e-mail?', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
   f({ key: 'contact.email.label', label: 'Email card label', value: 'E-mail', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
+  f({ key: 'contact.kvk.label', label: 'KvK card label', value: 'KvK-nummer', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
+  f({ key: 'contact.kvk.value', label: 'KvK number', value: '42075074', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
   f({ key: 'contact.flow.title', label: 'Support flow title', value: 'Support flow', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),
   f({ key: 'contact.flow.text', label: 'Support flow text', value: 'Berichten uit de live chat worden opgeslagen zodat support je vraag kan opvolgen. Als support offline is, blijft je bericht openstaan.', type: 'textarea', group: 'Contact support blocks', page: 'Contact page' }),
   f({ key: 'contact.response.title', label: 'Response title', value: 'Reactietijd', type: 'text', group: 'Contact support blocks', page: 'Contact page' }),

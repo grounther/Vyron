@@ -25,6 +25,7 @@ export default function ContactClient({ content }: { content: SiteContentMap }) 
           <h2 className="mt-3 text-3xl font-black">{content['contact.info.title']}</h2>
           <div className="mt-6 grid gap-4 text-sm leading-6 text-white/60">
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><p className="font-black text-white">{content['contact.email.label']}</p><a className="mt-1 block text-[#c8d6bd]" href="mailto:info@asorta.nl">info@asorta.nl</a></div>
+            <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><p className="font-black text-white">{content['contact.kvk.label'] || 'KvK-nummer'}</p><p className="mt-1 font-mono text-[#c8d6bd]">{content['contact.kvk.value'] || '42075074'}</p></div>
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><p className="font-black text-white">{content['contact.flow.title']}</p><p className="mt-1">{content['contact.flow.text']}</p></div>
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><p className="font-black text-white">{content['contact.response.title']}</p><p className="mt-1">{content['contact.response.text']}</p></div>
           </div>
