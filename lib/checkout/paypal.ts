@@ -61,7 +61,19 @@ function amount(value: unknown) {
 }
 
 function approvalUrl(order: PayPalOrderResponse) {
-  return order.links?.find((link) => link.rel === 'approve')?.href || ''
+  const links = Array.isArray(order.links) ? order.links : []
+  return (
+    links.find((link) => String(link.rel).toLowerCase() === 'approve')?.href ||
+    links.find((link) => String(link.rel).toLowerCase() === 'payer-action')?.href ||
+    links.find((link) => String(link.rel).toLowerCase() === 'checkout')?.href ||
+    ''
+  )
+}
+
+function paypalLinksForDebug(order: PayPalOrderResponse) {
+  return Array.isArray(order.links)
+    ? order.links.map((link) => `${link.rel}:${link.href}`).join(' | ')
+    : 'geen links ontvangen'
 }
 
 export async function createPayPalOrder(order: Record<string, any>, items: any[], shipping: Record<string, any>) {
@@ -140,7 +152,9 @@ export async function createPayPalOrder(order: Record<string, any>, items: any[]
   }
 
   const url = approvalUrl(body)
-  if (!url) throw new Error('PayPal gaf geen approval-link terug.')
+  if (!url) {
+    throw new Error(`PayPal gaf geen betaal-link terug. Ontvangen links: ${paypalLinksForDebug(body)}`)
+  }
 
   return { id: body.id, status: body.status || 'CREATED', approvalUrl: url }
 }
