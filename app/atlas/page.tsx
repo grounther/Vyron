@@ -21,6 +21,7 @@ import {
   PlugZap,
   ReceiptText,
   Calculator,
+  UsersRound,
 } from 'lucide-react'
 
 export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: false, follow: false } }
@@ -274,6 +275,7 @@ export default async function AtlasPage(){
     { permission: 'support' as const, href: '/atlas/support', icon: <MessageCircle className="text-[#b7c8ad]"/>, title: 'Support Center', text: 'Live chats, klantdossiers, orders, tracking en klantenservice antwoorden beheren.' },
     { permission: 'pricing' as const, href: '/atlas/pricing', icon: <Calculator className="text-[#b7c8ad]"/>, title: 'Prijsbeheer', text: 'Cardmarket paste-helper, marktwaarde -2%, margecheck en pricing logs.' },
     { permission: 'integrations' as const, href: '/atlas/integrations', icon: <PlugZap className="text-[#b7c8ad]"/>, title: 'Integrations', text: 'Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.' },
+    { permission: 'settings' as const, href: '/atlas/staff', icon: <UsersRound className="text-[#b7c8ad]"/>, title: 'Medewerkers', text: 'Beheer staff accounts, support badges en Atlas rechten per medewerker.' },
   ].filter((card) => hasAtlasPermission(staff, card.permission))
 
   return <main className="mx-auto max-w-7xl px-4 py-10 md:px-6">
