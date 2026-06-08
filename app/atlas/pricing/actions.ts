@@ -108,16 +108,19 @@ export async function updatePricingInput(formData: FormData) {
 
     revalidatePath('/atlas/pricing')
     revalidatePath('/atlas/products')
-    pricingRedirect({ saved: '1', product: slug })
   } catch (error) {
     pricingRedirect({ error: error instanceof Error ? error.message : 'Pricing update mislukt.' })
   }
+
+  pricingRedirect({ saved: '1', product: slug })
 }
 
 export async function applySuggestedPrice(formData: FormData) {
   const { admin, user } = await assertAtlasAdmin('/atlas/pricing')
   const slug = value(formData, 'slug')
   if (!slug) return
+
+  let redirectParams: Record<string, string> = { applied: '1', product: slug }
 
   try {
     const product = await getProduct(admin, slug)
@@ -157,43 +160,44 @@ export async function applySuggestedPrice(formData: FormData) {
       })
 
       revalidatePath('/atlas/pricing')
-      pricingRedirect({ error: calculation.note, product: slug })
+      redirectParams = { error: calculation.note, product: slug }
+    } else {
+      const appliedPrice = roundMoney(calculation.suggestedPrice)
+      const { error } = await admin.from('products').update({
+        price: appliedPrice,
+        pricing_status: 'applied',
+        suggested_price: appliedPrice,
+        last_pricing_note: `Prijs toegepast: ${calculation.note}`,
+        pricing_updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).eq('slug', slug)
+      if (error) throw new Error(error.message)
+
+      await insertPricingLog(admin, {
+        product_slug: slug,
+        product_name: product.name,
+        action: 'applied',
+        old_price: product.price,
+        market_value: calculation.marketValue,
+        suggested_price: calculation.suggestedPrice,
+        applied_price: appliedPrice,
+        min_safe_price: calculation.minSafePrice,
+        margin_percent: calculation.marginPercent,
+        source: product.market_source || 'manual',
+        status: 'applied',
+        note: `Prijs aangepast van €${Number(product.price || 0).toFixed(2)} naar €${appliedPrice.toFixed(2)}.`,
+        actor_email: user.email,
+      })
+
+      revalidatePath('/')
+      revalidatePath('/shop')
+      revalidatePath(`/product/${slug}`)
+      revalidatePath('/atlas/pricing')
+      revalidatePath('/atlas/products')
     }
-
-    const appliedPrice = roundMoney(calculation.suggestedPrice)
-    const { error } = await admin.from('products').update({
-      price: appliedPrice,
-      pricing_status: 'applied',
-      suggested_price: appliedPrice,
-      last_pricing_note: `Prijs toegepast: ${calculation.note}`,
-      pricing_updated_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }).eq('slug', slug)
-    if (error) throw new Error(error.message)
-
-    await insertPricingLog(admin, {
-      product_slug: slug,
-      product_name: product.name,
-      action: 'applied',
-      old_price: product.price,
-      market_value: calculation.marketValue,
-      suggested_price: calculation.suggestedPrice,
-      applied_price: appliedPrice,
-      min_safe_price: calculation.minSafePrice,
-      margin_percent: calculation.marginPercent,
-      source: product.market_source || 'manual',
-      status: 'applied',
-      note: `Prijs aangepast van €${Number(product.price || 0).toFixed(2)} naar €${appliedPrice.toFixed(2)}.`,
-      actor_email: user.email,
-    })
-
-    revalidatePath('/')
-    revalidatePath('/shop')
-    revalidatePath(`/product/${slug}`)
-    revalidatePath('/atlas/pricing')
-    revalidatePath('/atlas/products')
-    pricingRedirect({ applied: '1', product: slug })
   } catch (error) {
     pricingRedirect({ error: error instanceof Error ? error.message : 'Prijs toepassen mislukt.' })
   }
+
+  pricingRedirect(redirectParams)
 }
