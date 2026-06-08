@@ -2,22 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { sendResendEmail } from '@/lib/newsletter'
 
 async function requireAdmin() {
-  const auth = await createClient()
-  const { data: { user } } = await auth.auth.getUser()
-  if (!user?.email) redirect('/atlas-access?next=/atlas/support')
-
-  const admin = createAdminClient()
-  if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY ontbreekt')
-
-  const { data } = await admin.from('admin_users').select('email').eq('email', user.email).eq('active', true).maybeSingle()
-  if (!data) throw new Error('Geen Atlas rechten')
-
-  return { admin, user }
+  const { admin, user, staff } = await assertAtlasPermission('support', '/atlas/support')
+  return { admin, user, staff }
 }
 
 function clean(value: FormDataEntryValue | null, limit = 3000) {
@@ -42,7 +32,7 @@ function transcriptHtml(input: {
   messages: TranscriptMessage[]
 }) {
   const rows = input.messages.map((message) => {
-    const label = message.sender_type === 'customer' ? (input.customerName || 'Klant') : message.sender_type === 'operator' ? 'ASORTA Support' : 'Systeem'
+    const label = message.sender_type === 'customer' ? (input.customerName || 'Klant') : message.sender_type === 'operator' ? (message.author_name || 'ASORTA Support') : 'Systeem'
     const date = new Date(message.created_at).toLocaleString('nl-NL')
     return `<div style="margin:0 0 14px;padding:16px;border-radius:18px;background:${message.sender_type === 'customer' ? 'rgba(255,255,255,.08)' : 'rgba(183,200,173,.10)'};border:1px solid rgba(255,255,255,.10);"><div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#b7c8ad;font-weight:800;">${escapeHtml(label)} · ${escapeHtml(date)}</div><div style="margin-top:8px;color:rgba(255,255,255,.82);line-height:1.7;">${escapeHtml(message.body).replace(/\n/g, '<br/>')}</div></div>`
   }).join('')
@@ -51,7 +41,7 @@ function transcriptHtml(input: {
 }
 
 export async function replyToSupportConversation(formData: FormData) {
-  const { admin, user } = await requireAdmin()
+  const { admin, user, staff } = await requireAdmin()
   const conversationId = clean(formData.get('conversation_id'), 80)
   const message = clean(formData.get('message'))
 
@@ -68,7 +58,7 @@ export async function replyToSupportConversation(formData: FormData) {
   await admin.from('support_messages').insert({
     conversation_id: conversationId,
     sender_type: 'operator',
-    author_name: 'ASORTA Support',
+    author_name: staff.displayName,
     body: message,
   })
 

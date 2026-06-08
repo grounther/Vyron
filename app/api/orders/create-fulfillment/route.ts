@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const orderId = String(body.orderId || '').trim()
   if (!orderId) return NextResponse.json({ error: 'Missing orderId.' }, { status: 400 })
 
-  let adminAuth = await requireAtlasAdminApi()
+  let adminAuth = await requireAtlasAdminApi('orders')
   if (!adminAuth.ok && !requireInternalToken(request, 'INTERNAL_FULFILLMENT_TOKEN')) return adminAuth.response
 
   if (!adminAuth.ok) {

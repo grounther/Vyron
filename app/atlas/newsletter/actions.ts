@@ -2,14 +2,14 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || '').trim()
 }
 
 export async function saveCampaign(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/newsletter')
+  const { admin } = await assertAtlasPermission('newsletter', '/atlas/newsletter')
 
   const id = value(formData, 'id') || undefined
   const subject = value(formData, 'subject')
@@ -42,7 +42,7 @@ export async function saveCampaign(formData: FormData) {
 }
 
 export async function deleteCampaign(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/newsletter')
+  const { admin } = await assertAtlasPermission('newsletter', '/atlas/newsletter')
   const id = value(formData, 'id')
   if (!id) return
 
@@ -54,7 +54,7 @@ export async function deleteCampaign(formData: FormData) {
 }
 
 export async function updateSubscriberStatus(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/newsletter')
+  const { admin } = await assertAtlasPermission('newsletter', '/atlas/newsletter')
   const id = value(formData, 'id')
   const status = value(formData, 'status') || 'subscribed'
   if (!id) return

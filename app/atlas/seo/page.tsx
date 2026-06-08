@@ -1,7 +1,5 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { getProducts } from '@/lib/catalog'
 import { AlertTriangle, CheckCircle2, ExternalLink, FileSearch, Globe2, ImageIcon, PackageCheck, Search, ShieldCheck } from 'lucide-react'
 
@@ -19,21 +17,16 @@ function scoreColor(value: number) {
 }
 
 export default async function AtlasSeoPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) redirect('/atlas-access?next=/atlas/seo')
-
-  const admin = createAdminClient()
-  let isAdmin = false
-  let adminCheckReady = false
-
-  if (admin) {
-    const { data } = await admin.from('admin_users').select('email, active').eq('email', user.email).eq('active', true).maybeSingle()
-    isAdmin = Boolean(data)
-    adminCheckReady = true
+  let adminCheckReady = true
+  try {
+    await assertAtlasPermission('seo', '/atlas/seo')
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+      adminCheckReady = false
+    } else {
+      throw error
+    }
   }
-
-  if (adminCheckReady && !isAdmin) redirect('/atlas-access?next=/atlas/seo')
 
   const products = await getProducts()
   const activeProducts = products.filter((product) => product.shopifyProductId && product.shopifyVariantLegacyId)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveAtlasStaffAccess, hasAtlasPermission } from '@/lib/atlas-auth'
 
 type SupabaseAdmin = NonNullable<ReturnType<typeof createAdminClient>>
 
@@ -56,18 +57,13 @@ export async function requireAtlasAdminApi() {
     return { error: NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY ontbreekt.' }, { status: 500 }) }
   }
 
-  const { data: adminUser, error } = await admin
-    .from('admin_users')
-    .select('email')
-    .eq('email', user.email)
-    .eq('active', true)
-    .maybeSingle()
+  const staff = await resolveAtlasStaffAccess(admin, user.email)
 
-  if (error || !adminUser) {
-    return { error: NextResponse.json({ error: 'Geen Atlas rechten.' }, { status: 403 }) }
+  if (!staff || !hasAtlasPermission(staff, 'support')) {
+    return { error: NextResponse.json({ error: 'Geen Atlas Support rechten.' }, { status: 403 }) }
   }
 
-  return { admin, user }
+  return { admin, user, staff }
 }
 
 export async function getAtlasSupportSnapshot(admin: SupabaseAdmin, selectedId?: string | null): Promise<AtlasSupportSnapshot> {
@@ -150,7 +146,7 @@ export function supportTranscriptHtml(input: {
 }) {
   const rows = input.messages
     .map((message) => {
-      const label = message.sender_type === 'customer' ? input.customerName || 'Klant' : message.sender_type === 'operator' ? 'ASORTA Support' : 'Systeem'
+      const label = message.sender_type === 'customer' ? input.customerName || 'Klant' : message.sender_type === 'operator' ? (message.author_name || 'ASORTA Support') : 'Systeem'
       const date = new Date(message.created_at).toLocaleString('nl-NL')
       return `<div style="margin:0 0 14px;padding:16px;border-radius:18px;background:${message.sender_type === 'customer' ? 'rgba(255,255,255,.08)' : 'rgba(183,200,173,.10)'};border:1px solid rgba(255,255,255,.10);"><div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#b7c8ad;font-weight:800;">${escapeHtml(label)} · ${escapeHtml(date)}</div><div style="margin-top:8px;color:rgba(255,255,255,.82);line-height:1.7;">${escapeHtml(message.body).replace(/\n/g, '<br/>')}</div></div>`
     })

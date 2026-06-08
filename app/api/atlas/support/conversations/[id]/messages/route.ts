@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAtlasAdminApi()
   if ('error' in auth) return auth.error
-  const { admin, user } = auth
+  const { admin, user, staff } = auth
 
   const { id } = await params
   const body = await request.json().catch(() => ({}))
@@ -34,7 +34,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { error: insertError } = await admin.from('support_messages').insert({
     conversation_id: id,
     sender_type: 'operator',
-    author_name: 'ASORTA Support',
+    author_name: staff.displayName,
     body: message,
   })
 

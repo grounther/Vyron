@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { getAllActions, type SiteAction } from '@/lib/actions'
 import { categories } from '@/lib/products'
 import { deleteAction, saveAction } from './actions'
@@ -9,7 +9,7 @@ import { Megaphone, Save, Sparkles, Trash2 } from 'lucide-react'
 export const metadata = { title: 'Atlas Actions | ASORTA internal', robots: { index: false, follow: false } }
 
 export default async function AtlasPromotions(){
-  await assertAtlasAdmin('/atlas/promotions')
+  await assertAtlasPermission('promotions', '/atlas/promotions')
   const actions = await getAllActions()
 
   return <main className="mx-auto max-w-7xl px-4 py-10 md:px-6">

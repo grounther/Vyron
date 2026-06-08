@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || '').trim()
@@ -38,7 +38,7 @@ function datetimeOrNull(formData: FormData, key: string) {
 }
 
 export async function saveAction(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/promotions')
+  const { admin } = await assertAtlasPermission('promotions', '/atlas/promotions')
 
   const title = value(formData, 'title')
   const slug = slugify(value(formData, 'slug') || title)
@@ -77,7 +77,7 @@ export async function saveAction(formData: FormData) {
 }
 
 export async function deleteAction(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/promotions')
+  const { admin } = await assertAtlasPermission('promotions', '/atlas/promotions')
   const slug = value(formData, 'slug')
   if (!slug) return
 

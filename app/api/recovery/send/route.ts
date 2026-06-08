@@ -23,7 +23,7 @@ function recoveryHtml(items: any[], recoveryUrl: string) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAtlasAdminApi()
+  const auth = await requireAtlasAdminApi('recovery')
   if (!auth.ok) return auth.response
   const admin = auth.admin
 

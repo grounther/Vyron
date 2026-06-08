@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { Mail, Save, Trash2, Users } from 'lucide-react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { getNewsletterCampaigns, getNewsletterSubscribers, type NewsletterCampaign } from '@/lib/newsletter'
 import { deleteCampaign, saveCampaign, updateSubscriberStatus } from './actions'
 import SendCampaignButton from './SendCampaignButton'
@@ -9,7 +9,7 @@ import SendCampaignButton from './SendCampaignButton'
 export const metadata = { title: 'Atlas Newsletter | ASORTA internal', robots: { index: false, follow: false } }
 
 export default async function AtlasNewsletterPage() {
-  await assertAtlasAdmin('/atlas/newsletter')
+  await assertAtlasPermission('newsletter', '/atlas/newsletter')
   const [subscribers, campaigns] = await Promise.all([getNewsletterSubscribers(), getNewsletterCampaigns()])
   const active = subscribers.filter((subscriber) => subscriber.status === 'subscribed').length
 

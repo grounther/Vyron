@@ -43,7 +43,7 @@ function productImages(product: CJProductDetail) {
 }
 
 export async function GET(request: Request) {
-  const auth = await requireAtlasAdminApi()
+  const auth = await requireAtlasAdminApi('products')
   if (!auth.ok) return auth.response
 
   const { searchParams } = new URL(request.url)

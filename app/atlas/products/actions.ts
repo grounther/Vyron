@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || '').trim()
@@ -88,7 +88,7 @@ function deleteEmptyOptionalFields<T extends Record<string, unknown>>(row: T, ke
 }
 
 async function uploadProductImage(formData: FormData, slug: string) {
-  const { admin } = await assertAtlasAdmin('/atlas/products')
+  const { admin } = await assertAtlasPermission('products', '/atlas/products')
   const file = formData.get('image_file')
 
   if (!(file instanceof File) || file.size === 0) return ''
@@ -109,7 +109,7 @@ async function uploadProductImage(formData: FormData, slug: string) {
 }
 
 export async function saveProduct(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/products')
+  const { admin } = await assertAtlasPermission('products', '/atlas/products')
 
   const name = value(formData, 'name')
   const slug = slugify(value(formData, 'slug') || name)
@@ -191,7 +191,7 @@ export async function saveProduct(formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData) {
-  const { admin } = await assertAtlasAdmin('/atlas/products')
+  const { admin } = await assertAtlasPermission('products', '/atlas/products')
   const slug = value(formData, 'slug')
   if (!slug) return
 

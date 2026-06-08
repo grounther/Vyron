@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { ShoppingCart, Euro, RefreshCw, Mail } from 'lucide-react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { getCartRecoveryDashboard } from '@/lib/revenue'
 import SendRecoveryButton from './SendRecoveryButton'
 
 export const metadata = { title: 'Atlas Cart Recovery | ASORTA internal', robots: { index: false, follow: false } }
 
 export default async function AtlasRecoveryPage() {
-  await assertAtlasAdmin('/atlas/recovery')
+  await assertAtlasPermission('recovery', '/atlas/recovery')
   const { sessions, stats } = await getCartRecoveryDashboard()
 
   return (

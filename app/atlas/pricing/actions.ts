@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { calculatePricing, parseCardmarketPriceText, parseMoney, roundMoney } from '@/lib/pricing'
 
 function value(formData: FormData, key: string) {
@@ -44,7 +44,7 @@ async function insertPricingLog(admin: any, row: Record<string, any>) {
 }
 
 export async function updatePricingInput(formData: FormData) {
-  const { admin, user } = await assertAtlasAdmin('/atlas/pricing')
+  const { admin, user } = await assertAtlasPermission('pricing', '/atlas/pricing')
   const slug = value(formData, 'slug')
   if (!slug) return
 
@@ -116,7 +116,7 @@ export async function updatePricingInput(formData: FormData) {
 }
 
 export async function applySuggestedPrice(formData: FormData) {
-  const { admin, user } = await assertAtlasAdmin('/atlas/pricing')
+  const { admin, user } = await assertAtlasPermission('pricing', '/atlas/pricing')
   const slug = value(formData, 'slug')
   if (!slug) return
 

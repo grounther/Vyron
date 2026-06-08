@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type React from 'react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { applySuggestedPrice, updatePricingInput } from './actions'
 import { calculatePricing, formatEuro, parseCardmarketPriceText } from '@/lib/pricing'
 import { ArrowLeft, Calculator, ExternalLink, LineChart, Lock, Save, ShieldCheck, TrendingDown } from 'lucide-react'
@@ -40,7 +40,7 @@ function param(value: string | string[] | undefined) {
 }
 
 async function loadPricingData() {
-  const { admin } = await assertAtlasAdmin('/atlas/pricing')
+  const { admin } = await assertAtlasPermission('pricing', '/atlas/pricing')
 
   const productsResult = await admin
     .from('products')

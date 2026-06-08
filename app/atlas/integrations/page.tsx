@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type React from 'react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CheckCircle2, KeyRound, PlugZap, RefreshCw, WalletCards } from 'lucide-react'
 import ShopifySyncButton from './ShopifySyncButton'
@@ -17,7 +17,7 @@ async function getLogs() {
 }
 
 export default async function AtlasIntegrationsPage() {
-  await assertAtlasAdmin('/atlas/integrations')
+  await assertAtlasPermission('integrations', '/atlas/integrations')
   const logs = await getLogs()
   const shopifyReady = Boolean(process.env.SHOPIFY_STORE_DOMAIN && ((process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET) || process.env.SHOPIFY_ADMIN_ACCESS_TOKEN))
   const mollieReady = Boolean(process.env.MOLLIE_API_KEY)

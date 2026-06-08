@@ -6,7 +6,7 @@ import { syncShopifyProducts } from '@/lib/shopify/sync'
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
-  const auth = await requireAtlasAdminApi()
+  const auth = await requireAtlasAdminApi('integrations')
   if (!auth.ok) return auth.response
 
   if (!hasShopifyAdminConfig()) {

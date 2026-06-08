@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type React from 'react'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { categories } from '@/lib/products'
 import { getProducts } from '@/lib/catalog'
 import { deleteProduct, saveProduct } from './actions'
@@ -34,13 +34,13 @@ function json(value: unknown, fallback: unknown = []) {
 }
 
 async function getRawProducts() {
-  const { admin } = await assertAtlasAdmin('/atlas/products')
+  const { admin } = await assertAtlasPermission('products', '/atlas/products')
   const { data } = await admin.from('products').select('*').order('created_at', { ascending: true })
   return (data || []) as RawProduct[]
 }
 
 export default async function AtlasProducts({ searchParams }: { searchParams?: Promise<SearchParams> | SearchParams }){
-  await assertAtlasAdmin('/atlas/products')
+  await assertAtlasPermission('products', '/atlas/products')
   const params = searchParams ? await searchParams : {}
   const saveStatus = param(params.save)
   const saveMessage = param(params.save_message)

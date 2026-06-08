@@ -72,7 +72,7 @@ export default function AdminAccessClient({ next = '/atlas', error }: { next?: s
 
     <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-6 text-white/50">
       <ShieldCheck size={18} className="mb-2 text-[#b7c8ad]" />
-      Atlas controleert na login server-side of je e-mailadres actief staat in de Supabase tabel <code>admin_users</code>.
+      Atlas controleert na login server-side of je e-mailadres actief staat in de Supabase tabel <code>admin_users</code> of <code>atlas_staff_members</code> met support badge.
     </div>
 
     <div className="mt-5 text-center text-sm font-bold">

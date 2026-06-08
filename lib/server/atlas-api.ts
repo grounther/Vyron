@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { hasAtlasPermission, resolveAtlasStaffAccess, type AtlasPermission } from '@/lib/atlas-auth'
 
 type AtlasApiAuthResult =
   | {
@@ -14,7 +15,7 @@ type AtlasApiAuthResult =
       response: NextResponse
     }
 
-export async function requireAtlasAdminApi(): Promise<AtlasApiAuthResult> {
+export async function requireAtlasAdminApi(permission: AtlasPermission = 'settings'): Promise<AtlasApiAuthResult> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -35,28 +36,16 @@ export async function requireAtlasAdminApi(): Promise<AtlasApiAuthResult> {
     }
   }
 
-  const { data, error } = await admin
-    .from('admin_users')
-    .select('email, role, active')
-    .eq('email', user.email)
-    .eq('active', true)
-    .maybeSingle()
+  const staff = await resolveAtlasStaffAccess(admin, user.email)
 
-  if (error) {
+  if (!staff || !hasAtlasPermission(staff, permission)) {
     return {
       ok: false,
-      response: NextResponse.json({ error: error.message }, { status: 500 }),
+      response: NextResponse.json({ error: 'Atlas access denied.' }, { status: 403 }),
     }
   }
 
-  if (!data) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: 'Atlas admin access denied.' }, { status: 403 }),
-    }
-  }
-
-  return { ok: true, admin, user, role: String(data.role || 'admin') }
+  return { ok: true, admin, user, role: staff.role }
 }
 
 export function requireInternalToken(request: Request, envName: string) {

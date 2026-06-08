@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { getSiteContent, groupSiteContentFields, siteContentDefaults } from '@/lib/site-content'
 import { saveSiteContent } from './actions'
 import Link from 'next/link'
@@ -12,22 +11,16 @@ type PageSearchParams = Promise<{ saved?: string; error?: string }>
 
 export default async function AtlasPagesPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const params = searchParams ? await searchParams : {}
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) redirect('/atlas-access?next=/atlas/pages')
+  let adminCheckReady = true
 
-  const admin = createAdminClient()
-  let isAdmin = false
-  let adminCheckReady = false
-
-  if (admin) {
-    const { data } = await admin.from('admin_users').select('email').eq('email', user.email).eq('active', true).maybeSingle()
-    isAdmin = Boolean(data)
-    adminCheckReady = true
-  }
-
-  if (adminCheckReady && !isAdmin) {
-    return <main className="mx-auto max-w-xl px-4 py-16 md:px-6"><div className="card rounded-[2rem] p-6 text-center"><Lock className="mx-auto text-[#b7c8ad]" size={42}/><h1 className="mt-4 text-3xl font-black">Access denied</h1><p className="mt-3 text-white/55">Dit account heeft geen ASORTA Atlas rechten.</p></div></main>
+  try {
+    await assertAtlasPermission('pages', '/atlas/pages')
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+      adminCheckReady = false
+    } else {
+      throw error
+    }
   }
 
   const content = await getSiteContent()

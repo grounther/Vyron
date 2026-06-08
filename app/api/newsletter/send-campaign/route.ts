@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { assertAtlasAdmin } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { campaignEmailHtml, sendResendEmail } from '@/lib/newsletter'
 
 export async function POST(request: Request) {
   try {
-    const { admin } = await assertAtlasAdmin('/atlas/newsletter')
+    const { admin } = await assertAtlasPermission('newsletter', '/atlas/newsletter')
     const body = await request.json().catch(() => ({}))
     const campaignId = String(body.campaignId || '').trim()
 

@@ -3,7 +3,7 @@ import { products } from '@/lib/products'
 import { requireAtlasAdminApi } from '@/lib/server/atlas-api'
 
 export async function GET(){
-  const auth = await requireAtlasAdminApi()
+  const auth = await requireAtlasAdminApi('settings')
   if (!auth.ok) return auth.response
 
   const inventoryValue = products.reduce((sum,p)=>sum + (p.cost || 0),0)
