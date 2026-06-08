@@ -1,11 +1,17 @@
 'use client'
 
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
+import { Bot, ChevronDown, Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
 import type { AtlasSupportConversation, AtlasSupportMessage, AtlasSupportSnapshot } from '@/lib/support-admin'
 import CustomerPortalPanel from './CustomerPortalPanel'
 
-type BusyAction = 'reply' | 'status' | 'archive' | null
+type BusyAction = 'reply' | 'status' | 'archive' | 'sorkai' | null
+
+type SorkaiSettings = {
+  enabled: boolean
+  liveStatus: 'online' | 'offline' | 'auto'
+  mode: 'assist' | 'intake'
+}
 
 type Props = {
   initialSnapshot: AtlasSupportSnapshot
@@ -37,6 +43,7 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
   const [busy, setBusy] = useState<BusyAction>(null)
   const [error, setError] = useState('')
   const [liveState, setLiveState] = useState<'connected' | 'reconnecting'>('reconnecting')
+  const [sorkai, setSorkai] = useState<SorkaiSettings>({ enabled: true, liveStatus: 'offline', mode: 'assist' })
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   const openCount = useMemo(() => conversations.filter((conversation) => conversation.status !== 'closed').length, [conversations])
@@ -53,6 +60,37 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length, selected?.id])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/atlas/support/sorkai', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active && data?.liveStatus) setSorkai(data as SorkaiSettings)
+      })
+      .catch(() => undefined)
+    return () => { active = false }
+  }, [])
+
+  async function updateSorkai(next: Partial<SorkaiSettings>) {
+    setBusy('sorkai')
+    setError('')
+    try {
+      const response = await fetch('/api/atlas/support/sorkai', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Sorkai instellingen konden niet worden opgeslagen.')
+      setSorkai(data as SorkaiSettings)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sorkai instellingen konden niet worden opgeslagen.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
 
   useEffect(() => {
     let active = true
@@ -214,6 +252,8 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
       </section>
 
       <section className="mt-8 grid gap-4">
+        <SorkaiControl settings={sorkai} busy={busy === 'sorkai'} onChange={updateSorkai} />
+
         <SupportAccordion title="Gesprekken" subtitle={`${openCount} open · ${conversations.length} totaal`} count={conversations.length} defaultOpen>
           <div className="p-4">
           <div className="grid max-h-[680px] gap-2 overflow-auto pr-1">
@@ -390,4 +430,56 @@ function SupportAccordion({
 
 function StatusBadge({ status }: { status: string }) {
   return <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[.14em] ${statusClass(status)}`}>{status || 'open'}</span>
+}
+
+
+function SorkaiControl({
+  settings,
+  busy,
+  onChange,
+}: {
+  settings: SorkaiSettings
+  busy: boolean
+  onChange: (next: Partial<SorkaiSettings>) => void
+}) {
+  const active = settings.enabled && settings.liveStatus !== 'online'
+  return (
+    <div className="card rounded-[2rem] p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-4">
+          <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl border ${active ? 'border-[#b7c8ad]/25 bg-[#b7c8ad]/10 text-[#dbe9d4]' : 'border-white/10 bg-white/[.04] text-white/40'}`}>
+            <Bot size={22} />
+          </div>
+          <div>
+            <p className="kicker">Sorkai AI Support</p>
+            <h2 className="mt-1 text-xl font-black">Offline support assistent</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/52">
+              Als live support offline staat, beantwoordt Sorkai order-, track&trace- en minigamevragen automatisch. Onzekere of gevoelige zaken blijven als pending ticket staan voor menselijke controle.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3 md:min-w-[520px]">
+          <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Sorkai
+            <select value={settings.enabled ? 'true' : 'false'} disabled={busy} onChange={(event) => onChange({ enabled: event.target.value === 'true' })} className="support-input h-11 text-sm normal-case tracking-normal">
+              <option value="true">Aan</option>
+              <option value="false">Uit</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Live status
+            <select value={settings.liveStatus} disabled={busy} onChange={(event) => onChange({ liveStatus: event.target.value as SorkaiSettings['liveStatus'] })} className="support-input h-11 text-sm normal-case tracking-normal">
+              <option value="offline">Offline: Sorkai antwoordt</option>
+              <option value="online">Online: Sorkai pauzeert</option>
+              <option value="auto">Auto / testmodus</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-black uppercase tracking-[.16em] text-white/35">Mode
+            <select value={settings.mode} disabled={busy} onChange={(event) => onChange({ mode: event.target.value as SorkaiSettings['mode'] })} className="support-input h-11 text-sm normal-case tracking-normal">
+              <option value="assist">Antwoorden + ticket</option>
+              <option value="intake">Alleen intake</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
 }

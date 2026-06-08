@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { sendResendEmail } from '@/lib/newsletter'
 import { cleanText, escapeHtml, getCustomerSupportSnapshot } from '@/lib/support-admin'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { maybeRunSorkai } from '@/lib/sorkai'
 
 async function getConversation(token: string) {
   const supabase = createAdminClient()
@@ -9,7 +10,7 @@ async function getConversation(token: string) {
 
   const { data: conversation, error } = await supabase
     .from('support_conversations')
-    .select('id, public_token, customer_name, customer_email, status, subject, last_message_at, updated_at')
+    .select('id, public_token, customer_name, customer_email, status, subject, metadata, last_message_at, updated_at')
     .eq('public_token', token)
     .maybeSingle()
 
@@ -61,6 +62,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     .from('support_tickets')
     .update({ status: 'open', updated_at: now })
     .eq('conversation_id', conversation.id)
+
+  await maybeRunSorkai(supabase, conversation, message)
 
   await sendResendEmail({
     to: 'info@asorta.nl',
