@@ -25,6 +25,8 @@ export type AtlasSupportMessage = {
   author_name: string | null
   body: string
   created_at: string
+  is_internal?: boolean | null
+  internal_kind?: string | null
 }
 
 export type AtlasSupportSnapshot = {
@@ -92,7 +94,7 @@ export async function getAtlasSupportSnapshot(admin: SupabaseAdmin, selectedId?:
   const { data: messagesData = [] } = selected
     ? await admin
         .from('support_messages')
-        .select('id, sender_type, author_name, body, created_at')
+        .select('id, sender_type, author_name, body, created_at, is_internal, internal_kind')
         .eq('conversation_id', selected.id)
         .order('created_at', { ascending: true })
     : { data: [] }
@@ -116,8 +118,9 @@ export async function getCustomerSupportSnapshot(admin: SupabaseAdmin, token: st
 
   const { data: messages = [] } = await admin
     .from('support_messages')
-    .select('id, sender_type, author_name, body, created_at')
+    .select('id, sender_type, author_name, body, created_at, is_internal, internal_kind')
     .eq('conversation_id', conversation.id)
+    .eq('is_internal', false)
     .order('created_at', { ascending: true })
 
   return {

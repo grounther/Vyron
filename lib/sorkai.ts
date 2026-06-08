@@ -193,10 +193,55 @@ export async function buildSorkaiReply(admin: Admin, conversation: Conversation,
   return { reply, intent, needsHuman, confidence }
 }
 
+
+export async function buildSorkaiStaffAssist(admin: Admin, conversation: Conversation, question: string) {
+  const cleanQuestion = cleanText(question, 1200) || 'Controleer dit supportgesprek en geef een korte interne samenvatting voor de medewerker.'
+  const { data: recentMessages = [] } = await admin
+    .from('support_messages')
+    .select('sender_type,author_name,body,created_at,is_internal')
+    .eq('conversation_id', conversation.id)
+    .order('created_at', { ascending: false })
+    .limit(8)
+
+  const visibleMessages = ((recentMessages || []) as any[])
+    .filter((message) => message.is_internal !== true)
+    .reverse()
+
+  const lastCustomer = [...visibleMessages].reverse().find((message) => message.sender_type === 'customer')
+  const contextText = [cleanQuestion, conversation.subject || '', lastCustomer?.body || ''].join('\n')
+  const result = await buildSorkaiReply(admin, conversation, contextText)
+  const transcript = visibleMessages
+    .slice(-5)
+    .map((message) => `${message.sender_type === 'customer' ? 'Klant' : message.author_name || 'Support'}: ${cleanText(message.body, 260)}`)
+    .join('\n')
+
+  const advice = result.needsHuman
+    ? 'Dit lijkt menselijke controle nodig te hebben. Gebruik de check hieronder als onderbouwing, maar bevestig gevoelige acties zelf.'
+    : 'Deze check lijkt voldoende zeker om als basis voor je antwoord te gebruiken. Controleer bedragen, status en klantgegevens altijd nog visueel.'
+
+  return {
+    intent: result.intent || 'assist',
+    confidence: result.confidence || 0.7,
+    needsHuman: result.needsHuman || false,
+    body: `Interne Sorkai check\n\nVraag medewerker:\n${cleanQuestion}\n\nAdvies:\n${advice}\n\nControle-uitkomst:\n${result.reply}\n\nLaatste gesprekscontext:\n${transcript || 'Geen zichtbare berichten gevonden.'}\n\nLet op: dit is een interne assist voor ASORTA Support. Niet automatisch naar de klant sturen.`,
+  }
+}
+
 export async function maybeRunSorkai(admin: Admin, conversation: Conversation, customerMessage: string): Promise<SorkaiResult> {
   const settings = await getSorkaiSettings(admin)
   if (!settings.enabled || settings.liveStatus === 'online') return { inserted: false }
   if (!conversation?.id) return { inserted: false }
+  if ((conversation.metadata as any)?.sorkai_human_takeover === true) return { inserted: false }
+
+  const { data: humanReplies } = await admin
+    .from('support_messages')
+    .select('id,sender_type,author_name')
+    .eq('conversation_id', conversation.id)
+    .eq('sender_type', 'operator')
+    .neq('author_name', 'Sorkai')
+    .limit(1)
+
+  if (Array.isArray(humanReplies) && humanReplies.length) return { inserted: false }
 
   const { data: recent } = await admin
     .from('support_messages')

@@ -9,6 +9,7 @@ type AnyRow = Record<string, any>
 
 export type AtlasPermission =
   | 'support'
+  | 'head_support'
   | 'products'
   | 'orders'
   | 'pricing'
@@ -32,6 +33,7 @@ export type AtlasStaffAccess = {
 
 const ALL_PERMISSIONS: AtlasPermission[] = [
   'support',
+  'head_support',
   'products',
   'orders',
   'pricing',

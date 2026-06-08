@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { hasAtlasPermission } from '@/lib/atlas-auth'
 import { cleanText, requireAtlasAdminApi } from '@/lib/support-admin'
 import { getSorkaiSettings, setSorkaiSettings } from '@/lib/sorkai'
 
@@ -13,6 +14,9 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const auth = await requireAtlasAdminApi()
   if ('error' in auth) return auth.error
+  if (!hasAtlasPermission(auth.staff, 'settings') && !hasAtlasPermission(auth.staff, 'head_support')) {
+    return NextResponse.json({ error: 'Alleen admin/head support mag Sorkai instellingen wijzigen.' }, { status: 403 })
+  }
 
   const body = await request.json().catch(() => ({}))
   const liveStatus = cleanText(body.liveStatus, 20)

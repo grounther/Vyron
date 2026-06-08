@@ -19,7 +19,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { data: conversation, error: conversationError } = await admin
     .from('support_conversations')
-    .select('id, customer_email, customer_name, subject, public_token, status')
+    .select('id, customer_email, customer_name, subject, public_token, status, metadata')
     .eq('id', id)
     .maybeSingle()
 
@@ -51,6 +51,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       assigned_to: user.email,
       last_message_at: now,
       updated_at: now,
+      metadata: {
+        ...((conversation as any).metadata || {}),
+        sorkai_human_takeover: true,
+        sorkai_human_takeover_at: now,
+        sorkai_human_takeover_by: user.email,
+      },
     })
     .eq('id', id)
 

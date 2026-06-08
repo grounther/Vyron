@@ -87,8 +87,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { data: messages = [] } = await admin
     .from('support_messages')
-    .select('id, sender_type, author_name, body, created_at')
+    .select('id, sender_type, author_name, body, created_at, is_internal, internal_kind')
     .eq('conversation_id', id)
+    .eq('is_internal', false)
     .order('created_at', { ascending: true })
 
   await sendResendEmail({

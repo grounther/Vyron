@@ -1,11 +1,11 @@
 'use client'
 
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { Bot, ChevronDown, Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Trash2, Wifi, WifiOff } from 'lucide-react'
+import { Bot, ChevronDown, Loader2, MessageCircle, RefreshCw, Send, ShieldCheck, Sparkles, Trash2, Wifi, WifiOff } from 'lucide-react'
 import type { AtlasSupportConversation, AtlasSupportMessage, AtlasSupportSnapshot } from '@/lib/support-admin'
 import CustomerPortalPanel from './CustomerPortalPanel'
 
-type BusyAction = 'reply' | 'status' | 'archive' | 'sorkai' | null
+type BusyAction = 'reply' | 'status' | 'archive' | 'sorkai' | 'ask-sorkai' | null
 
 type SorkaiSettings = {
   enabled: boolean
@@ -15,6 +15,8 @@ type SorkaiSettings = {
 
 type Props = {
   initialSnapshot: AtlasSupportSnapshot
+  canManageSorkai?: boolean
+  canAskSorkai?: boolean
 }
 
 function formatDate(value?: string | null) {
@@ -34,12 +36,13 @@ function statusClass(status: string) {
   return 'border-white/10 bg-white/[.06] text-white/55'
 }
 
-export default function AtlasSupportClient({ initialSnapshot }: Props) {
+export default function AtlasSupportClient({ initialSnapshot, canManageSorkai = false, canAskSorkai = true }: Props) {
   const [conversations, setConversations] = useState<AtlasSupportConversation[]>(initialSnapshot.conversations)
   const [selected, setSelected] = useState<AtlasSupportConversation | null>(initialSnapshot.selected)
   const [messages, setMessages] = useState<AtlasSupportMessage[]>(initialSnapshot.messages)
   const [selectedId, setSelectedId] = useState(initialSnapshot.selected?.id || '')
   const [draft, setDraft] = useState('')
+  const [sorkaiQuestion, setSorkaiQuestion] = useState('')
   const [busy, setBusy] = useState<BusyAction>(null)
   const [error, setError] = useState('')
   const [liveState, setLiveState] = useState<'connected' | 'reconnecting'>('reconnecting')
@@ -223,6 +226,31 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
   }
 
 
+  async function askSorkai(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selected?.id || !canAskSorkai) return
+    const question = sorkaiQuestion.trim()
+
+    setBusy('ask-sorkai')
+    setError('')
+
+    try {
+      const response = await fetch(`/api/atlas/support/conversations/${selected.id}/sorkai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      })
+      const snapshot = await response.json()
+      if (!response.ok) throw new Error(snapshot.error || 'Sorkai check kon niet worden uitgevoerd.')
+      applySnapshot(snapshot)
+      setSorkaiQuestion('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sorkai check kon niet worden uitgevoerd.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
   async function manualRefresh() {
     try {
       const query = selectedId ? `?id=${encodeURIComponent(selectedId)}` : ''
@@ -252,7 +280,9 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
       </section>
 
       <section className="mt-8 grid gap-4">
-        <SorkaiControl settings={sorkai} busy={busy === 'sorkai'} onChange={updateSorkai} />
+        {canManageSorkai ? (
+          <SorkaiControl settings={sorkai} busy={busy === 'sorkai'} onChange={updateSorkai} />
+        ) : null}
 
         <SupportAccordion title="Gesprekken" subtitle={`${openCount} open · ${conversations.length} totaal`} count={conversations.length} defaultOpen>
           <div className="p-4">
@@ -328,18 +358,41 @@ export default function AtlasSupportClient({ initialSnapshot }: Props) {
                 {messages.length ? messages.map((message) => {
                   const customer = message.sender_type === 'customer'
                   const system = message.sender_type === 'system'
+                  const internal = message.is_internal === true
                   return (
-                    <div key={message.id} className={`mb-4 flex ${system ? 'justify-center' : customer ? 'justify-start' : 'justify-end'}`}>
-                      <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 ${system ? 'border border-white/10 bg-white/[.035] text-center text-white/42' : customer ? 'border border-white/10 bg-white/[.055] text-white/72' : 'bg-white text-black'}`}>
-                        {!system && <p className={`mb-1 text-[10px] font-black uppercase tracking-[.18em] ${customer ? 'text-[#b7c8ad]' : 'text-black/45'}`}>{message.author_name || (customer ? 'Customer' : 'ASORTA Support')}</p>}
+                    <div key={message.id} className={`mb-4 flex ${internal || system ? 'justify-center' : customer ? 'justify-start' : 'justify-end'}`}>
+                      <div className={`max-w-[86%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 ${internal ? 'border border-amber-200/20 bg-amber-300/10 text-left text-amber-50' : system ? 'border border-white/10 bg-white/[.035] text-center text-white/42' : customer ? 'border border-white/10 bg-white/[.055] text-white/72' : 'bg-white text-black'}`}>
+                        {internal ? <p className="mb-1 text-[10px] font-black uppercase tracking-[.18em] text-amber-100/65">Intern · {message.author_name || 'Sorkai Assist'}</p> : null}
+                        {!system && !internal && <p className={`mb-1 text-[10px] font-black uppercase tracking-[.18em] ${customer ? 'text-[#b7c8ad]' : 'text-black/45'}`}>{message.author_name || (customer ? 'Customer' : 'ASORTA Support')}</p>}
                         {message.body}
-                        <p className={`mt-2 text-[10px] ${customer || system ? 'text-white/30' : 'text-black/35'}`}>{formatDate(message.created_at)}</p>
+                        <p className={`mt-2 text-[10px] ${internal ? 'text-amber-100/45' : customer || system ? 'text-white/30' : 'text-black/35'}`}>{formatDate(message.created_at)}</p>
                       </div>
                     </div>
                   )
                 }) : <div className="grid min-h-64 place-items-center text-sm text-white/45">Geen berichten gevonden.</div>}
                 <div ref={scrollRef} />
               </div>
+
+              {canAskSorkai ? (
+                <form onSubmit={askSorkai} className="mt-5 rounded-3xl border border-amber-200/15 bg-amber-300/[.06] p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[.22em] text-amber-100/55">Interne assist</p>
+                      <h3 className="mt-1 flex items-center gap-2 text-lg font-black"><Sparkles size={18} className="text-amber-100" /> Vraag Sorkai</h3>
+                      <p className="mt-1 text-xs leading-5 text-white/45">Alleen zichtbaar in Atlas. De klant ziet deze check niet.</p>
+                    </div>
+                    <button disabled={busy === 'ask-sorkai'} className="rounded-full border border-amber-100/20 bg-amber-100/10 px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-amber-50 transition hover:bg-amber-100/15 disabled:opacity-60" type="submit">
+                      {busy === 'ask-sorkai' ? 'Sorkai checkt...' : 'Vraag Sorkai'}
+                    </button>
+                  </div>
+                  <textarea
+                    value={sorkaiQuestion}
+                    onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setSorkaiQuestion(event.target.value)}
+                    className="support-input mt-3 min-h-24 resize-none py-4"
+                    placeholder="Bijv. check orderstatus, pakjeslog of vraag wat ik het beste kan antwoorden..."
+                  />
+                </form>
+              ) : null}
 
               {selectedClosed ? (
                 <div className="mt-5 rounded-3xl border border-white/10 bg-white/[.035] p-5 text-sm leading-6 text-white/55">

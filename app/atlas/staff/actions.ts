@@ -6,6 +6,7 @@ import { assertAtlasPermission, displayNameFromEmail, type AtlasPermission } fro
 
 const BADGES: AtlasPermission[] = [
   'support',
+  'head_support',
   'products',
   'orders',
   'pricing',
