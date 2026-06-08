@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { Heart, Package, Trophy, User } from 'lucide-react'
+import { Heart, LifeBuoy, LockKeyhole, MessageCircle, Package, ShieldCheck, Trophy, User } from 'lucide-react'
 import { getSiteContent } from '@/lib/site-content'
 import AccountWishlistClient from '@/components/AccountWishlistClient'
 import TcgPackOpener from '@/components/TcgPackOpener'
 import { getTcgState } from '@/lib/tcg-game-server'
+import { isSupportOnly, resolveAtlasStaffAccess, type AtlasStaffAccess } from '@/lib/atlas-auth'
 
 export const metadata = { title: 'Account | ASORTA' }
 
@@ -17,7 +18,8 @@ export default async function AccountPage() {
   if (!user?.email) redirect('/login?next=/account')
 
   const admin = createAdminClient()
-  let isAdmin = false
+  let staffAccess: AtlasStaffAccess | null = null
+  let atlasHref: string | null = null
   let orders: any[] = []
   let loyalty: any = null
   let wishlistCount = 0
@@ -26,10 +28,16 @@ export default async function AccountPage() {
   let tcgCollectionCount = 0
 
   if (admin) {
-    const { data: adminUser } = await admin.from('admin_users').select('email').eq('email', user.email).eq('active', true).maybeSingle()
-    isAdmin = Boolean(adminUser)
-
     const email = user.email.toLowerCase().trim()
+    staffAccess = await resolveAtlasStaffAccess(admin, email)
+    if (staffAccess?.active) {
+      atlasHref = isSupportOnly(staffAccess) ? '/atlas/support' : '/atlas'
+    }
+
+    if (staffAccess?.active && isSupportOnly(staffAccess)) {
+      return <SupportAccountPage email={email} staff={staffAccess} />
+    }
+
     const { data: customer } = await admin.from('customers').select('id').eq('email', email).maybeSingle()
     if (customer?.id) {
       const { data: orderRows } = await admin
@@ -142,11 +150,72 @@ export default async function AccountPage() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/shop" className="btn-primary inline-flex">{content['account.continue']}</Link>
-        {isAdmin && <Link href="/atlas" className="rounded-full border border-[#b7c8ad]/30 px-5 py-3 text-sm font-black text-[#b7c8ad] hover:bg-[#b7c8ad]/10">Open Atlas</Link>}
+        {atlasHref && <Link href={atlasHref} className="rounded-full border border-[#b7c8ad]/30 px-5 py-3 text-sm font-black text-[#b7c8ad] hover:bg-[#b7c8ad]/10">{atlasHref === '/atlas/support' ? 'Open Atlas Support' : 'Open Atlas'}</Link>}
         <form action="/auth/signout" method="post"><button className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/55 hover:bg-white/10 hover:text-white">Log out</button></form>
       </div>
     </main>
   )
+}
+
+
+function SupportAccountPage({ email, staff }: { email: string; staff: AtlasStaffAccess }) {
+  return (
+    <main className="mx-auto max-w-5xl px-4 py-16 md:px-6">
+      <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">ASORTA support account</p>
+      <h1 className="mt-4 text-5xl font-black">Welkom, {staff.displayName}</h1>
+      <p className="mt-4 max-w-2xl text-white/60">
+        Ingelogd als <span className="font-black text-white">{email}</span>. Dit account is ingericht voor klantenservice en krijgt alleen toegang tot de supportomgeving.
+      </p>
+
+      <section className="mt-8 grid gap-4 md:grid-cols-3">
+        <SupportStat icon={<LifeBuoy />} label="Portaal" value="Support" />
+        <SupportStat icon={<ShieldCheck />} label="Rol" value="Medewerker" />
+        <SupportStat icon={<LockKeyhole />} label="Toegang" value="Beperkt" />
+      </section>
+
+      <section className="mt-8 card rounded-[2rem] p-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.25em] text-[#f6d36c]">Klantenservice</p>
+            <h2 className="mt-2 text-3xl font-black">Atlas Support</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">
+              Open hier gesprekken, klantdossiers, orderstatussen, pakjeslogs en Sorkai-checks. Productbeheer, pricing en instellingen blijven verborgen voor supportaccounts.
+            </p>
+          </div>
+          <Link href="/atlas/support" className="btn-primary inline-flex whitespace-nowrap">
+            Open Atlas Support <MessageCircle size={18} className="ml-2" />
+          </Link>
+        </div>
+      </section>
+
+      <section className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="card rounded-[2rem] p-6">
+          <h2 className="text-2xl font-black">Wat je kunt doen</h2>
+          <div className="mt-5 grid gap-3 text-sm leading-6 text-white/58">
+            <p>• Klantgesprekken beantwoorden</p>
+            <p>• Ordernummer, e-mail en track & trace controleren</p>
+            <p>• Minigame pakjesstatus en logs bekijken</p>
+            <p>• Sorkai als interne assistent aanroepen</p>
+          </div>
+        </div>
+        <div className="card rounded-[2rem] p-6">
+          <h2 className="text-2xl font-black">Beperkte toegang</h2>
+          <p className="mt-3 text-sm leading-6 text-white/55">
+            Dit account ziet geen persoonlijke winkeldata zoals wishlist, loyalty of minigame collectie. Zo blijft de accountpagina overzichtelijk en gericht op supportwerk.
+          </p>
+        </div>
+      </section>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link href="/atlas/support" className="btn-primary inline-flex">Open Atlas Support</Link>
+        <form action="/auth/signout" method="post"><button className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/55 hover:bg-white/10 hover:text-white">Log out</button></form>
+      </div>
+    </main>
+  )
+}
+
+function SupportStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return <div className="card rounded-[1.5rem] p-5"><div className="text-[#b7c8ad]">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-[.22em] text-white/35">{label}</p><p className="mt-2 text-2xl font-black">{value}</p></div>
 }
 
 function AccountStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
