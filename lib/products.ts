@@ -86,7 +86,17 @@ export type Product = {
   hotDeal?: boolean
   conditionLabel?: string
   sealedStatus?: string
+  cardmarketUrl?: string
+  marketValue?: number
+  marketSource?: string
+  autoPricingEnabled?: boolean
+  minMarginPercent?: number
+  minPrice?: number
+  priceLocked?: boolean
+  pricingStatus?: string
+  suggestedPrice?: number
 }
+
 
 export const categories: Category[] = [
   {

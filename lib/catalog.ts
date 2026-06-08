@@ -148,6 +148,15 @@ function mapProductRow(row: ProductRow): Product {
     hotDeal: asBoolean(row.hot_deal, false),
     conditionLabel: asString(row.condition_label, 'Sealed'),
     sealedStatus: asString(row.sealed_status, 'Origineel sealed'),
+    cardmarketUrl: asString(row.cardmarket_url, ''),
+    marketValue: asNumber(row.market_value, 0),
+    marketSource: asString(row.market_source, ''),
+    autoPricingEnabled: asBoolean(row.auto_pricing_enabled, false),
+    minMarginPercent: asNumber(row.min_margin_percent, 15),
+    minPrice: asNumber(row.min_price, 0),
+    priceLocked: asBoolean(row.price_locked, false),
+    pricingStatus: asString(row.pricing_status, ''),
+    suggestedPrice: asNumber(row.suggested_price, 0),
   }
 }
 

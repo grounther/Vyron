@@ -20,6 +20,7 @@ import {
   MessageCircle,
   PlugZap,
   ReceiptText,
+  Calculator,
 } from 'lucide-react'
 
 export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: false, follow: false } }
@@ -308,6 +309,7 @@ export default async function AtlasPage(){
       <Link href="/atlas/newsletter" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Mail className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Exclusive Drops</h2><p className="mt-2 text-sm leading-6 text-white/55">Beheer e-mail inschrijvingen, welcome mails en drop campagnes.</p></Link>
       <Link href="/atlas/recovery" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><ShoppingCart className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Cart Recovery</h2><p className="mt-2 text-sm leading-6 text-white/55">Bekijk abandoned carts en verstuur recovery mails.</p></Link>
       <Link href="/atlas/support" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><MessageCircle className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Support Center</h2><p className="mt-2 text-sm leading-6 text-white/55">Live chats, klantdossiers, orders, tracking en klantenservice antwoorden beheren.</p></Link>
+      <Link href="/atlas/pricing" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><Calculator className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Prijsbeheer</h2><p className="mt-2 text-sm leading-6 text-white/55">Cardmarket paste-helper, marktwaarde -2%, margecheck en pricing logs.</p></Link>
       <Link href="/atlas/integrations" className="card group rounded-[1.7rem] p-6 transition hover:-translate-y-1 hover:border-white/25"><PlugZap className="text-[#b7c8ad]"/><h2 className="mt-4 text-2xl font-black">Integrations</h2><p className="mt-2 text-sm leading-6 text-white/55">Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.</p></Link>
     </section>
 

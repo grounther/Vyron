@@ -142,7 +142,21 @@ function ProductForm({ mode, product, categories }:{ mode:'create'|'edit'; produ
       <CheckField label="Online verkoopbaar" name="sell_online" defaultChecked={p.sell_online !== false} />
       <CheckField label="Mee naar markten" name="sell_market" defaultChecked={Boolean(p.sell_market)} />
       <CheckField label="Hot Deal tonen" name="hot_deal" defaultChecked={Boolean(p.hot_deal)} />
+      <CheckField label="Auto-pricing aan" name="auto_pricing_enabled" defaultChecked={Boolean(p.auto_pricing_enabled)} />
+      <CheckField label="Prijs lock" name="price_locked" defaultChecked={Boolean(p.price_locked)} />
     </div>
+
+    <section className="rounded-[1.4rem] border border-[#b7c8ad]/15 bg-[#b7c8ad]/[.035] p-4">
+      <h3 className="mb-4 font-black">Prijsautomatisering / marktwaarde</h3>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label="Cardmarket URL" name="cardmarket_url" defaultValue={text(p.cardmarket_url)} placeholder="https://www.cardmarket.com/..." />
+        <Field label="Marktwaarde" name="market_value" type="number" step="0.01" defaultValue={String(p.market_value || '')} placeholder="bijv. 131.66" />
+        <Field label="Prijsbron" name="market_source" defaultValue={text(p.market_source, 'Cardmarket handmatig')} />
+        <Field label="Minimale marge %" name="min_margin_percent" type="number" step="0.1" defaultValue={String(p.min_margin_percent ?? 15)} />
+        <Field label="Minimum verkoopprijs" name="min_price" type="number" step="0.01" defaultValue={String(p.min_price || '')} />
+        <div className="rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-xs leading-5 text-white/50">Gebruik Atlas → Prijsbeheer om Cardmarket tekstblokken te plakken, adviesprijzen te berekenen en wijzigingen te loggen.</div>
+      </div>
+    </section>
 
     <section className="rounded-[1.4rem] border border-white/10 bg-white/[.025] p-4">
       <div className="mb-4 flex items-center gap-2"><UploadCloud size={17} className="text-[#b7c8ad]"/><h3 className="font-black">Images</h3></div>
