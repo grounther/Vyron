@@ -203,9 +203,15 @@ export async function maybeRunSorkai(admin: Admin, conversation: Conversation, c
     .select('id,sender_type,author_name,created_at')
     .eq('conversation_id', conversation.id)
     .order('created_at', { ascending: false })
-    .limit(2)
+    .limit(1)
 
-  if ((recent || []).some((message: any) => message.sender_type === 'operator' && String(message.author_name || '').toLowerCase() === 'sorkai')) {
+  const latest = Array.isArray(recent) ? recent[0] : null
+  // maybeRunSorkai is called after a customer message is inserted. The previous version
+  // checked the last two messages and skipped when one of them was Sorkai. That made
+  // Sorkai answer only once per conversation because the previous Sorkai reply was
+  // still within the last two rows. Only skip when the actual latest message is already
+  // from Sorkai, which prevents duplicate bot replies while allowing normal follow-ups.
+  if (latest?.sender_type === 'operator' && String(latest?.author_name || '').toLowerCase() === 'sorkai') {
     return { inserted: false }
   }
 
