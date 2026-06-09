@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { AlertTriangle, CheckCircle2, PackageCheck, RefreshCcw, Truck } from 'lucide-react'
 import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { cleanupCancelledOrders } from '@/lib/checkout/cleanup'
-import { finalizePaidOrderAction, updateOrderFulfillment } from './actions'
+import { checkPaymentAndFinalizeAction, finalizePaidOrderAction, quickOrderWorkflowAction, updateOrderFulfillment } from './actions'
 
 export const metadata = { title: 'Orders | Atlas ASORTA', robots: { index: false, follow: false } }
 
@@ -155,78 +155,167 @@ export default async function AtlasOrdersPage({ searchParams }: PageProps) {
   </main>
 }
 
+function objectValue(value: unknown): AnyRow {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as AnyRow : {}
+}
+
+function customerName(order: AnyRow) {
+  const shipping = objectValue(order.shipping_address)
+  const billing = objectValue(order.billing_address)
+  return String(shipping.name || billing.name || order.customer_name || 'Onbekende klant')
+}
+
+function addressLine(order: AnyRow) {
+  const shipping = objectValue(order.shipping_address)
+  const parts = [shipping.address1, shipping.address2, shipping.postalCode || shipping.postal_code, shipping.city, shipping.country].filter(Boolean)
+  return parts.length ? parts.join(', ') : 'Geen adres opgeslagen'
+}
+
+function currentStep(status: unknown) {
+  const value = String(status || 'pending_payment').toLowerCase()
+  const order = ['pending_payment', 'processing', 'packed', 'shipped', 'delivered']
+  const index = order.indexOf(value)
+  if (value === 'cancelled' || value === 'canceled') return -1
+  return index >= 0 ? index : 1
+}
+
+function WorkflowPill({ label, active, done }: { label: string; active: boolean; done: boolean }) {
+  return <div className={`rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-[.12em] ${active ? 'border-[#b7c8ad]/40 bg-[#b7c8ad]/15 text-[#e7f4de]' : done ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-100' : 'border-white/10 bg-white/[.03] text-white/35'}`}>{label}</div>
+}
+
+function QuickStatusButton({ orderId, status, children, note, tone = 'default' }: { orderId: string; status: string; children: React.ReactNode; note?: string; tone?: 'default' | 'danger' }) {
+  return <form action={quickOrderWorkflowAction}>
+    <input type="hidden" name="order_id" value={orderId} />
+    <input type="hidden" name="fulfillment_status" value={status} />
+    {note ? <input type="hidden" name="note" value={note} /> : null}
+    <button className={`w-full rounded-full px-4 py-3 text-sm font-black transition ${tone === 'danger' ? 'border border-red-400/30 text-red-100 hover:bg-red-500/10' : 'border border-[#b7c8ad]/30 text-[#dbe9d4] hover:bg-[#b7c8ad]/10'}`}>{children}</button>
+  </form>
+}
+
 function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { order: AnyRow; items: AnyRow[]; events: AnyRow[]; isPaid: boolean; inventoryDone: boolean; packDone: boolean }) {
+  const shipping = objectValue(order.shipping_address)
+  const raw = objectValue(order.raw)
+  const status = String(order.fulfillment_status || 'pending_payment').toLowerCase()
+  const step = currentStep(status)
+  const orderId = String(order.id || '')
+  const canShip = status === 'packed'
+
   return <article className="rounded-[1.6rem] border border-white/10 bg-black/25 p-5">
-    <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
+    <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{date(order.created_at)}</p>
-            <h2 className="mt-1 text-2xl font-black">{order.order_number || order.id}</h2>
-            <p className="mt-1 text-sm text-white/50">{order.customer_email || 'Geen e-mail'} • {order.payment_provider || 'paypal'}</p>
+        <p className="text-xs font-black uppercase tracking-[.22em] text-white/35">{date(order.created_at)}</p>
+        <h2 className="mt-1 text-2xl font-black">{order.order_number || order.id}</h2>
+        <p className="mt-1 text-sm text-white/50">{order.customer_email || 'Geen e-mail'} • {order.payment_provider || 'paypal'}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">{badge(order.payment_status, 'payment')}{badge(order.fulfillment_status, 'fulfillment')}</div>
+    </div>
+
+    <div className="mt-5 grid gap-2 md:grid-cols-5">
+      {['Wacht betaling', 'Verwerking', 'Ingepakt', 'Verzonden', 'Afgeleverd'].map((label, index) => <WorkflowPill key={label} label={label} active={step === index} done={step > index} />)}
+    </div>
+
+    <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
+      <div className="grid gap-5">
+        <section className="rounded-[1.5rem] border border-white/10 bg-white/[.025] p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.2em] text-[#b7c8ad]">Klant & levering</p>
+              <h3 className="mt-2 text-xl font-black">{customerName(order)}</h3>
+              <p className="mt-1 text-sm text-white/55">{order.customer_email || 'Geen e-mail'}{shipping.phone ? ` • ${shipping.phone}` : ''}</p>
+            </div>
+            {order.tracking_url ? <Link href={String(order.tracking_url)} target="_blank" className="rounded-full border border-white/10 px-4 py-2 text-xs font-black text-white/60 hover:bg-white/10 hover:text-white">Tracking openen</Link> : null}
           </div>
-          <div className="flex flex-wrap gap-2">{badge(order.payment_status, 'payment')}{badge(order.fulfillment_status, 'fulfillment')}</div>
-        </div>
+          <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+            <Info label="Adres" value={addressLine(order)} />
+            <Info label="Track & trace" value={order.tracking_number || 'Nog niet ingevuld'} />
+          </div>
+        </section>
 
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-[.16em] text-white/35"><tr><th className="py-2">Product</th><th>Aantal</th><th>SKU</th><th>Prijs</th><th>Totaal</th></tr></thead>
-            <tbody>{items.map((item) => <tr key={item.id} className="border-t border-white/10 text-white/65"><td className="py-3 font-black text-white">{item.product_name || item.product_slug}</td><td>{item.quantity}</td><td>{item.variant_sku || item.supplier_sku || '—'}</td><td>{eur(item.unit_price)}</td><td>{eur(Number(item.unit_price || 0) * Number(item.quantity || 1))}</td></tr>)}</tbody>
-          </table>
-        </div>
+        <section className="rounded-[1.5rem] border border-white/10 bg-white/[.025] p-4">
+          <p className="text-xs font-black uppercase tracking-[.2em] text-[#b7c8ad]">Producten</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="text-xs uppercase tracking-[.16em] text-white/35"><tr><th className="py-2">Product</th><th>Aantal</th><th>SKU</th><th>Prijs</th><th>Totaal</th></tr></thead>
+              <tbody>{items.length ? items.map((item) => <tr key={item.id} className="border-t border-white/10 text-white/65"><td className="py-3 font-black text-white">{item.product_name || item.product_slug}</td><td>{item.quantity}</td><td>{item.variant_sku || item.supplier_sku || '—'}</td><td>{eur(item.unit_price)}</td><td>{eur(Number(item.unit_price || 0) * Number(item.quantity || 1))}</td></tr>) : <tr><td colSpan={5} className="py-4 text-white/45">Geen orderregels gevonden.</td></tr>}</tbody>
+            </table>
+          </div>
+        </section>
 
-        <div className="mt-5 grid gap-3 text-sm text-white/55 sm:grid-cols-4">
+        <section className="grid gap-3 text-sm md:grid-cols-4">
           <Info label="Subtotaal" value={eur(order.subtotal)} />
           <Info label="Verzending" value={eur(order.shipping_total)} />
           <Info label="Totaal" value={eur(order.total)} />
           <Info label="Winst indicatie" value={eur(order.estimated_profit)} />
-        </div>
+        </section>
 
-        <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-          <State label="Voorraad" done={inventoryDone} text={inventoryDone ? `Verwerkt ${date(rawFlag(order, 'inventory_decremented_at'))}` : isPaid ? 'Nog niet verwerkt' : 'Wacht op betaling'} />
-          <State label="Minigame pakje" done={packDone} text={packDone ? `Toegekend ${date(rawFlag(order, 'pack_credit_granted_at'))}` : isPaid ? 'Nog niet toegekend' : 'Wacht op betaling'} />
+        <section className="grid gap-3 text-sm sm:grid-cols-3">
+          <State label="Voorraad" done={inventoryDone} text={inventoryDone ? `Verwerkt ${date(raw.inventory_decremented_at)}` : isPaid ? 'Nog niet verwerkt' : 'Wacht op betaling'} />
+          <State label="Minigame pakje" done={packDone} text={packDone ? `Toegekend ${date(raw.pack_credit_granted_at)}` : isPaid ? 'Nog niet toegekend' : 'Wacht op betaling'} />
           <State label="PayPal capture" done={isPaid} text={isPaid ? 'Betaald' : String(order.payment_status || 'pending')} />
-        </div>
+        </section>
       </div>
 
-      <div className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
-        <h3 className="text-lg font-black">Fulfillment</h3>
-        <form action={updateOrderFulfillment} className="mt-4 grid gap-3">
-          <input type="hidden" name="order_id" value={order.id} />
-          <label className="grid gap-2 text-sm font-black text-white/60">Status
-            <select name="fulfillment_status" defaultValue={order.fulfillment_status || 'processing'} className="support-input rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white">
-              <option value="pending_payment">Wacht op betaling</option>
-              <option value="processing">In verwerking</option>
-              <option value="packed">Ingepakt</option>
-              <option value="shipped">Verzonden</option>
-              <option value="delivered">Afgeleverd</option>
-              <option value="cancelled">Geannuleerd</option>
-            </select>
-          </label>
-          <label className="grid gap-2 text-sm font-black text-white/60">Track & trace nummer
-            <input name="tracking_number" defaultValue={order.tracking_number || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
-          </label>
-          <label className="grid gap-2 text-sm font-black text-white/60">Tracking URL
-            <input name="tracking_url" defaultValue={order.tracking_url || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
-          </label>
-          <label className="grid gap-2 text-sm font-black text-white/60">Interne notitie
-            <textarea name="note" rows={3} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" placeholder="Bijv. pakket klaargezet, klant geïnformeerd..." />
-          </label>
-          <button className="btn-primary justify-center">Fulfillment opslaan</button>
-        </form>
-
-        {isPaid ? <form action={finalizePaidOrderAction} className="mt-3">
-          <input type="hidden" name="order_id" value={order.id} />
-          <button className="w-full rounded-full border border-[#b7c8ad]/30 px-5 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Voorraad/reward opnieuw controleren</button>
-        </form> : null}
-
-        <div className="mt-5 border-t border-white/10 pt-4">
-          <h4 className="text-sm font-black uppercase tracking-[.18em] text-white/35">Laatste events</h4>
-          <div className="mt-3 grid gap-2 text-xs leading-5 text-white/50">
-            {events.length ? events.slice(0, 5).map((event) => <div key={event.id} className="rounded-2xl bg-white/[.035] p-3"><strong className="text-white/75">{event.event_type}</strong><br/>{event.message || event.source || '—'}<br/><span className="text-white/30">{date(event.created_at)} {event.actor_email ? `• ${event.actor_email}` : ''}</span></div>) : <p>Nog geen orderlog.</p>}
+      <aside className="grid gap-5">
+        <section className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
+          <h3 className="text-lg font-black">Volgende actie</h3>
+          <p className="mt-1 text-sm text-white/45">Gebruik de snelle knoppen voor de normale orderflow.</p>
+          <div className="mt-4 grid gap-3">
+            {status === 'pending_payment' ? <form action={checkPaymentAndFinalizeAction}>
+              <input type="hidden" name="order_id" value={orderId} />
+              <button className="w-full rounded-full border border-[#b7c8ad]/30 px-4 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Betaling opnieuw controleren</button>
+            </form> : null}
+            {status === 'processing' ? <QuickStatusButton orderId={orderId} status="packed" note="Order is ingepakt en klaar voor verzending.">Markeer als ingepakt</QuickStatusButton> : null}
+            {canShip ? <form action={quickOrderWorkflowAction} className="grid gap-2 rounded-[1.25rem] border border-white/10 bg-white/[.025] p-3">
+              <input type="hidden" name="order_id" value={orderId} />
+              <input type="hidden" name="fulfillment_status" value="shipped" />
+              <input name="tracking_number" defaultValue={order.tracking_number || ''} placeholder="Track & trace nummer" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
+              <input name="tracking_url" defaultValue={order.tracking_url || ''} placeholder="Tracking URL" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
+              <input type="hidden" name="note" value="Order is verzonden naar de klant." />
+              <button className="rounded-full border border-[#b7c8ad]/30 px-4 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Markeer als verzonden</button>
+            </form> : null}
+            {status === 'shipped' || status === 'fulfilled' ? <QuickStatusButton orderId={orderId} status="delivered" note="Order is afgeleverd.">Markeer als afgeleverd</QuickStatusButton> : null}
+            {!['cancelled', 'canceled', 'delivered'].includes(status) ? <QuickStatusButton orderId={orderId} status="cancelled" note="Order is geannuleerd door medewerker." tone="danger">Annuleer order</QuickStatusButton> : null}
+            {isPaid ? <form action={finalizePaidOrderAction}>
+              <input type="hidden" name="order_id" value={orderId} />
+              <button className="w-full rounded-full border border-white/10 px-4 py-3 text-sm font-black text-white/60 hover:bg-white/10 hover:text-white">Voorraad/reward opnieuw controleren</button>
+            </form> : null}
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
+          <h3 className="text-lg font-black">Fulfillment details</h3>
+          <form action={updateOrderFulfillment} className="mt-4 grid gap-3">
+            <input type="hidden" name="order_id" value={order.id} />
+            <label className="grid gap-2 text-sm font-black text-white/60">Status
+              <select name="fulfillment_status" defaultValue={order.fulfillment_status || 'processing'} className="support-input rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white">
+                <option value="pending_payment">Wacht op betaling</option>
+                <option value="processing">In verwerking</option>
+                <option value="packed">Ingepakt</option>
+                <option value="shipped">Verzonden</option>
+                <option value="delivered">Afgeleverd</option>
+                <option value="cancelled">Geannuleerd</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-black text-white/60">Track & trace nummer
+              <input name="tracking_number" defaultValue={order.tracking_number || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
+            </label>
+            <label className="grid gap-2 text-sm font-black text-white/60">Tracking URL
+              <input name="tracking_url" defaultValue={order.tracking_url || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
+            </label>
+            <label className="grid gap-2 text-sm font-black text-white/60">Interne notitie
+              <textarea name="note" rows={3} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" placeholder="Bijv. pakket klaargezet, klant geïnformeerd..." />
+            </label>
+            <button className="btn-primary justify-center">Fulfillment opslaan</button>
+          </form>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
+          <h4 className="text-sm font-black uppercase tracking-[.18em] text-white/35">Order tijdlijn</h4>
+          <div className="mt-3 grid gap-2 text-xs leading-5 text-white/50">
+            {events.length ? events.slice(0, 8).map((event) => <div key={event.id} className="rounded-2xl bg-white/[.035] p-3"><strong className="text-white/75">{event.event_type}</strong><br/>{event.message || event.source || '—'}<br/><span className="text-white/30">{date(event.created_at)} {event.actor_email ? `• ${event.actor_email}` : ''}</span></div>) : <p>Nog geen orderlog.</p>}
+          </div>
+        </section>
+      </aside>
     </div>
   </article>
 }
