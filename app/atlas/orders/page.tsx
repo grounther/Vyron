@@ -171,6 +171,15 @@ function addressLine(order: AnyRow) {
   return parts.length ? parts.join(', ') : 'Geen adres opgeslagen'
 }
 
+const workflowSteps = [
+  { key: 'pending_payment', label: 'Wacht betaling' },
+  { key: 'processing', label: 'Verwerking' },
+  { key: 'packed', label: 'Ingepakt' },
+  { key: 'shipped', label: 'Verzonden' },
+  { key: 'delivered', label: 'Afgeleverd' },
+  { key: 'cancelled', label: 'Geannuleerd' },
+]
+
 function currentStep(status: unknown) {
   const value = String(status || 'pending_payment').toLowerCase()
   const order = ['pending_payment', 'processing', 'packed', 'shipped', 'delivered']
@@ -179,8 +188,28 @@ function currentStep(status: unknown) {
   return index >= 0 ? index : 1
 }
 
-function WorkflowPill({ label, active, done }: { label: string; active: boolean; done: boolean }) {
-  return <div className={`rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-[.12em] ${active ? 'border-[#b7c8ad]/40 bg-[#b7c8ad]/15 text-[#e7f4de]' : done ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-100' : 'border-white/10 bg-white/[.03] text-white/35'}`}>{label}</div>
+function workflowTone(status: unknown, index: number): 'orange' | 'green' | 'red' | 'muted' {
+  const value = String(status || 'pending_payment').toLowerCase()
+  const isCancelled = value === 'cancelled' || value === 'canceled'
+  const isSentOrDone = value === 'shipped' || value === 'fulfilled' || value === 'delivered'
+
+  if (isCancelled) return 'red'
+  if (index === 5) return 'muted'
+  if (isSentOrDone) return 'green'
+
+  const step = currentStep(value)
+  return index <= step ? 'orange' : 'muted'
+}
+
+function WorkflowPill({ label, tone }: { label: string; tone: 'orange' | 'green' | 'red' | 'muted' }) {
+  const klass = tone === 'green'
+    ? 'border-emerald-300/30 bg-emerald-300/15 text-emerald-100 shadow-[0_0_18px_rgba(110,231,183,.10)]'
+    : tone === 'orange'
+      ? 'border-orange-300/35 bg-orange-400/15 text-orange-100 shadow-[0_0_18px_rgba(251,146,60,.10)]'
+      : tone === 'red'
+        ? 'border-red-400/35 bg-red-500/15 text-red-100 shadow-[0_0_18px_rgba(248,113,113,.10)]'
+        : 'border-white/10 bg-white/[.03] text-white/35'
+  return <div className={`rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-[.12em] ${klass}`}>{label}</div>
 }
 
 function QuickStatusButton({ orderId, status, children, note, tone = 'default' }: { orderId: string; status: string; children: React.ReactNode; note?: string; tone?: 'default' | 'danger' }) {
@@ -196,7 +225,6 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
   const shipping = objectValue(order.shipping_address)
   const raw = objectValue(order.raw)
   const status = String(order.fulfillment_status || 'pending_payment').toLowerCase()
-  const step = currentStep(status)
   const orderId = String(order.id || '')
   const canShip = status === 'packed'
 
@@ -210,8 +238,8 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
       <div className="flex flex-wrap gap-2">{badge(order.payment_status, 'payment')}{badge(order.fulfillment_status, 'fulfillment')}</div>
     </div>
 
-    <div className="mt-5 grid gap-2 md:grid-cols-5">
-      {['Wacht betaling', 'Verwerking', 'Ingepakt', 'Verzonden', 'Afgeleverd'].map((label, index) => <WorkflowPill key={label} label={label} active={step === index} done={step > index} />)}
+    <div className="mt-5 grid gap-2 md:grid-cols-6">
+      {workflowSteps.map((item, index) => <WorkflowPill key={item.key} label={item.label} tone={workflowTone(status, index)} />)}
     </div>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
