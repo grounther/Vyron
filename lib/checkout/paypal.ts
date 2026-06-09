@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { finalizePaidOrder } from '@/lib/checkout/orders'
 
 type PayPalLink = { href: string; rel: string; method?: string }
 type PayPalOrderResponse = {
@@ -170,7 +171,10 @@ export async function capturePayPalOrder(admin: SupabaseClient, paypalOrderId: s
 
   const order = existingOrders?.[0]
   if (!order?.id) throw new Error('ASORTA order niet gevonden bij deze PayPal betaling.')
-  if (String(order.payment_status || '').toLowerCase() === 'paid') return { order, status: 'already_paid' }
+  if (String(order.payment_status || '').toLowerCase() === 'paid') {
+    const finalized = await finalizePaidOrder(admin, order)
+    return { order: finalized, status: 'already_paid' }
+  }
 
   const accessToken = await getAccessToken()
   const response = await fetch(`${paypalBaseUrl()}/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}/capture`, {
@@ -208,36 +212,8 @@ export async function capturePayPalOrder(admin: SupabaseClient, paypalOrderId: s
     .single()
 
   if (updateError) throw new Error(updateError.message)
-  await grantPackCreditForPaidOrder(admin, updated)
 
-  return { order: updated, status: captureStatus || body?.status || 'captured' }
-}
+  const finalized = paid ? await finalizePaidOrder(admin, updated) : updated
 
-export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: Record<string, any>) {
-  if (!order?.id || String(order.payment_status || '').toLowerCase() !== 'paid') return
-
-  const email = String(order.customer_email || '').trim().toLowerCase()
-  if (!email) return
-
-  const { data: customer } = await admin
-    .from('customers')
-    .select('id,auth_user_id,email')
-    .eq('email', email)
-    .maybeSingle()
-
-  if (!customer?.auth_user_id) return
-
-  await admin
-    .from('customer_pack_credits')
-    .upsert({
-      customer_id: customer.id,
-      auth_user_id: customer.auth_user_id,
-      customer_email: email,
-      order_id: order.id,
-      order_number: order.order_number,
-      source: 'paypal_paid_order',
-      status: 'available',
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'order_id' })
-    .then(() => undefined, () => undefined)
+  return { order: finalized, status: captureStatus || body?.status || 'captured' }
 }

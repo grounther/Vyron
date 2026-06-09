@@ -170,10 +170,8 @@ async function loadMetrics(admin: ReturnType<typeof createAdminClient>): Promise
 
   const productsResult = await admin
     .from('products')
-    .select('id,name,price,estimated_cost,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id,status')
+    .select('id,name,slug,price,estimated_cost,shopify_product_id,shopify_product_legacy_id,shopify_variant_id,shopify_variant_legacy_id,status')
     .in('status', ['active', 'launch'])
-    .not('shopify_product_id', 'is', null)
-    .not('shopify_variant_legacy_id', 'is', null)
     .limit(2000)
 
   if (productsResult.error) errors.push(productsResult.error.message)
@@ -273,6 +271,7 @@ export default async function AtlasPage(){
     { permission: 'newsletter' as const, href: '/atlas/newsletter', icon: <Mail className="text-[#b7c8ad]"/>, title: 'Exclusive Drops', text: 'Beheer e-mail inschrijvingen, welcome mails en drop campagnes.' },
     { permission: 'recovery' as const, href: '/atlas/recovery', icon: <ShoppingCart className="text-[#b7c8ad]"/>, title: 'Cart Recovery', text: 'Bekijk abandoned carts en verstuur recovery mails.' },
     { permission: 'support' as const, href: '/atlas/support', icon: <MessageCircle className="text-[#b7c8ad]"/>, title: 'Support Center', text: 'Live chats, klantdossiers, orders, tracking en klantenservice antwoorden beheren.' },
+    { permission: 'orders' as const, href: '/atlas/orders', icon: <ReceiptText className="text-[#b7c8ad]"/>, title: 'Orderbeheer', text: 'Betaalde PayPal-orders verwerken, voorraad/rewards controleren en tracking bijwerken.' },
     { permission: 'pricing' as const, href: '/atlas/pricing', icon: <Calculator className="text-[#b7c8ad]"/>, title: 'Prijsbeheer', text: 'Cardmarket paste-helper, marktwaarde -2%, margecheck en pricing logs.' },
     { permission: 'integrations' as const, href: '/atlas/integrations', icon: <PlugZap className="text-[#b7c8ad]"/>, title: 'Integrations', text: 'Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.' },
     { permission: 'settings' as const, href: '/atlas/staff', icon: <UsersRound className="text-[#b7c8ad]"/>, title: 'Medewerkers', text: 'Beheer staff accounts, support badges en Atlas rechten per medewerker.' },

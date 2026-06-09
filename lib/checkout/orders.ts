@@ -23,6 +23,8 @@ type ShippingInput = {
 }
 
 type ProductRow = Record<string, any>
+type OrderRow = Record<string, any>
+type OrderItemRow = Record<string, any>
 
 function parseNumber(value: unknown, fallback = 0) {
   const parsed = typeof value === 'number' ? value : Number(String(value || '').replace(',', '.'))
@@ -130,6 +132,37 @@ function orderNumber() {
   return `AS-${stamp}-${random}`
 }
 
+function orderRaw(order: OrderRow) {
+  const raw = order?.raw
+  return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
+}
+
+async function safeOrderEvent(admin: SupabaseClient, row: Record<string, any>) {
+  await admin.from('order_processing_events').insert(row).then(() => undefined, () => undefined)
+}
+
+async function ensureCustomerForCheckout(admin: SupabaseClient, shipping: ShippingInput, authUserId?: string) {
+  const email = shipping.email.trim().toLowerCase()
+  if (!email) return null
+
+  const payload = {
+    email,
+    auth_user_id: authUserId || null,
+    full_name: shipping.name || null,
+    phone: shipping.phone || null,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await admin
+    .from('customers')
+    .upsert(payload, { onConflict: 'email' })
+    .select('id,email,auth_user_id')
+    .single()
+
+  if (error || !data?.id) return null
+  return data as Record<string, any>
+}
+
 export async function createOrderFromCheckout(admin: SupabaseClient, input: { items: unknown; shipping: unknown; source?: string; authUserId?: string }) {
   const items = normalizeCheckoutItems(input.items)
   if (!items.length) throw new Error('Cart is leeg.')
@@ -137,6 +170,7 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
   const shipping = normalizeShipping(input.shipping)
   validateShipping(shipping)
 
+  const customer = await ensureCustomerForCheckout(admin, shipping, input.authUserId)
   const slugs = Array.from(new Set(items.map((item) => item.slug)))
   const productRows = await loadProducts(admin, slugs)
   const productBySlug = new Map(productRows.map((product) => [product.slug, product]))
@@ -145,6 +179,13 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
   for (const item of items) {
     const product = productBySlug.get(item.slug)
     if (!product) throw new Error(`Product ${item.slug} is niet beschikbaar.`)
+
+    const sellOnline = product.sell_online !== false
+    const onlineStock = parseNumber(product.inventory_online, 0)
+    if (!sellOnline) throw new Error(`${product.name || item.slug} is niet online verkoopbaar.`)
+    if (onlineStock <= 0) throw new Error(`${product.name || item.slug} is online uitverkocht.`)
+    if (onlineStock < item.qty) throw new Error(`${product.name || item.slug} heeft nog maar ${onlineStock} online op voorraad.`)
+
     const variant = variantFromProduct(product, item.variantSku)
     const mapping = await loadSupplierMapping(admin, item.slug, item.variantSku || variant?.sku)
     const unitPrice = parseNumber(variant?.price, parseNumber(product.price))
@@ -182,6 +223,7 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
     .from('orders')
     .insert({
       order_number: orderNumber(),
+      customer_id: customer?.id || null,
       customer_email: shipping.email,
       subtotal,
       shipping_total: shippingTotal,
@@ -195,8 +237,8 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
       currency: 'EUR',
       shipping_address: shipping,
       billing_address: shipping,
-      auth_user_id: input.authUserId || null,
-      raw: { source: input.source || 'site_checkout' },
+      auth_user_id: input.authUserId || customer?.auth_user_id || null,
+      raw: { source: input.source || 'site_checkout', checkout_created_at: new Date().toISOString() },
     })
     .select('*')
     .single()
@@ -207,5 +249,167 @@ export async function createOrderFromCheckout(admin: SupabaseClient, input: { it
   const { error: itemError } = await admin.from('order_items').insert(rows)
   if (itemError) throw new Error(itemError.message)
 
+  await safeOrderEvent(admin, {
+    order_id: order.id,
+    order_number: order.order_number,
+    event_type: 'order_created',
+    source: input.source || 'site_checkout',
+    message: 'Order aangemaakt en wacht op betaling.',
+    metadata: { subtotal, shippingTotal, total, itemCount: rows.length },
+  })
+
   return { order: order as Record<string, any>, items: rows, shipping, subtotal, total }
+}
+
+async function loadOrderItems(admin: SupabaseClient, orderId: string): Promise<OrderItemRow[]> {
+  const { data, error } = await admin.from('order_items').select('*').eq('order_id', orderId)
+  if (error) return []
+  return (data || []) as OrderItemRow[]
+}
+
+export async function decrementInventoryForPaidOrder(admin: SupabaseClient, order: OrderRow) {
+  if (!order?.id) return { changed: false, items: [] as any[] }
+  const raw = orderRaw(order)
+  if (raw.inventory_decremented_at) return { changed: false, items: [] as any[] }
+
+  const items = await loadOrderItems(admin, String(order.id))
+  const adjustments: any[] = []
+
+  for (const item of items) {
+    const slug = String(item.product_slug || '').trim()
+    const qty = Math.max(0, Number(item.quantity || 0))
+    if (!slug || !qty) continue
+
+    const { data: product } = await admin
+      .from('products')
+      .select('id,slug,name,inventory_online,inventory_market,inventory_total')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (!product?.id) continue
+
+    const beforeOnline = Math.max(0, Number(product.inventory_online || 0))
+    const beforeMarket = Math.max(0, Number(product.inventory_market || 0))
+    const beforeTotal = Math.max(0, Number(product.inventory_total || 0))
+    const afterOnline = Math.max(0, beforeOnline - qty)
+    const afterTotal = Math.max(beforeMarket + afterOnline, Math.max(0, beforeTotal - qty))
+
+    const { error } = await admin
+      .from('products')
+      .update({
+        inventory_online: afterOnline,
+        inventory_total: afterTotal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', product.id)
+
+    if (!error) {
+      adjustments.push({ slug, product: product.name, qty, beforeOnline, afterOnline, beforeTotal, afterTotal })
+    }
+  }
+
+  const updatedRaw = { ...raw, inventory_decremented_at: new Date().toISOString(), inventory_adjustments: adjustments }
+  await admin.from('orders').update({ raw: updatedRaw, updated_at: new Date().toISOString() }).eq('id', order.id).then(() => undefined, () => undefined)
+
+  await safeOrderEvent(admin, {
+    order_id: order.id,
+    order_number: order.order_number,
+    event_type: 'inventory_decremented',
+    source: 'payment_capture',
+    message: adjustments.length ? 'Online voorraad afgetrokken na betaling.' : 'Geen voorraadregels gevonden om af te trekken.',
+    metadata: { adjustments },
+  })
+
+  return { changed: true, items: adjustments }
+}
+
+export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: OrderRow) {
+  if (!order?.id || String(order.payment_status || '').toLowerCase() !== 'paid') return { granted: false, credit: null as any }
+
+  const email = String(order.customer_email || '').trim().toLowerCase()
+  if (!email) return { granted: false, credit: null as any }
+
+  const raw = orderRaw(order)
+  if (raw.pack_credit_granted_at) return { granted: false, credit: null as any }
+
+  const { data: customer } = await admin
+    .from('customers')
+    .select('id,auth_user_id,email')
+    .eq('email', email)
+    .maybeSingle()
+
+  const { data: credit, error } = await admin
+    .from('customer_pack_credits')
+    .upsert({
+      customer_id: customer?.id || order.customer_id || null,
+      auth_user_id: customer?.auth_user_id || order.auth_user_id || null,
+      customer_email: email,
+      order_id: order.id,
+      order_number: order.order_number,
+      source: 'paypal_paid_order',
+      status: 'available',
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'order_id' })
+    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
+    .maybeSingle()
+
+  if (error || !credit?.id) return { granted: false, credit: null as any }
+
+  await admin.from('customer_pack_events').insert({
+    customer_id: credit.customer_id,
+    auth_user_id: credit.auth_user_id,
+    customer_email: credit.customer_email,
+    credit_id: credit.id,
+    order_id: order.id,
+    event_type: 'grant',
+    source: 'paypal_paid_order',
+    quantity: 1,
+    reason: order.order_number ? `Automatisch pakje voor betaalde order ${order.order_number}` : 'Automatisch pakje voor betaalde order',
+    created_by: 'system',
+  }).then(() => undefined, () => undefined)
+
+  const updatedRaw = { ...raw, pack_credit_granted_at: new Date().toISOString(), pack_credit_id: credit.id }
+  await admin.from('orders').update({ raw: updatedRaw, updated_at: new Date().toISOString() }).eq('id', order.id).then(() => undefined, () => undefined)
+
+  await safeOrderEvent(admin, {
+    order_id: order.id,
+    order_number: order.order_number,
+    event_type: 'pack_credit_granted',
+    source: 'payment_capture',
+    message: 'Virtueel minigame pakje toegekend na betaling.',
+    metadata: { creditId: credit.id, customerEmail: email },
+  })
+
+  return { granted: true, credit }
+}
+
+export async function finalizePaidOrder(admin: SupabaseClient, order: OrderRow) {
+  if (!order?.id || String(order.payment_status || '').toLowerCase() !== 'paid') return order
+
+  await decrementInventoryForPaidOrder(admin, order)
+  await grantPackCreditForPaidOrder(admin, order)
+
+  const raw = orderRaw(order)
+  const finalRaw = { ...raw, finalized_at: raw.finalized_at || new Date().toISOString() }
+  const { data: updated } = await admin
+    .from('orders')
+    .update({
+      fulfillment_status: ['pending_payment', 'open', ''].includes(String(order.fulfillment_status || '').toLowerCase()) ? 'processing' : order.fulfillment_status || 'processing',
+      raw: finalRaw,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', order.id)
+    .select('*')
+    .maybeSingle()
+
+  await safeOrderEvent(admin, {
+    order_id: order.id,
+    order_number: order.order_number,
+    event_type: 'order_finalized',
+    source: 'payment_capture',
+    message: 'Betaalde order afgerond: voorraad, reward en status verwerkt.',
+    metadata: { paymentStatus: order.payment_status },
+  })
+
+  return (updated || order) as OrderRow
 }
