@@ -37,6 +37,8 @@ export async function updateOrderFulfillment(formData: FormData) {
     if (lookupError || !order?.id) throw new Error('Order niet gevonden.')
 
     const raw = order.raw && typeof order.raw === 'object' ? order.raw : {}
+    const now = new Date().toISOString()
+    const isCancelled = ['cancelled', 'canceled'].includes(fulfillmentStatus.toLowerCase())
     const { error } = await admin
       .from('orders')
       .update({
@@ -45,11 +47,13 @@ export async function updateOrderFulfillment(formData: FormData) {
         tracking_url: trackingUrl || null,
         raw: {
           ...raw,
-          last_fulfillment_update_at: new Date().toISOString(),
+          last_fulfillment_update_at: now,
           last_fulfillment_update_by: user.email,
           last_fulfillment_note: note || raw.last_fulfillment_note || null,
+          cancelled_at: isCancelled ? raw.cancelled_at || now : raw.cancelled_at || null,
+          cancelled_by: isCancelled ? user.email : raw.cancelled_by || null,
         },
-        updated_at: new Date().toISOString(),
+        updated_at: now,
       })
       .eq('id', orderId)
 
