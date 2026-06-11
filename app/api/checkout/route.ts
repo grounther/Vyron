@@ -23,8 +23,16 @@ export async function POST(request: Request) {
     }
 
     const provider = String(body.provider || process.env.CHECKOUT_PROVIDER || process.env.PAYMENT_PROVIDER || 'paypal').toLowerCase()
+    const mollieMethods = new Set(['mollie', 'ideal', 'wero', 'bancontact', 'creditcard'])
+    const wantsMollie = mollieMethods.has(provider)
 
-    if (!((provider === 'mollie' || provider === 'ideal' || provider === 'wero') && hasMollieConfig()) && !hasPayPalConfig()) {
+    if (wantsMollie && !hasMollieConfig()) {
+      return NextResponse.json({
+        error: 'Mollie is nog niet geconfigureerd. Voeg MOLLIE_API_KEY toe in Vercel Environment Variables.',
+      }, { status: 503 })
+    }
+
+    if (!wantsMollie && !hasPayPalConfig()) {
       return NextResponse.json({
         error: 'PayPal is nog niet geconfigureerd. Voeg PAYPAL_CLIENT_ID en PAYPAL_CLIENT_SECRET toe in Vercel Environment Variables.',
       }, { status: 503 })
@@ -41,11 +49,18 @@ export async function POST(request: Request) {
       await admin.from('orders').update({ auth_user_id: authUserId, updated_at: new Date().toISOString() }).eq('id', result.order.id)
     }
 
-    if ((provider === 'mollie' || provider === 'ideal' || provider === 'wero') && hasMollieConfig()) {
-      const payment = await createMolliePayment(result.order)
+    if (wantsMollie) {
+      const mollieMethod = provider === 'mollie' ? 'ideal' : provider
+      const payment = await createMolliePayment(result.order, mollieMethod)
       await admin
         .from('orders')
-        .update({ payment_id: payment.id, payment_provider: 'mollie', payment_status: payment.status || 'open', updated_at: new Date().toISOString() })
+        .update({
+          payment_id: payment.id,
+          payment_provider: 'mollie',
+          payment_status: payment.status || 'open',
+          fulfillment_status: 'pending_payment',
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', result.order.id)
 
       return NextResponse.json({

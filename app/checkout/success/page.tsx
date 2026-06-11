@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getTcgState } from '@/lib/tcg-game-server'
 import { capturePayPalOrder } from '@/lib/checkout/paypal'
+import { processMolliePayment } from '@/lib/checkout/mollie'
 import TcgPackOpener from '@/components/TcgPackOpener'
 import ClearCartOnSuccess from '@/components/ClearCartOnSuccess'
 
@@ -26,6 +27,25 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
       captureMessage = result.status === 'already_paid' ? 'Deze PayPal betaling was al verwerkt.' : 'PayPal betaling ontvangen en verwerkt.'
     } catch (error) {
       captureError = error instanceof Error ? error.message : 'PayPal betaling kon niet automatisch worden verwerkt.'
+    }
+  }
+
+  if (payment === 'mollie' && order && admin) {
+    try {
+      const { data: orderRow } = await admin
+        .from('orders')
+        .select('payment_id,payment_status')
+        .eq('order_number', String(order))
+        .maybeSingle()
+
+      if (orderRow?.payment_id && String(orderRow.payment_status || '').toLowerCase() !== 'paid') {
+        const result = await processMolliePayment(admin, String(orderRow.payment_id))
+        captureMessage = result.paid ? 'iDEAL betaling ontvangen en verwerkt.' : 'Je iDEAL betaling wordt nog gecontroleerd door Mollie.'
+      } else if (String(orderRow?.payment_status || '').toLowerCase() === 'paid') {
+        captureMessage = 'Deze iDEAL betaling was al verwerkt.'
+      }
+    } catch (error) {
+      captureError = error instanceof Error ? error.message : 'iDEAL betaling kon niet automatisch worden verwerkt.'
     }
   }
 
@@ -51,7 +71,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
       {captureError ? <AlertTriangle className="mx-auto text-amber-300" size={54} /> : <CheckCircle2 className="mx-auto text-emerald-300" size={54} />}
       <p className="kicker mt-6">{content['checkout.success.kicker']}</p>
       <h1 className="mt-3 text-4xl font-black md:text-6xl">{captureError ? 'Betaling wordt gecontroleerd' : content['checkout.success.title']}</h1>
-      <p className="mt-4 text-white/58">{captureError ? 'Je order is aangemaakt, maar de PayPal bevestiging kon niet direct worden afgerond. Neem contact op als dit blijft staan.' : text}</p>
+      <p className="mt-4 text-white/58">{captureError ? 'Je order is aangemaakt, maar de betaalbevestiging kon niet direct worden afgerond. Neem contact op als dit blijft staan.' : text}</p>
       {captureMessage ? <p className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">{captureMessage}</p> : null}
       {captureError ? <p className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">{captureError}</p> : null}
       {packCount > 0 ? (

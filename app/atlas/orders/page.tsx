@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { AlertTriangle, CheckCircle2, PackageCheck, RefreshCcw, Truck } from 'lucide-react'
 import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { cleanupCancelledOrders } from '@/lib/checkout/cleanup'
+import { buildTrackingUrl, carrierPortalUrl, normalizeShippingCarrier, shippingCarrierLabel } from '@/lib/checkout/shipping'
 import { checkPaymentAndFinalizeAction, finalizePaidOrderAction, quickOrderWorkflowAction, updateOrderFulfillment } from './actions'
 
 export const metadata = { title: 'Orders | Atlas ASORTA', robots: { index: false, follow: false } }
@@ -171,6 +172,43 @@ function addressLine(order: AnyRow) {
   return parts.length ? parts.join(', ') : 'Geen adres opgeslagen'
 }
 
+function postalCode(order: AnyRow) {
+  const shipping = objectValue(order.shipping_address)
+  return String(shipping.postalCode || shipping.postal_code || shipping.zip || '').trim()
+}
+
+function processSteps(order: AnyRow, status: string, isPaid: boolean) {
+  const raw = objectValue(order.raw)
+  const carrier = shippingCarrierLabel(raw.shipping_carrier || 'postnl')
+  const trackingNumber = String(order.tracking_number || '').trim()
+  const shipped = ['shipped', 'fulfilled', 'delivered'].includes(status)
+  return [
+    { label: 'Betaald', done: isPaid, detail: isPaid ? 'Betaling ontvangen' : 'Wacht op betaling' },
+    { label: 'Verzamelen', done: Boolean(raw.picking_started_at) || ['packed', 'shipped', 'fulfilled', 'delivered'].includes(status), detail: raw.picking_started_at ? date(raw.picking_started_at) : 'Nog niet gestart' },
+    { label: 'Klaarmaken', done: Boolean(raw.packed_at) || ['packed', 'shipped', 'fulfilled', 'delivered'].includes(status), detail: raw.packed_at ? date(raw.packed_at) : 'Nog niet klaar' },
+    { label: 'Aangemeld', done: Boolean(raw.shipment_booked_at) || shipped, detail: raw.shipment_booked_at ? `${carrier} • ${date(raw.shipment_booked_at)}` : 'Nog niet aangemeld' },
+    { label: 'T&T naar klant', done: shipped && Boolean(trackingNumber), detail: trackingNumber || 'Nog geen tracking' },
+  ]
+}
+
+function ProcessStep({ label, done, detail }: { label: string; done: boolean; detail: string }) {
+  return <div className={`rounded-2xl border p-3 ${done ? 'border-emerald-300/20 bg-emerald-300/10' : 'border-white/10 bg-white/[.03]'}`}>
+    <p className="text-xs font-black uppercase tracking-[.16em] text-white/40">{label}</p>
+    <p className="mt-1 text-sm font-black text-white">{done ? 'OK' : 'Open'}</p>
+    <p className="mt-1 text-xs text-white/55">{detail}</p>
+  </div>
+}
+
+function CarrierOptions({ current }: { current?: unknown }) {
+  const value = normalizeShippingCarrier(current || 'postnl')
+  return <select name="shipping_carrier" defaultValue={value} className="support-input rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white">
+    <option value="postnl">PostNL</option>
+    <option value="dhl">DHL</option>
+    <option value="ups">UPS</option>
+    <option value="other">Anders</option>
+  </select>
+}
+
 const workflowSteps = [
   { key: 'pending_payment', label: 'Wacht betaling' },
   { key: 'processing', label: 'Verwerking' },
@@ -227,6 +265,11 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
   const status = String(order.fulfillment_status || 'pending_payment').toLowerCase()
   const orderId = String(order.id || '')
   const canShip = status === 'packed'
+  const carrier = normalizeShippingCarrier(raw.shipping_carrier || 'postnl')
+  const carrierLabel = shippingCarrierLabel(carrier)
+  const trackingDefault = String(order.tracking_number || '')
+  const trackingUrlDefault = String(order.tracking_url || buildTrackingUrl({ carrier, trackingNumber: trackingDefault, order }) || '')
+  const carrierPortal = carrierPortalUrl(carrier)
 
   return <article className="rounded-[1.6rem] border border-white/10 bg-black/25 p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -241,6 +284,10 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
     <div className="mt-5 grid gap-2 md:grid-cols-6">
       {workflowSteps.map((item, index) => <WorkflowPill key={item.key} label={item.label} tone={workflowTone(status, index)} />)}
     </div>
+
+    <section className="mt-4 grid gap-3 md:grid-cols-5">
+      {processSteps(order, status, isPaid).map((step) => <ProcessStep key={step.label} {...step} />)}
+    </section>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
       <div className="grid gap-5">
@@ -292,14 +339,35 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
               <input type="hidden" name="order_id" value={orderId} />
               <button className="w-full rounded-full border border-[#b7c8ad]/30 px-4 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Betaling opnieuw controleren</button>
             </form> : null}
-            {status === 'processing' ? <QuickStatusButton orderId={orderId} status="packed" note="Order is ingepakt en klaar voor verzending.">Markeer als ingepakt</QuickStatusButton> : null}
+            {status === 'processing' && !raw.picking_started_at ? <form action={quickOrderWorkflowAction}>
+              <input type="hidden" name="order_id" value={orderId} />
+              <input type="hidden" name="fulfillment_status" value="processing" />
+              <input type="hidden" name="picking_started" value="1" />
+              <input type="hidden" name="note" value="Order verzamelen gestart." />
+              <button className="w-full rounded-full border border-orange-300/30 px-4 py-3 text-sm font-black text-orange-100 hover:bg-orange-400/10">Start order verzamelen</button>
+            </form> : null}
+            {status === 'processing' ? <QuickStatusButton orderId={orderId} status="packed" note="Order is verzameld, ingepakt en klaar voor verzending.">Markeer klaar voor verzending</QuickStatusButton> : null}
             {canShip ? <form action={quickOrderWorkflowAction} className="grid gap-2 rounded-[1.25rem] border border-white/10 bg-white/[.025] p-3">
               <input type="hidden" name="order_id" value={orderId} />
+              <input type="hidden" name="fulfillment_status" value="packed" />
+              <input type="hidden" name="shipment_booked" value="1" />
+              <input type="hidden" name="note" value="Pakket is aangemeld bij de vervoerder." />
+              <label className="grid gap-1 text-xs font-black uppercase tracking-[.14em] text-white/40">Vervoerder<CarrierOptions current={carrier} /></label>
+              <input name="tracking_number" defaultValue={trackingDefault} placeholder="Track & trace nummer" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
+              <input name="tracking_url" defaultValue={trackingUrlDefault} placeholder="Tracking URL" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
+              <button className="rounded-full border border-[#b7c8ad]/30 px-4 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Aangemeld bij vervoerder</button>
+              {carrierPortal ? <Link href={carrierPortal} target="_blank" className="text-center text-xs font-black text-white/45 hover:text-white">Open {carrierLabel} portaal →</Link> : null}
+            </form> : null}
+            {canShip ? <form action={quickOrderWorkflowAction} className="grid gap-2 rounded-[1.25rem] border border-emerald-300/15 bg-emerald-300/[.06] p-3">
+              <input type="hidden" name="order_id" value={orderId} />
               <input type="hidden" name="fulfillment_status" value="shipped" />
-              <input name="tracking_number" defaultValue={order.tracking_number || ''} placeholder="Track & trace nummer" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
-              <input name="tracking_url" defaultValue={order.tracking_url || ''} placeholder="Tracking URL" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
-              <input type="hidden" name="note" value="Order is verzonden naar de klant." />
-              <button className="rounded-full border border-[#b7c8ad]/30 px-4 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Markeer als verzonden</button>
+              <input type="hidden" name="notify_customer" value="1" />
+              <input type="hidden" name="shipment_booked" value="1" />
+              <input type="hidden" name="note" value="Order is verzonden en track & trace is naar de klant gestuurd." />
+              <label className="grid gap-1 text-xs font-black uppercase tracking-[.14em] text-white/40">Vervoerder<CarrierOptions current={carrier} /></label>
+              <input name="tracking_number" defaultValue={trackingDefault} placeholder="Track & trace nummer" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" required />
+              <input name="tracking_url" defaultValue={trackingUrlDefault} placeholder="Tracking URL" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white outline-none" />
+              <button className="rounded-full border border-emerald-300/30 px-4 py-3 text-sm font-black text-emerald-100 hover:bg-emerald-300/10">Markeer verzonden + mail T&T</button>
             </form> : null}
             {status === 'shipped' || status === 'fulfilled' ? <QuickStatusButton orderId={orderId} status="delivered" note="Order is afgeleverd.">Markeer als afgeleverd</QuickStatusButton> : null}
             {!['cancelled', 'canceled', 'delivered'].includes(status) ? <QuickStatusButton orderId={orderId} status="cancelled" note="Order is geannuleerd door medewerker." tone="danger">Annuleer order</QuickStatusButton> : null}
@@ -324,15 +392,19 @@ function OrderCard({ order, items, events, isPaid, inventoryDone, packDone }: { 
                 <option value="cancelled">Geannuleerd</option>
               </select>
             </label>
+            <label className="grid gap-2 text-sm font-black text-white/60">Vervoerder
+              <CarrierOptions current={carrier} />
+            </label>
             <label className="grid gap-2 text-sm font-black text-white/60">Track & trace nummer
-              <input name="tracking_number" defaultValue={order.tracking_number || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
+              <input name="tracking_number" defaultValue={trackingDefault} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
             </label>
             <label className="grid gap-2 text-sm font-black text-white/60">Tracking URL
-              <input name="tracking_url" defaultValue={order.tracking_url || ''} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
+              <input name="tracking_url" defaultValue={trackingUrlDefault} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" />
             </label>
             <label className="grid gap-2 text-sm font-black text-white/60">Interne notitie
               <textarea name="note" rows={3} className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none" placeholder="Bijv. pakket klaargezet, klant geïnformeerd..." />
             </label>
+            <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[.03] px-4 py-3 text-sm font-black text-white/60"><input type="checkbox" name="notify_customer" value="1" /> Mail klant bij status Verzonden</label>
             <button className="btn-primary justify-center">Fulfillment opslaan</button>
           </form>
         </section>

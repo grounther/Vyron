@@ -8,6 +8,7 @@ import AccountWishlistClient from '@/components/AccountWishlistClient'
 import TcgPackOpener from '@/components/TcgPackOpener'
 import { getTcgState } from '@/lib/tcg-game-server'
 import { isSupportOnly, resolveAtlasStaffAccess, type AtlasStaffAccess } from '@/lib/atlas-auth'
+import { shippingCarrierLabel } from '@/lib/checkout/shipping'
 
 export const metadata = { title: 'Account | ASORTA' }
 
@@ -42,7 +43,7 @@ export default async function AccountPage() {
     if (customer?.id) {
       const { data: orderRows } = await admin
         .from('orders')
-        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_url')
+        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_number,tracking_url,raw')
         .or(`customer_id.eq.${customer.id},customer_email.eq.${email}`)
         .order('created_at', { ascending: false })
         .limit(8)
@@ -50,7 +51,7 @@ export default async function AccountPage() {
     } else {
       const { data: orderRows } = await admin
         .from('orders')
-        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_url')
+        .select('order_number,total,payment_status,fulfillment_status,created_at,tracking_number,tracking_url,raw')
         .eq('customer_email', email)
         .order('created_at', { ascending: false })
         .limit(8)
@@ -127,7 +128,10 @@ export default async function AccountPage() {
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
         <div className="card rounded-[2rem] p-6">
           <h2 className="text-2xl font-black">{content['account.orders.title']}</h2>
-          {!orders.length ? <p className="mt-3 text-white/55">{content['account.orders.empty']}</p> : <div className="mt-5 grid gap-3">{orders.map((order) => <div key={order.order_number} className="rounded-2xl border border-white/10 bg-white/[.03] p-4"><div className="flex flex-wrap justify-between gap-3"><strong>{order.order_number}</strong><span>€{Number(order.total || 0).toFixed(2)}</span></div><p className="mt-2 text-sm text-white/50">{order.payment_status} • {order.fulfillment_status}</p>{order.tracking_url && <a href={order.tracking_url} className="mt-3 inline-block text-sm font-black text-[#b7c8ad]">Track order →</a>}</div>)}</div>}
+          {!orders.length ? <p className="mt-3 text-white/55">{content['account.orders.empty']}</p> : <div className="mt-5 grid gap-3">{orders.map((order) => {
+            const raw = order.raw && typeof order.raw === 'object' ? order.raw : {}
+            return <div key={order.order_number} className="rounded-2xl border border-white/10 bg-white/[.03] p-4"><div className="flex flex-wrap justify-between gap-3"><strong>{order.order_number}</strong><span>€{Number(order.total || 0).toFixed(2)}</span></div><p className="mt-2 text-sm text-white/50">{order.payment_status} • {order.fulfillment_status}</p>{order.tracking_number ? <p className="mt-2 text-sm text-white/60">{shippingCarrierLabel(raw.shipping_carrier)} track & trace: <span className="font-black text-white">{order.tracking_number}</span></p> : null}{order.tracking_url && <a href={order.tracking_url} className="mt-3 inline-block text-sm font-black text-[#b7c8ad]">Track order →</a>}</div>
+          })}</div>}
         </div>
 
         <div className="card rounded-[2rem] p-6">

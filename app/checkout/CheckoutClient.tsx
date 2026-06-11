@@ -20,6 +20,7 @@ type CartItem = {
 }
 
 type CheckoutState = 'idle' | 'submitting' | 'redirecting' | 'done' | 'error'
+type PaymentMethod = 'ideal' | 'paypal'
 
 type ShippingState = {
   name: string
@@ -84,6 +85,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
   const [email, setEmail] = useState('')
   const [discountCode, setDiscountCode] = useState('')
   const [discountNotice, setDiscountNotice] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('ideal')
   const [locale, setLocale] = useState<Locale>('nl')
   const [shipping, setShipping] = useState<ShippingState>({
     name: '',
@@ -161,7 +163,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        provider: 'paypal',
+        provider: paymentMethod,
         email,
         items: checkoutItems,
         shipping: { ...shipping, email },
@@ -215,6 +217,37 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
           />
           <span className="text-xs leading-5 text-white/40">{checkout.emailHelp}</span>
         </label>
+
+
+        <div className="mt-7 grid gap-3 md:max-w-2xl">
+          <span className="text-sm font-black text-white/70">Kies je betaalmethode</span>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className={`cursor-pointer rounded-2xl border p-4 transition ${paymentMethod === 'ideal' ? 'border-[#b7c8ad] bg-[#b7c8ad]/12' : 'border-white/10 bg-white/[.035] hover:border-white/20'}`}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="ideal"
+                checked={paymentMethod === 'ideal'}
+                onChange={() => setPaymentMethod('ideal')}
+                className="sr-only"
+              />
+              <span className="block text-base font-black text-white">iDEAL</span>
+              <span className="mt-1 block text-xs leading-5 text-white/45">Betaal veilig via je eigen bank met Mollie.</span>
+            </label>
+            <label className={`cursor-pointer rounded-2xl border p-4 transition ${paymentMethod === 'paypal' ? 'border-[#b7c8ad] bg-[#b7c8ad]/12' : 'border-white/10 bg-white/[.035] hover:border-white/20'}`}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="paypal"
+                checked={paymentMethod === 'paypal'}
+                onChange={() => setPaymentMethod('paypal')}
+                className="sr-only"
+              />
+              <span className="block text-base font-black text-white">PayPal</span>
+              <span className="mt-1 block text-xs leading-5 text-white/45">Betaal met je PayPal-account of PayPal betaalomgeving.</span>
+            </label>
+          </div>
+        </div>
 
         {hasManualItems && <div className="mt-6 grid gap-4 text-sm text-white/60 md:max-w-2xl md:grid-cols-2">
           <label className="grid gap-2 md:col-span-2"><span className="font-black text-white/70">Naam voor verzending</span><input value={shipping.name} onChange={(event) => updateShipping('name', event.target.value)} required className="rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none focus:border-[#b7c8ad]" /></label>
@@ -274,7 +307,7 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
         <div className="mt-3 flex justify-between text-white/65"><span>{checkout.shipping}</span><span>{hasManualItems ? `€${shippingTotal.toFixed(2)}` : checkout.shippingInShopify}</span></div>
         <div className="mt-6 flex justify-between border-t border-white/10 pt-6 text-xl font-black"><span>{checkout.total}</span><span>€{total.toFixed(2)}</span></div>
         {normalizedDiscountCode && <p className="mt-2 text-xs leading-5 text-white/42">{checkout.discountCalculated}</p>}
-        <button disabled={state === 'submitting' || state === 'redirecting'} className="btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"><PackageCheck size={18} className="mr-2" />{state === 'submitting' ? checkout.starting : state === 'redirecting' ? checkout.redirecting : hasManualItems ? 'Order plaatsen' : checkout.pay}</button>
+        <button disabled={state === 'submitting' || state === 'redirecting'} className="btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"><PackageCheck size={18} className="mr-2" />{state === 'submitting' ? checkout.starting : state === 'redirecting' ? checkout.redirecting : paymentMethod === 'ideal' ? 'Betalen met iDEAL' : 'Betalen met PayPal'}</button>
         {message && <p className={`mt-4 rounded-2xl border p-4 text-sm ${state === 'error' ? 'border-red-400/25 bg-red-400/10 text-red-100' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100'}`}>{message}</p>}
         <p className="mt-4 flex gap-2 text-xs leading-5 text-white/42"><ShieldCheck size={15} /> {checkout.afterPayment}</p>
       </aside>

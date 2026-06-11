@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { finalizePaidOrder } from '@/lib/checkout/orders'
+import { buildTrackingUrl, cleanTrackingNumber, customerTrackingEmailBody, normalizeShippingCarrier, shippingCarrierLabel } from '@/lib/checkout/shipping'
+import { campaignEmailHtml, sendResendEmail } from '@/lib/newsletter'
 
 function clean(value: FormDataEntryValue | null, limit = 500) {
   return typeof value === 'string' ? value.trim().slice(0, limit) : ''
@@ -36,12 +38,16 @@ async function saveFulfillmentUpdate(admin: any, input: {
   fulfillmentStatus: string
   trackingNumber?: string
   trackingUrl?: string
+  shippingCarrier?: string
+  notifyCustomer?: boolean
+  shipmentBooked?: boolean
+  pickingStarted?: boolean
   note?: string
   source?: string
 }) {
   const { data: order, error: lookupError } = await admin
     .from('orders')
-    .select('id,order_number,raw,tracking_number,tracking_url,fulfillment_status')
+    .select('id,order_number,customer_email,raw,shipping_address,tracking_number,tracking_url,fulfillment_status')
     .eq('id', input.orderId)
     .single()
 
@@ -52,8 +58,11 @@ async function saveFulfillmentUpdate(admin: any, input: {
   const status = input.fulfillmentStatus || 'processing'
   const lower = status.toLowerCase()
   const isCancelled = ['cancelled', 'canceled'].includes(lower)
-  const trackingNumber = input.trackingNumber || order.tracking_number || ''
-  const trackingUrl = input.trackingUrl || order.tracking_url || ''
+  const carrier = normalizeShippingCarrier(input.shippingCarrier || raw.shipping_carrier || 'postnl')
+  const trackingNumber = cleanTrackingNumber(input.trackingNumber || order.tracking_number || '')
+  const trackingUrl = input.trackingUrl || order.tracking_url || buildTrackingUrl({ carrier, trackingNumber, order }) || ''
+  const shipmentBookedAt = (input.shipmentBooked || Boolean(trackingNumber && lower === 'packed')) ? raw.shipment_booked_at || now : raw.shipment_booked_at || null
+  const pickingStartedAt = input.pickingStarted ? raw.picking_started_at || now : raw.picking_started_at || null
 
   const { error } = await admin
     .from('orders')
@@ -66,6 +75,12 @@ async function saveFulfillmentUpdate(admin: any, input: {
         last_fulfillment_update_at: now,
         last_fulfillment_update_by: input.userEmail || null,
         last_fulfillment_note: input.note || raw.last_fulfillment_note || null,
+        shipping_carrier: carrier,
+        shipping_carrier_label: shippingCarrierLabel(carrier),
+        picking_started_at: pickingStartedAt,
+        picking_started_by: pickingStartedAt ? input.userEmail || raw.picking_started_by || null : raw.picking_started_by || null,
+        shipment_booked_at: shipmentBookedAt,
+        shipment_booked_by: shipmentBookedAt ? input.userEmail || raw.shipment_booked_by || null : raw.shipment_booked_by || null,
         packed_at: lower === 'packed' ? raw.packed_at || now : raw.packed_at || null,
         packed_by: lower === 'packed' ? input.userEmail || null : raw.packed_by || null,
         shipped_at: lower === 'shipped' ? raw.shipped_at || now : raw.shipped_at || null,
@@ -84,12 +99,44 @@ async function saveFulfillmentUpdate(admin: any, input: {
   await logEvent(admin, {
     order_id: input.orderId,
     order_number: order.order_number,
-    event_type: 'fulfillment_updated',
+    event_type: input.pickingStarted ? 'order_picking_started' : input.shipmentBooked ? 'shipment_booked' : lower === 'shipped' ? 'shipment_shipped' : 'fulfillment_updated',
     source: input.source || 'atlas_orders',
     message: input.note || `Fulfillment status aangepast naar ${statusLabel(status)}.`,
     actor_email: input.userEmail,
-    metadata: { fulfillmentStatus: status, trackingNumber, trackingUrl, previousStatus: order.fulfillment_status },
+    metadata: { fulfillmentStatus: status, trackingNumber, trackingUrl, carrier, previousStatus: order.fulfillment_status, notifyCustomer: Boolean(input.notifyCustomer), shipmentBooked: Boolean(input.shipmentBooked), pickingStarted: Boolean(input.pickingStarted) },
   })
+
+  if (lower === 'shipped' && input.notifyCustomer && order.customer_email && trackingNumber) {
+    const body = customerTrackingEmailBody({
+      orderNumber: order.order_number || input.orderId,
+      carrier,
+      trackingNumber,
+      trackingUrl,
+    })
+    const emailResult = await sendResendEmail({
+      to: order.customer_email,
+      subject: `Je ASORTA bestelling is verzonden: ${order.order_number || input.orderId}`,
+      html: campaignEmailHtml({
+        eyebrow: 'ASORTA verzending',
+        title: 'Je pakket is onderweg',
+        body,
+        ctaLabel: trackingUrl ? 'Bekijk tracking' : null,
+        ctaUrl: trackingUrl || null,
+      }),
+      replyTo: 'klantenservice@asorta.nl',
+      from: process.env.SUPPORT_FROM || process.env.NEWSLETTER_FROM || 'ASORTA Support <info@asorta.nl>',
+    })
+
+    await logEvent(admin, {
+      order_id: input.orderId,
+      order_number: order.order_number,
+      event_type: emailResult.error ? 'tracking_email_failed' : emailResult.skipped ? 'tracking_email_skipped' : 'tracking_email_sent',
+      source: 'atlas_orders_email',
+      message: emailResult.error || emailResult.skipped ? `Trackingmail niet verzonden: ${emailResult.error || 'RESEND_API_KEY ontbreekt'}.` : 'Trackingmail naar klant verzonden.',
+      actor_email: input.userEmail,
+      metadata: { to: order.customer_email, carrier, trackingNumber, trackingUrl, result: emailResult },
+    })
+  }
 }
 
 export async function updateOrderFulfillment(formData: FormData) {
@@ -98,6 +145,10 @@ export async function updateOrderFulfillment(formData: FormData) {
   const fulfillmentStatus = clean(formData.get('fulfillment_status'), 80) || 'processing'
   const trackingNumber = clean(formData.get('tracking_number'), 180)
   const trackingUrl = clean(formData.get('tracking_url'), 500)
+  const shippingCarrier = clean(formData.get('shipping_carrier'), 80)
+  const notifyCustomer = clean(formData.get('notify_customer'), 10) === '1'
+  const shipmentBooked = clean(formData.get('shipment_booked'), 10) === '1'
+  const pickingStarted = clean(formData.get('picking_started'), 10) === '1'
   const note = clean(formData.get('note'), 1000)
 
   try {
@@ -108,6 +159,10 @@ export async function updateOrderFulfillment(formData: FormData) {
       fulfillmentStatus,
       trackingNumber,
       trackingUrl,
+      shippingCarrier,
+      notifyCustomer,
+      shipmentBooked,
+      pickingStarted,
       note,
       source: 'atlas_orders_form',
     })
@@ -127,6 +182,10 @@ export async function quickOrderWorkflowAction(formData: FormData) {
   const fulfillmentStatus = clean(formData.get('fulfillment_status'), 80)
   const trackingNumber = clean(formData.get('tracking_number'), 180)
   const trackingUrl = clean(formData.get('tracking_url'), 500)
+  const shippingCarrier = clean(formData.get('shipping_carrier'), 80)
+  const notifyCustomer = clean(formData.get('notify_customer'), 10) === '1'
+  const shipmentBooked = clean(formData.get('shipment_booked'), 10) === '1'
+  const pickingStarted = clean(formData.get('picking_started'), 10) === '1'
   const note = clean(formData.get('note'), 1000)
 
   try {
@@ -139,6 +198,10 @@ export async function quickOrderWorkflowAction(formData: FormData) {
       fulfillmentStatus,
       trackingNumber,
       trackingUrl,
+      shippingCarrier,
+      notifyCustomer,
+      shipmentBooked,
+      pickingStarted,
       note: note || `Snelle workflowactie: ${statusLabel(fulfillmentStatus)}.`,
       source: 'atlas_orders_quick_action',
     })

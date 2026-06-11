@@ -19,6 +19,7 @@ type OrderResult = {
   currency: string
   trackingNumber?: string | null
   trackingUrl?: string | null
+  shippingCarrier?: string | null
   orderStatusUrl?: string | null
   createdAt?: string | null
   updatedAt?: string | null
@@ -172,6 +173,7 @@ export default function TrackOrderLookupClient({ initialOrder = '', initialEmail
             {order.trackingNumber || order.trackingUrl ? (
               <div className="mt-6 rounded-2xl border border-[#b7c8ad]/25 bg-[#b7c8ad]/10 p-4">
                 <h4 className="font-black text-[#e7f0e2]">Tracking beschikbaar</h4>
+                {order.shippingCarrier ? <p className="mt-2 text-sm text-white/65">Vervoerder: <span className="font-black text-white">{order.shippingCarrier}</span></p> : null}
                 {order.trackingNumber ? <p className="mt-2 text-sm text-white/65">Trackingnummer: <span className="font-black text-white">{order.trackingNumber}</span></p> : null}
                 {order.trackingUrl ? <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-full bg-white px-5 py-2 text-sm font-black text-black">Bekijk tracking</a> : null}
               </div>

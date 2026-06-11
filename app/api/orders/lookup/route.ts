@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { shippingCarrierLabel } from '@/lib/checkout/shipping'
 
 export const runtime = 'nodejs'
 
@@ -37,10 +38,13 @@ function timeline(order: AnyRow) {
   const fulfilled = isFulfilled(order.fulfillment_status || order.shopify_fulfillment_status)
   const tracking = Boolean(order.tracking_number || order.tracking_url || order.shopify_tracking_numbers?.length || order.shopify_tracking_urls?.length)
 
+  const raw = order.raw && typeof order.raw === 'object' ? order.raw : {}
   return [
     { key: 'received', label: 'Bestelling ontvangen', description: 'Je bestelling is geregistreerd in ons systeem.', done: true },
     { key: 'paid', label: 'Betaling bevestigd', description: 'De betaling is ontvangen of geautoriseerd.', done: paid },
-    { key: 'processing', label: 'In behandeling', description: 'Je bestelling wordt voorbereid voor verzending.', done: paid || fulfilled || tracking },
+    { key: 'picking', label: 'Order verzamelen', description: raw.picking_started_at ? 'ASORTA is je order aan het verzamelen.' : 'Zodra de betaling is verwerkt, verzamelen we je producten.', done: Boolean(raw.picking_started_at) || fulfilled || tracking },
+    { key: 'packed', label: 'Klaargemaakt voor verzending', description: raw.packed_at ? 'Je pakket is ingepakt.' : 'Je order wordt klaargemaakt voor de vervoerder.', done: Boolean(raw.packed_at) || fulfilled || tracking },
+    { key: 'shipment_booked', label: 'Aangemeld bij vervoerder', description: raw.shipment_booked_at ? `Aangemeld bij ${shippingCarrierLabel(raw.shipping_carrier)}.` : 'We melden je pakket aan bij PostNL, DHL, UPS of een andere vervoerder.', done: Boolean(raw.shipment_booked_at) || tracking },
     { key: 'tracking', label: 'Tracking beschikbaar', description: 'Je ontvangt tracking zodra je pakket is aangemeld bij de vervoerder.', done: tracking },
   ]
 }
@@ -102,6 +106,7 @@ export async function POST(request: Request) {
       currency: order.currency || 'EUR',
       trackingNumber,
       trackingUrl,
+      shippingCarrier: shippingCarrierLabel(order.raw?.shipping_carrier),
       orderStatusUrl: order.shopify_order_status_url || null,
       createdAt: order.created_at || null,
       updatedAt: order.updated_at || null,

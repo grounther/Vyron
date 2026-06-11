@@ -338,6 +338,8 @@ export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: 
     .eq('email', email)
     .maybeSingle()
 
+  const rewardSource = `${String(order.payment_provider || 'payment').toLowerCase()}_paid_order`
+
   const { data: credit, error } = await admin
     .from('customer_pack_credits')
     .upsert({
@@ -346,7 +348,7 @@ export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: 
       customer_email: email,
       order_id: order.id,
       order_number: order.order_number,
-      source: 'paypal_paid_order',
+      source: rewardSource,
       status: 'available',
       updated_at: new Date().toISOString(),
     }, { onConflict: 'order_id' })
@@ -362,7 +364,7 @@ export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: 
     credit_id: credit.id,
     order_id: order.id,
     event_type: 'grant',
-    source: 'paypal_paid_order',
+    source: rewardSource,
     quantity: 1,
     reason: order.order_number ? `Automatisch pakje voor betaalde order ${order.order_number}` : 'Automatisch pakje voor betaalde order',
     created_by: 'system',
