@@ -1,1 +1,3 @@
-export { POST, runtime } from '@/app/api/webhooks/payment/mollie/route'
+export const runtime = 'nodejs'
+
+export { POST } from '@/app/api/webhooks/payment/mollie/route'
