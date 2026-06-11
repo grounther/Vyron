@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { products as staticProducts } from '@/lib/products'
 import type { Product } from '@/lib/products'
 import { ensureBookkeepingEntryForOrder } from '@/lib/bookkeeping'
+import { sendAdminOrderNotification } from '@/lib/notifications/order-notifications'
 
 type CheckoutItemInput = {
   slug: string
@@ -461,6 +462,16 @@ export async function finalizePaidOrder(admin: SupabaseClient, order: OrderRow) 
   const finalOrder = (updated || { ...baseOrder, fulfillment_status: fulfillmentStatus, raw: finalRaw }) as OrderRow
 
   await ensureBookkeepingEntryForOrder(admin, finalOrder, { source: 'payment_capture' })
+  await sendAdminOrderNotification(admin, finalOrder).catch(async (error) => {
+    await safeOrderEvent(admin, {
+      order_id: order.id,
+      order_number: order.order_number,
+      event_type: 'admin_order_notification_error',
+      source: 'order_notifications',
+      message: error instanceof Error ? error.message : 'Interne ordermelding kon niet worden verzonden.',
+      metadata: {},
+    })
+  })
 
   await safeOrderEvent(admin, {
     order_id: order.id,
