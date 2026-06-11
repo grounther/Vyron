@@ -47,6 +47,59 @@ export async function ensureTcgCustomer(admin: SupabaseClient, user: User): Prom
   return { customer: data as CustomerContext['customer'] }
 }
 
+
+async function voidAvailableCreditsForUnpaidOrders(admin: SupabaseClient, user: User) {
+  const { data: credits } = await admin
+    .from('customer_pack_credits')
+    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source')
+    .eq('auth_user_id', user.id)
+    .eq('status', 'available')
+    .not('order_id', 'is', null)
+    .limit(200)
+
+  const orderIds = Array.from(new Set((credits || []).map((credit: any) => String(credit.order_id || '')).filter(Boolean)))
+  if (!orderIds.length) return 0
+
+  const { data: orders } = await admin
+    .from('orders')
+    .select('id,payment_status')
+    .in('id', orderIds)
+
+  const paidOrderIds = new Set((orders || [])
+    .filter((order: any) => String(order.payment_status || '').toLowerCase() === 'paid')
+    .map((order: any) => String(order.id)))
+
+  const creditsToVoid = (credits || []).filter((credit: any) => !paidOrderIds.has(String(credit.order_id || '')))
+  const creditIds = creditsToVoid.map((credit: any) => credit.id).filter(Boolean)
+  if (!creditIds.length) return 0
+
+  await admin
+    .from('customer_pack_credits')
+    .update({ status: 'void', updated_at: new Date().toISOString() })
+    .in('id', creditIds)
+    .then(() => undefined, () => undefined)
+
+  await admin
+    .from('customer_pack_events')
+    .insert(creditsToVoid.map((credit: any) => ({
+      customer_id: credit.customer_id,
+      auth_user_id: credit.auth_user_id,
+      customer_email: credit.customer_email,
+      credit_id: credit.id,
+      order_id: credit.order_id,
+      event_type: 'void',
+      source: 'payment_guard',
+      quantity: 1,
+      reason: credit.order_number
+        ? `Pakje ingetrokken omdat order ${credit.order_number} niet betaald is.`
+        : 'Pakje ingetrokken omdat de gekoppelde order niet betaald is.',
+      created_by: 'system',
+    })))
+    .then(() => undefined, () => undefined)
+
+  return creditIds.length
+}
+
 export async function syncPackCreditsForPaidOrders(admin: SupabaseClient, user: User, customerId: string) {
   const email = String(user.email || '').trim().toLowerCase()
   if (!email) return 0
@@ -55,29 +108,52 @@ export async function syncPackCreditsForPaidOrders(admin: SupabaseClient, user: 
     .from('orders')
     .select('id,order_number,customer_email,payment_status,total,created_at')
     .eq('customer_email', email)
-    .in('payment_status', ['paid', 'authorized', 'partially_paid', 'open'])
+    .eq('payment_status', 'paid')
     .order('created_at', { ascending: true })
     .limit(100)
 
-  const rows = (orders || []).map((order: any) => ({
-    customer_id: customerId,
-    auth_user_id: user.id,
-    customer_email: email,
-    order_id: order.id,
-    order_number: order.order_number,
-    source: 'paid_order',
-    status: 'available',
-  }))
+  const paidOrders = orders || []
+  if (!paidOrders.length) return 0
 
-  if (!rows.length) return 0
-  const { error } = await admin.from('customer_pack_credits').upsert(rows, { onConflict: 'order_id' })
-  if (error) return 0
+  const orderIds = paidOrders.map((order: any) => String(order.id || '')).filter(Boolean)
+  const { data: existingCredits } = await admin
+    .from('customer_pack_credits')
+    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
+    .in('order_id', orderIds)
 
-  const orderIds = rows.map((row: { order_id: string }) => row.order_id).filter(Boolean)
+  const existingByOrderId = new Map((existingCredits || []).map((credit: any) => [String(credit.order_id), credit]))
+  const rowsToInsert = paidOrders
+    .filter((order: any) => !existingByOrderId.has(String(order.id)))
+    .map((order: any) => ({
+      customer_id: customerId,
+      auth_user_id: user.id,
+      customer_email: email,
+      order_id: order.id,
+      order_number: order.order_number,
+      source: 'paid_order',
+      status: 'available',
+    }))
+
+  if (rowsToInsert.length) {
+    await admin.from('customer_pack_credits').insert(rowsToInsert).then(() => undefined, () => undefined)
+  }
+
+  const creditsToRestore = (existingCredits || []).filter((credit: any) => String(credit.status || '').toLowerCase() === 'void')
+  const restoreIds = creditsToRestore.map((credit: any) => credit.id).filter(Boolean)
+  if (restoreIds.length) {
+    await admin
+      .from('customer_pack_credits')
+      .update({ status: 'available', auth_user_id: user.id, customer_id: customerId, customer_email: email, source: 'paid_order', updated_at: new Date().toISOString() })
+      .in('id', restoreIds)
+      .eq('status', 'void')
+      .then(() => undefined, () => undefined)
+  }
+
   const { data: credits } = await admin
     .from('customer_pack_credits')
-    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source')
+    .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
     .in('order_id', orderIds)
+    .neq('status', 'void')
 
   const creditIds = (credits || []).map((credit: any) => credit.id).filter(Boolean)
   const { data: existingEvents } = creditIds.length
@@ -104,11 +180,12 @@ export async function syncPackCreditsForPaidOrders(admin: SupabaseClient, user: 
       .then(() => undefined, () => undefined)
   }
 
-  return rows.length
+  return rowsToInsert.length + restoreIds.length
 }
 
 export async function getTcgState(admin: SupabaseClient, user: User) {
   const { customer } = await ensureTcgCustomer(admin, user)
+  await voidAvailableCreditsForUnpaidOrders(admin, user)
   await syncPackCreditsForPaidOrders(admin, user, customer.id)
 
   const [{ data: credits }, { data: collection }] = await Promise.all([
@@ -167,6 +244,7 @@ export async function openTcgPack(admin: SupabaseClient, user: User, seriesKey: 
   if (!series) throw new Error('Kies een geldige serie.')
 
   const { customer } = await ensureTcgCustomer(admin, user)
+  await voidAvailableCreditsForUnpaidOrders(admin, user)
   await syncPackCreditsForPaidOrders(admin, user, customer.id)
 
   const { data: credit, error: creditError } = await admin

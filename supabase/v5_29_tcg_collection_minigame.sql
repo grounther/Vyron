@@ -104,7 +104,7 @@ drop policy if exists "Users can read own card collection" on public.customer_ca
 create policy "Users can read own card collection" on public.customer_card_collection
 for select using (auth.uid() = auth_user_id);
 
--- Optional backfill: grant one available virtual pack for already paid/open orders that have an email.
+-- Optional backfill: grant one available virtual pack for already paid orders that have an email.
 -- A pack is only granted once per order because of the unique order_id index.
 insert into public.customer_pack_credits (customer_id, auth_user_id, customer_email, order_id, order_number, source, status)
 select
@@ -118,6 +118,6 @@ select
 from public.orders o
 left join public.customers c on lower(c.email) = lower(o.customer_email)
 where o.customer_email is not null
-  and o.payment_status in ('paid','authorized','partially_paid','open')
+  and o.payment_status = 'paid'
   and coalesce(o.auth_user_id, c.auth_user_id) is not null
 on conflict (order_id) where order_id is not null do nothing;

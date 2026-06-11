@@ -339,50 +339,91 @@ export async function grantPackCreditForPaidOrder(admin: SupabaseClient, order: 
     .maybeSingle()
 
   const rewardSource = `${String(order.payment_provider || 'payment').toLowerCase()}_paid_order`
+  const payload = {
+    customer_id: customer?.id || order.customer_id || null,
+    auth_user_id: customer?.auth_user_id || order.auth_user_id || null,
+    customer_email: email,
+    order_id: order.id,
+    order_number: order.order_number,
+    source: rewardSource,
+    status: 'available',
+    updated_at: new Date().toISOString(),
+  }
 
-  const { data: credit, error } = await admin
+  const { data: existingCredit } = await admin
     .from('customer_pack_credits')
-    .upsert({
-      customer_id: customer?.id || order.customer_id || null,
-      auth_user_id: customer?.auth_user_id || order.auth_user_id || null,
-      customer_email: email,
-      order_id: order.id,
-      order_number: order.order_number,
-      source: rewardSource,
-      status: 'available',
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'order_id' })
     .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
+    .eq('order_id', order.id)
     .maybeSingle()
 
-  if (error || !credit?.id) return { granted: false, credit: null as any }
+  let credit = existingCredit as any
+  let granted = false
 
-  await admin.from('customer_pack_events').insert({
-    customer_id: credit.customer_id,
-    auth_user_id: credit.auth_user_id,
-    customer_email: credit.customer_email,
-    credit_id: credit.id,
-    order_id: order.id,
-    event_type: 'grant',
-    source: rewardSource,
-    quantity: 1,
-    reason: order.order_number ? `Automatisch pakje voor betaalde order ${order.order_number}` : 'Automatisch pakje voor betaalde order',
-    created_by: 'system',
-  }).then(() => undefined, () => undefined)
+  if (credit?.id) {
+    if (String(credit.status || '').toLowerCase() === 'void') {
+      const { data: restored } = await admin
+        .from('customer_pack_credits')
+        .update(payload)
+        .eq('id', credit.id)
+        .eq('status', 'void')
+        .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
+        .maybeSingle()
+      credit = restored || credit
+      granted = Boolean(restored?.id)
+    }
+  } else {
+    const { data: inserted, error } = await admin
+      .from('customer_pack_credits')
+      .insert(payload)
+      .select('id,customer_id,auth_user_id,customer_email,order_id,order_number,source,status')
+      .maybeSingle()
+
+    if (error || !inserted?.id) return { granted: false, credit: null as any }
+    credit = inserted
+    granted = true
+  }
+
+  if (!credit?.id) return { granted: false, credit: null as any }
+
+  if (granted) {
+    const { data: existingGrantEvents } = await admin
+      .from('customer_pack_events')
+      .select('id')
+      .eq('credit_id', credit.id)
+      .eq('event_type', 'grant')
+      .limit(1)
+
+    if (!existingGrantEvents?.length) {
+      await admin.from('customer_pack_events').insert({
+        customer_id: credit.customer_id,
+        auth_user_id: credit.auth_user_id,
+        customer_email: credit.customer_email,
+        credit_id: credit.id,
+        order_id: order.id,
+        event_type: 'grant',
+        source: rewardSource,
+        quantity: 1,
+        reason: order.order_number ? `Automatisch pakje voor betaalde order ${order.order_number}` : 'Automatisch pakje voor betaalde order',
+        created_by: 'system',
+      }).then(() => undefined, () => undefined)
+    }
+  }
 
   const updatedRaw = { ...raw, pack_credit_granted_at: new Date().toISOString(), pack_credit_id: credit.id }
   await admin.from('orders').update({ raw: updatedRaw, updated_at: new Date().toISOString() }).eq('id', order.id).then(() => undefined, () => undefined)
 
-  await safeOrderEvent(admin, {
-    order_id: order.id,
-    order_number: order.order_number,
-    event_type: 'pack_credit_granted',
-    source: 'payment_capture',
-    message: 'Virtueel minigame pakje toegekend na betaling.',
-    metadata: { creditId: credit.id, customerEmail: email },
-  })
+  if (granted) {
+    await safeOrderEvent(admin, {
+      order_id: order.id,
+      order_number: order.order_number,
+      event_type: 'pack_credit_granted',
+      source: 'payment_capture',
+      message: 'Virtueel minigame pakje toegekend na betaling.',
+      metadata: { creditId: credit.id, customerEmail: email },
+    })
+  }
 
-  return { granted: true, credit }
+  return { granted, credit }
 }
 
 export async function finalizePaidOrder(admin: SupabaseClient, order: OrderRow) {
