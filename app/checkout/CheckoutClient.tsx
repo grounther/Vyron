@@ -20,7 +20,31 @@ type CartItem = {
 }
 
 type CheckoutState = 'idle' | 'submitting' | 'redirecting' | 'done' | 'error'
-type PaymentMethod = 'ideal' | 'paypal'
+type PaymentMethod =
+  | 'ideal'
+  | 'paypal'
+  | 'creditcard'
+  | 'klarnapaylater'
+  | 'klarnasliceit'
+  | 'riverty'
+  | 'applepay'
+  | 'googlepay'
+  | 'wero'
+  | 'bancontact'
+
+
+const paymentMethods: Array<{ id: PaymentMethod; title: string; description: string; group?: string }> = [
+  { id: 'ideal', title: 'iDEAL', description: 'Betaal veilig via je eigen bank met Mollie.' },
+  { id: 'paypal', title: 'PayPal', description: 'Betaal met je PayPal-account of PayPal betaalomgeving.' },
+  { id: 'creditcard', title: 'Creditcard / debitcard', description: 'Betaal met kredietkaart of debitcard via Mollie.' },
+  { id: 'klarnapaylater', title: 'Klarna achteraf betalen', description: 'Koop nu en betaal later via Klarna.' },
+  { id: 'klarnasliceit', title: 'Klarna in 3x', description: 'Betaal in drie termijnen via Klarna.' },
+  { id: 'riverty', title: 'Riverty achteraf betalen', description: 'Achteraf betalen via Riverty.' },
+  { id: 'applepay', title: 'Apple Pay', description: 'Snel betalen met Apple Pay via Mollie.' },
+  { id: 'googlepay', title: 'Google Pay', description: 'Snel betalen met Google Pay via Mollie.' },
+  { id: 'wero', title: 'Wero', description: 'Betaal via Wero in de Mollie checkout.' },
+  { id: 'bancontact', title: 'Bancontact', description: 'Handig voor Belgische klanten.' },
+]
 
 type ShippingState = {
   name: string
@@ -219,34 +243,25 @@ export default function CheckoutClient({ copy = {} }: { copy?: Record<string, st
         </label>
 
 
-        <div className="mt-7 grid gap-3 md:max-w-2xl">
+        <div className="mt-7 grid gap-3 md:max-w-4xl">
           <span className="text-sm font-black text-white/70">Kies je betaalmethode</span>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className={`cursor-pointer rounded-2xl border p-4 transition ${paymentMethod === 'ideal' ? 'border-[#b7c8ad] bg-[#b7c8ad]/12' : 'border-white/10 bg-white/[.035] hover:border-white/20'}`}>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="ideal"
-                checked={paymentMethod === 'ideal'}
-                onChange={() => setPaymentMethod('ideal')}
-                className="sr-only"
-              />
-              <span className="block text-base font-black text-white">iDEAL</span>
-              <span className="mt-1 block text-xs leading-5 text-white/45">Betaal veilig via je eigen bank met Mollie.</span>
-            </label>
-            <label className={`cursor-pointer rounded-2xl border p-4 transition ${paymentMethod === 'paypal' ? 'border-[#b7c8ad] bg-[#b7c8ad]/12' : 'border-white/10 bg-white/[.035] hover:border-white/20'}`}>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="paypal"
-                checked={paymentMethod === 'paypal'}
-                onChange={() => setPaymentMethod('paypal')}
-                className="sr-only"
-              />
-              <span className="block text-base font-black text-white">PayPal</span>
-              <span className="mt-1 block text-xs leading-5 text-white/45">Betaal met je PayPal-account of PayPal betaalomgeving.</span>
-            </label>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {paymentMethods.map((method) => (
+              <label key={method.id} className={`cursor-pointer rounded-2xl border p-4 transition ${paymentMethod === method.id ? 'border-[#b7c8ad] bg-[#b7c8ad]/12' : 'border-white/10 bg-white/[.035] hover:border-white/20'}`}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={method.id}
+                  checked={paymentMethod === method.id}
+                  onChange={() => setPaymentMethod(method.id)}
+                  className="sr-only"
+                />
+                <span className="block text-base font-black text-white">{method.title}</span>
+                <span className="mt-1 block text-xs leading-5 text-white/45">{method.description}</span>
+              </label>
+            ))}
           </div>
+          <p className="text-xs leading-5 text-white/40">Achteraf betalen en wallets lopen via Mollie. De beschikbaarheid hangt af van je Mollie-profiel, land, apparaat en goedkeuring door de betaalmethode.</p>
         </div>
 
         {hasManualItems && <div className="mt-6 grid gap-4 text-sm text-white/60 md:max-w-2xl md:grid-cols-2">

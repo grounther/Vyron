@@ -10,7 +10,17 @@ type MolliePaymentResponse = {
   _links?: { checkout?: { href?: string } }
 }
 
-type MollieMethod = 'ideal' | 'wero' | 'bancontact' | 'creditcard'
+type MollieMethod =
+  | 'ideal'
+  | 'wero'
+  | 'bancontact'
+  | 'creditcard'
+  | 'applepay'
+  | 'googlepay'
+  | 'klarnapaylater'
+  | 'klarnasliceit'
+  | 'in3'
+  | 'riverty'
 
 function siteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || ''
@@ -19,10 +29,70 @@ function siteUrl() {
   return `https://${configured.replace(/\/$/, '')}`
 }
 
-function normalizeMethod(method: unknown): MollieMethod {
-  const value = String(method || 'ideal').trim().toLowerCase()
-  if (value === 'wero' || value === 'bancontact' || value === 'creditcard') return value
+export function normalizeMollieMethod(method: unknown): MollieMethod {
+  const value = String(method || 'ideal').trim().toLowerCase().replace(/[\s_-]+/g, '')
+  if (value === 'wero') return 'wero'
+  if (value === 'bancontact') return 'bancontact'
+  if (value === 'creditcard' || value === 'card' || value === 'debitcard' || value === 'kredietkaart' || value === 'creditdebit') return 'creditcard'
+  if (value === 'applepay') return 'applepay'
+  if (value === 'googlepay') return 'googlepay'
+  if (value === 'klarnapaylater' || value === 'klarnaachteraf' || value === 'paylater') return 'klarnapaylater'
+  if (value === 'klarnasliceit' || value === 'klarnain3' || value === 'klarnain3x' || value === 'payin3') return 'klarnasliceit'
+  if (value === 'in3' || value === 'idealin3') return 'in3'
+  if (value === 'riverty' || value === 'afterpay') return 'riverty'
   return 'ideal'
+}
+
+function toMoney(value: unknown) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || 0).replace(',', '.'))
+  return Number.isFinite(parsed) ? parsed.toFixed(2) : '0.00'
+}
+
+function orderAddress(input: any) {
+  if (!input || typeof input !== 'object') return undefined
+  return {
+    givenName: String(input.name || 'ASORTA klant').trim(),
+    email: String(input.email || '').trim().toLowerCase() || undefined,
+    phone: String(input.phone || '').trim() || undefined,
+    streetAndNumber: [input.address1, input.address2].map((part) => String(part || '').trim()).filter(Boolean).join(' '),
+    postalCode: String(input.postalCode || input.postal_code || '').trim(),
+    city: String(input.city || '').trim(),
+    country: String(input.countryCode || input.country_code || 'NL').trim().toUpperCase(),
+  }
+}
+
+function buildPaymentLines(order: Record<string, any>, items: Record<string, any>[] = []) {
+  const currency = String(order.currency || 'EUR')
+  const lines: Record<string, any>[] = items.map((item) => {
+    const quantity = Math.max(1, Number(item.quantity || item.qty || 1))
+    const unitPrice = Number(item.unit_price || item.price || 0)
+    const total = unitPrice * quantity
+    return {
+      type: 'physical',
+      description: String(item.product_name || item.name || item.product_slug || 'ASORTA product').slice(0, 255),
+      quantity,
+      unitPrice: { currency, value: toMoney(unitPrice) },
+      totalAmount: { currency, value: toMoney(total) },
+      vatRate: '0.00',
+      vatAmount: { currency, value: '0.00' },
+      sku: String(item.variant_sku || item.supplier_sku || item.product_slug || '').slice(0, 64) || undefined,
+    }
+  })
+
+  const shippingTotal = Number(order.shipping_total || 0)
+  if (shippingTotal > 0) {
+    lines.push({
+      type: 'shipping_fee',
+      description: 'Verzending',
+      quantity: 1,
+      unitPrice: { currency, value: toMoney(shippingTotal) },
+      totalAmount: { currency, value: toMoney(shippingTotal) },
+      vatRate: '0.00',
+      vatAmount: { currency, value: '0.00' },
+    })
+  }
+
+  return lines
 }
 
 function mollieStatusToOrderStatus(status: string) {
@@ -37,13 +107,13 @@ export function hasMollieConfig() {
   return Boolean(process.env.MOLLIE_API_KEY)
 }
 
-export async function createMolliePayment(order: Record<string, any>, method: unknown = 'ideal') {
+export async function createMolliePayment(order: Record<string, any>, method: unknown = 'ideal', items: Record<string, any>[] = [], shipping?: Record<string, any>) {
   const apiKey = process.env.MOLLIE_API_KEY
   if (!apiKey) throw new Error('MOLLIE_API_KEY ontbreekt.')
 
   const baseUrl = siteUrl()
   const orderNumber = String(order.order_number || order.id)
-  const mollieMethod = normalizeMethod(method)
+  const mollieMethod = normalizeMollieMethod(method)
   const response = await fetch('https://api.mollie.com/v2/payments', {
     method: 'POST',
     headers: {
@@ -57,8 +127,11 @@ export async function createMolliePayment(order: Record<string, any>, method: un
       },
       method: mollieMethod,
       description: `ASORTA order ${orderNumber}`,
-      redirectUrl: `${baseUrl}/checkout/success?payment=mollie&order=${encodeURIComponent(orderNumber)}`,
+      redirectUrl: `${baseUrl}/checkout/success?payment=mollie&method=${encodeURIComponent(mollieMethod)}&order=${encodeURIComponent(orderNumber)}`,
       webhookUrl: `${baseUrl}/api/webhooks/payment/mollie`,
+      billingAddress: orderAddress(order.billing_address || shipping),
+      shippingAddress: orderAddress(order.shipping_address || shipping),
+      lines: buildPaymentLines(order, items),
       metadata: {
         order_id: String(order.id),
         order_number: orderNumber,

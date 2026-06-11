@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrderFromCheckout } from '@/lib/checkout/orders'
-import { createMolliePayment, hasMollieConfig } from '@/lib/checkout/mollie'
+import { createMolliePayment, hasMollieConfig, normalizeMollieMethod } from '@/lib/checkout/mollie'
 import { createPayPalOrder, hasPayPalConfig } from '@/lib/checkout/paypal'
 import { createClient } from '@/lib/supabase/server'
 
@@ -23,7 +23,22 @@ export async function POST(request: Request) {
     }
 
     const provider = String(body.provider || process.env.CHECKOUT_PROVIDER || process.env.PAYMENT_PROVIDER || 'paypal').toLowerCase()
-    const mollieMethods = new Set(['mollie', 'ideal', 'wero', 'bancontact', 'creditcard'])
+    const mollieMethods = new Set([
+      'mollie',
+      'ideal',
+      'wero',
+      'bancontact',
+      'creditcard',
+      'debitcard',
+      'applepay',
+      'googlepay',
+      'klarnapaylater',
+      'klarnaachteraf',
+      'klarnasliceit',
+      'klarnain3',
+      'in3',
+      'riverty',
+    ])
     const wantsMollie = mollieMethods.has(provider)
 
     if (wantsMollie && !hasMollieConfig()) {
@@ -50,13 +65,13 @@ export async function POST(request: Request) {
     }
 
     if (wantsMollie) {
-      const mollieMethod = provider === 'mollie' ? 'ideal' : provider
-      const payment = await createMolliePayment(result.order, mollieMethod)
+      const mollieMethod = normalizeMollieMethod(provider === 'mollie' ? 'ideal' : provider)
+      const payment = await createMolliePayment(result.order, mollieMethod, result.items, result.shipping)
       await admin
         .from('orders')
         .update({
           payment_id: payment.id,
-          payment_provider: 'mollie',
+          payment_provider: `mollie:${mollieMethod}`,
           payment_status: payment.status || 'open',
           fulfillment_status: 'pending_payment',
           updated_at: new Date().toISOString(),
