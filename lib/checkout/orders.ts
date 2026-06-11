@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { products as staticProducts } from '@/lib/products'
 import type { Product } from '@/lib/products'
+import { ensureBookkeepingEntryForOrder } from '@/lib/bookkeeping'
 
 type CheckoutItemInput = {
   slug: string
@@ -432,12 +433,24 @@ export async function finalizePaidOrder(admin: SupabaseClient, order: OrderRow) 
   await decrementInventoryForPaidOrder(admin, order)
   await grantPackCreditForPaidOrder(admin, order)
 
-  const raw = orderRaw(order)
+  const { data: latestOrder } = await admin
+    .from('orders')
+    .select('*')
+    .eq('id', order.id)
+    .maybeSingle()
+    .then((result) => result, () => ({ data: null } as any))
+
+  const baseOrder = (latestOrder || order) as OrderRow
+  const raw = orderRaw(baseOrder)
   const finalRaw = { ...raw, finalized_at: raw.finalized_at || new Date().toISOString() }
+  const fulfillmentStatus = ['pending_payment', 'open', 'pending', ''].includes(String(baseOrder.fulfillment_status || '').toLowerCase())
+    ? 'processing'
+    : baseOrder.fulfillment_status || 'processing'
+
   const { data: updated } = await admin
     .from('orders')
     .update({
-      fulfillment_status: ['pending_payment', 'open', ''].includes(String(order.fulfillment_status || '').toLowerCase()) ? 'processing' : order.fulfillment_status || 'processing',
+      fulfillment_status: fulfillmentStatus,
       raw: finalRaw,
       updated_at: new Date().toISOString(),
     })
@@ -445,14 +458,18 @@ export async function finalizePaidOrder(admin: SupabaseClient, order: OrderRow) 
     .select('*')
     .maybeSingle()
 
+  const finalOrder = (updated || { ...baseOrder, fulfillment_status: fulfillmentStatus, raw: finalRaw }) as OrderRow
+
+  await ensureBookkeepingEntryForOrder(admin, finalOrder, { source: 'payment_capture' })
+
   await safeOrderEvent(admin, {
     order_id: order.id,
     order_number: order.order_number,
     event_type: 'order_finalized',
     source: 'payment_capture',
-    message: 'Betaalde order afgerond: voorraad, reward en status verwerkt.',
+    message: 'Betaalde order afgerond: voorraad, reward, boekhouding en status verwerkt.',
     metadata: { paymentStatus: order.payment_status },
   })
 
-  return (updated || order) as OrderRow
+  return finalOrder
 }

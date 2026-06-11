@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { assertAtlasPermission } from '@/lib/atlas-auth'
 import { finalizePaidOrder } from '@/lib/checkout/orders'
+import { syncBookkeepingEntryForOrderId } from '@/lib/bookkeeping'
 import { buildTrackingUrl, cleanTrackingNumber, customerTrackingEmailBody, normalizeShippingCarrier, shippingCarrierLabel } from '@/lib/checkout/shipping'
 import { campaignEmailHtml, sendResendEmail } from '@/lib/newsletter'
 
@@ -105,6 +106,8 @@ async function saveFulfillmentUpdate(admin: any, input: {
     actor_email: input.userEmail,
     metadata: { fulfillmentStatus: status, trackingNumber, trackingUrl, carrier, previousStatus: order.fulfillment_status, notifyCustomer: Boolean(input.notifyCustomer), shipmentBooked: Boolean(input.shipmentBooked), pickingStarted: Boolean(input.pickingStarted) },
   })
+
+  await syncBookkeepingEntryForOrderId(admin, input.orderId, { actorEmail: input.userEmail, source: input.source || 'atlas_orders' })
 
   if (lower === 'shipped' && input.notifyCustomer && order.customer_email && trackingNumber) {
     const body = customerTrackingEmailBody({

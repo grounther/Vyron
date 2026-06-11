@@ -111,7 +111,10 @@ export default async function AtlasOrdersPage({ searchParams }: PageProps) {
         <h1 className="mt-3 text-4xl font-black md:text-6xl">Orderbeheer</h1>
         <p className="mt-3 max-w-2xl text-white/55">Betaalstatus, voorraadverwerking, minigame reward, tracking en fulfillment per order.</p>
       </div>
-      <Link href="/atlas" className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/60 hover:bg-white/10 hover:text-white">Terug naar Atlas</Link>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/atlas/bookkeeping" className="rounded-full border border-[#b7c8ad]/30 px-5 py-3 text-sm font-black text-[#dbe9d4] hover:bg-[#b7c8ad]/10">Boekhouding</Link>
+        <Link href="/atlas" className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/60 hover:bg-white/10 hover:text-white">Terug naar Atlas</Link>
+      </div>
     </div>
 
     {saved ? <div className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm text-emerald-100"><CheckCircle2 className="mr-2 inline" size={18}/> Order bijgewerkt.</div> : null}
