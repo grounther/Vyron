@@ -884,3 +884,12 @@ select.support-input option{
 textarea.support-input{
   line-height:1.45;
 }
+
+/* ASORTA TCG pack reveal flip */
+.tcg-flip-scene{perspective:1300px;transform-style:preserve-3d}
+.tcg-flip-inner{position:relative;height:100%;width:100%;transform-style:preserve-3d;transition:transform .68s cubic-bezier(.2,.85,.2,1)}
+.tcg-flip-inner[data-flipped="true"]{transform:rotateY(180deg)}
+.tcg-flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.tcg-flip-front{transform:rotateY(180deg)}
+.tcg-reveal-card-front{animation:tcgRevealGlow .9s ease both}
+@keyframes tcgRevealGlow{0%{filter:brightness(.75) saturate(.9);box-shadow:0 24px 70px rgba(0,0,0,.42)}55%{filter:brightness(1.16) saturate(1.18);box-shadow:0 0 95px rgba(246,211,108,.28),0 24px 90px rgba(0,0,0,.48)}100%{filter:brightness(1) saturate(1);box-shadow:0 22px 70px rgba(0,0,0,.42)}}

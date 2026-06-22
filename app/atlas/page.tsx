@@ -23,6 +23,7 @@ import {
   FileSpreadsheet,
   Calculator,
   UsersRound,
+  ScanLine,
 } from 'lucide-react'
 
 export const metadata = { title: 'Atlas | ASORTA internal', robots: { index: false, follow: false } }
@@ -275,6 +276,7 @@ export default async function AtlasPage(){
     { permission: 'orders' as const, href: '/atlas/orders', icon: <ReceiptText className="text-[#b7c8ad]"/>, title: 'Orderbeheer', text: 'Betaalde PayPal/Mollie-orders verwerken, voorraad/rewards controleren en tracking bijwerken.' },
     { permission: 'orders' as const, href: '/atlas/bookkeeping', icon: <FileSpreadsheet className="text-[#b7c8ad]"/>, title: 'Boekhouding', text: 'Automatische boekhoudregels voor betaalde orders downloaden als Excel of CSV voor Sheets.' },
     { permission: 'pricing' as const, href: '/atlas/pricing', icon: <Calculator className="text-[#b7c8ad]"/>, title: 'Prijsbeheer', text: 'Cardmarket paste-helper, marktwaarde -2%, margecheck en pricing logs.' },
+    { permission: 'pricing' as const, href: '/card-scanner', icon: <ScanLine className="text-[#b7c8ad]"/>, title: 'Kaartscanner', text: 'Scan of zoek TCG kaarten en toon waarde vanuit je eigen ASORTA pricingdatabase.' },
     { permission: 'integrations' as const, href: '/atlas/integrations', icon: <PlugZap className="text-[#b7c8ad]"/>, title: 'Integrations', text: 'Betaalproviders, PayPal checkout, Mollie voorbereiding en sync status.' },
     { permission: 'settings' as const, href: '/atlas/staff', icon: <UsersRound className="text-[#b7c8ad]"/>, title: 'Medewerkers', text: 'Beheer staff accounts, support badges en Atlas rechten per medewerker.' },
   ].filter((card) => hasAtlasPermission(staff, card.permission))

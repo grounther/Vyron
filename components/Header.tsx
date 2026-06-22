@@ -5,7 +5,7 @@ import ProductImage from './ProductImage'
 import LanguageSwitcher from './LanguageSwitcher'
 import { getDictionary, normalizeLocale, type Locale } from '@/lib/i18n/config'
 import { useEffect, useMemo, useState } from 'react'
-import { Menu, Search, ShoppingCart, X, Trash2, Minus, Plus, ArrowRight, UserRound } from 'lucide-react'
+import { Menu, Search, ShoppingCart, X, Trash2, Minus, Plus, ArrowRight, UserRound, ScanLine } from 'lucide-react'
 
 type CartItem={slug:string;name:string;price:number;hero:string;qty:number;variant?:string;sku?:string}
 const CART_KEY='asorta_cart'
@@ -45,6 +45,7 @@ export default function Header(){
   const dict = getDictionary(locale)
   const links = useMemo(() => [
     [dict.nav.shop, '/shop'],
+    ['Scanner', '/card-scanner'],
     ['Markten', '/market'],
     [dict.nav.boosterPacks, '/category/booster-packs'],
     [dict.nav.eliteTrainerBoxes, '/category/elite-trainer-boxes'],
@@ -66,6 +67,7 @@ export default function Header(){
         </nav>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <div className="hidden lg:block"><LanguageSwitcher compact /></div>
+          <Link href="/card-scanner" className="hidden rounded-full border border-white/10 p-2.5 text-white/70 transition hover:bg-white/10 hover:text-white md:inline-flex" aria-label="Kaartscanner"><ScanLine size={18}/></Link>
           <Link href="/search" className="rounded-full border border-white/10 p-2.5 text-white/70 transition hover:bg-white/10" aria-label={dict.nav.search}><Search size={18}/></Link>
           <Link href="/account" className="hidden rounded-full border border-white/10 p-2.5 text-white/70 transition hover:bg-white/10 hover:text-white sm:inline-flex" aria-label={dict.nav.account}><UserRound size={18}/></Link>
           <button onClick={()=>setCartOpen(true)} className="relative inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm font-black text-black shadow-[0_10px_40px_rgba(255,255,255,.14)] ring-1 ring-white/30 transition hover:-translate-y-0.5 hover:bg-zinc-100 hover:shadow-[0_14px_48px_rgba(255,255,255,.18)] sm:px-4" aria-label={dict.nav.cart}>

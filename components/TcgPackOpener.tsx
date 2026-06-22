@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Sparkles, X } from 'lucide-react'
-import { tcgSeries, type TcgCard, type TcgSeriesKey } from '@/lib/tcg-game'
+import { rarityLabel, tcgSeries, type TcgCard, type TcgSeriesKey } from '@/lib/tcg-game'
 import TcgCardArt from '@/components/TcgCardArt'
 
 type PulledCard = TcgCard & { packSlot?: number; pullId?: string }
@@ -23,6 +23,7 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
   const [selectedSeries, setSelectedSeries] = useState<TcgSeriesKey | null>(null)
   const [cards, setCards] = useState<PulledCard[]>([])
   const [revealed, setRevealed] = useState(0)
+  const [cardFlipped, setCardFlipped] = useState(false)
   const [dragStart, setDragStart] = useState<number | null>(null)
   const [dragProgress, setDragProgress] = useState(0)
   const [error, setError] = useState('')
@@ -36,6 +37,7 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
     setSelectedSeries(null)
     setCards([])
     setRevealed(0)
+    setCardFlipped(false)
     setDragStart(null)
     setDragProgress(0)
     setError('')
@@ -45,6 +47,9 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
   function chooseSeries(seriesKey: TcgSeriesKey) {
     setSelectedSeries(seriesKey)
     setStage('tear')
+    setCards([])
+    setRevealed(0)
+    setCardFlipped(false)
     setError('')
   }
 
@@ -71,6 +76,7 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
 
     setCards(data.cards || [])
     setRevealed(0)
+    setCardFlipped(false)
     setPackCount((count) => Math.max(0, count - 1))
     setTimeout(() => setStage('reveal'), 500)
   }
@@ -94,11 +100,20 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
     else setDragProgress(0)
   }
 
-  function revealNext() {
+  function handleRevealClick() {
+    if (!currentCard) return
+
+    if (!cardFlipped) {
+      setCardFlipped(true)
+      return
+    }
+
     if (revealed < cards.length - 1) {
       setRevealed((value) => value + 1)
+      setCardFlipped(false)
     } else {
       setRevealed(cards.length)
+      setCardFlipped(false)
       setStage('done')
     }
   }
@@ -205,23 +220,66 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
               <div className="grid gap-7 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
                 <div>
                   <p className="kicker">Kaart {Math.min(revealed + 1, cards.length)} van {cards.length}</p>
-                  <h2 className="mt-3 text-4xl font-black md:text-5xl">Klik om te onthullen</h2>
-                  <p className="mt-4 text-sm leading-7 text-white/60">Elke kaart wordt automatisch aan je verzameling toegevoegd. Dubbelen tellen mee als extra exemplaar.</p>
+                  <h2 className="mt-3 text-4xl font-black md:text-5xl">{cardFlipped ? currentCard.name : 'Klik om te flippen'}</h2>
+                  <p className="mt-4 text-sm leading-7 text-white/60">
+                    Draai elke kaart eerst om. Zodra de voorkant zichtbaar is kun je door naar de volgende kaart. Elke pull is al veilig aan je verzameling toegevoegd.
+                  </p>
+                  {cardFlipped ? (
+                    <div className="mt-5 rounded-[1.4rem] border border-[#f6d36c]/20 bg-[#f6d36c]/10 p-4">
+                      <p className="text-xs font-black uppercase tracking-[.24em] text-[#f6d36c]">Getrokken kaart</p>
+                      <p className="mt-2 text-2xl font-black text-white">{currentCard.name}</p>
+                      <p className="mt-1 text-sm font-bold text-white/60">{rarityLabel(currentCard.rarity)} · {currentCard.type}</p>
+                    </div>
+                  ) : null}
                 </div>
 
-                <button onClick={revealNext} className="relative mx-auto h-[460px] w-full max-w-[330px]">
-                  {cards.slice(revealed, revealed + 5).map((card, stackIndex) => (
-                    <div key={`${card.pullId}-${stackIndex}`} className="absolute inset-0 rounded-[1.7rem] border border-white/10 bg-[linear-gradient(135deg,#20252c,#050505)] p-4 shadow-[0_24px_70px_rgba(0,0,0,.45)] transition" style={{ transform: `translate(${stackIndex * 8}px, ${stackIndex * 8}px) rotate(${stackIndex * 1.5}deg)`, opacity: 1 - stackIndex * 0.12 }}>
-                      {stackIndex === 0 ? (
-                        <div className="flex h-full flex-col items-center justify-center rounded-[1.2rem] border border-white/10 bg-[radial-gradient(circle_at_50%_40%,rgba(246,211,108,.22),transparent_35%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))]">
-                          <p className="text-xs font-black uppercase tracking-[.35em] text-white/45">ASORTA</p>
-                          <div className="my-8 h-28 w-28 rounded-full border border-white/15 bg-black/30 shadow-[0_0_70px_rgba(246,211,108,.18)]" />
-                          <p className="text-sm font-black uppercase tracking-[.25em] text-white/55">Card Back</p>
+                <div className="mx-auto w-full max-w-[370px]">
+                  <button
+                    type="button"
+                    onClick={handleRevealClick}
+                    aria-label={cardFlipped ? 'Ga naar de volgende kaart' : 'Onthul deze kaart'}
+                    className="tcg-flip-scene group relative mx-auto h-[500px] w-full max-w-[350px] rounded-[1.9rem] outline-none focus-visible:ring-2 focus-visible:ring-[#f6d36c] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  >
+                    {cards.slice(revealed, revealed + 5).map((card, stackIndex) => {
+                      const isTopCard = stackIndex === 0
+                      return (
+                        <div
+                          key={`${card.pullId || card.id}-${revealed}-${stackIndex}`}
+                          className="absolute inset-0 rounded-[1.8rem] border border-white/10 bg-[linear-gradient(135deg,#20252c,#050505)] p-4 shadow-[0_24px_70px_rgba(0,0,0,.45)] transition duration-300"
+                          style={{
+                            transform: isTopCard
+                              ? 'translate(0px, 0px) rotate(0deg)'
+                              : `translate(${stackIndex * 8}px, ${stackIndex * 8}px) rotate(${stackIndex * 1.5}deg)`,
+                            opacity: 1 - stackIndex * 0.12,
+                            zIndex: cards.length - stackIndex,
+                          }}
+                        >
+                          {isTopCard ? (
+                            <div className="tcg-flip-inner" data-flipped={cardFlipped ? 'true' : 'false'}>
+                              <div className="tcg-flip-face">
+                                <TcgCardBack />
+                              </div>
+                              <div className="tcg-flip-face tcg-flip-front">
+                                <TcgCardArt card={card} className={`h-full w-full ${cardFlipped ? 'tcg-reveal-card-front' : ''}`} />
+                              </div>
+                            </div>
+                          ) : (
+                            <TcgCardBack subtle />
+                          )}
                         </div>
-                      ) : null}
-                    </div>
-                  ))}
-                </button>
+                      )
+                    })}
+                  </button>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-center">
+                    <button type="button" onClick={handleRevealClick} className="btn-primary">
+                      {cardFlipped ? (revealed < cards.length - 1 ? 'Volgende kaart' : 'Bekijk alle pulls') : 'Draai kaart om'}
+                    </button>
+                    <p className="w-full text-xs font-bold uppercase tracking-[.18em] text-white/35">
+                      {cardFlipped ? 'Kaart zichtbaar' : 'Tik of klik op de kaart'}
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : null}
 
@@ -253,5 +311,15 @@ export default function TcgPackOpener({ initialPackCount, compact = false, autoO
         </div>
       ) : null}
     </>
+  )
+}
+
+function TcgCardBack({ subtle = false }: { subtle?: boolean }) {
+  return (
+    <div className={`flex h-full flex-col items-center justify-center rounded-[1.2rem] border border-white/10 bg-[radial-gradient(circle_at_50%_40%,rgba(246,211,108,.22),transparent_35%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] ${subtle ? 'opacity-70' : ''}`}>
+      <p className="text-xs font-black uppercase tracking-[.35em] text-white/45">ASORTA</p>
+      <div className="my-8 h-28 w-28 rounded-full border border-white/15 bg-black/30 shadow-[0_0_70px_rgba(246,211,108,.18)]" />
+      <p className="text-sm font-black uppercase tracking-[.25em] text-white/55">Card Back</p>
+    </div>
   )
 }
