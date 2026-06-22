@@ -101,6 +101,213 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T | null>
   return (await response.json()) as T
 }
 
+
+type PokemonkaartCandidate = {
+  url: string
+  title: string
+}
+
+type PokemonkaartCard = {
+  url: string
+  name: string
+  localId: string
+  setName: string
+  image: string
+  marketValue: number | null
+  finish: string
+  rarity: string
+}
+
+function decodeHtml(value: string) {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/&euro;/g, '€')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function parseEuro(value: string) {
+  const match = value.match(/€\s*([0-9.]+,[0-9]{2}|[0-9]+(?:\.[0-9]{3})*(?:,[0-9]{2})?)/)
+  if (!match?.[1]) return null
+  const parsed = Number(match[1].replace(/\./g, '').replace(',', '.'))
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function absolutePokemonkaartUrl(url: string) {
+  if (url.startsWith('http')) return url
+  return `https://www.pokemonkaart.nl${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+function searchUrlsForPokemonkaart(candidate: string) {
+  const q = encodeURIComponent(candidate)
+  return [
+    `https://www.pokemonkaart.nl/?s=${q}`,
+    `https://www.pokemonkaart.nl/zoeken?keyword=${q}`,
+    `https://www.pokemonkaart.nl/zoeken?q=${q}`,
+  ]
+}
+
+function extractPokemonkaartCandidates(html: string) {
+  const candidates = new Map<string, PokemonkaartCandidate>()
+  const anchorRegex = /<a\s+[^>]*href=["']([^"']*\/kaart\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
+  let match: RegExpExecArray | null
+  while ((match = anchorRegex.exec(html))) {
+    const url = absolutePokemonkaartUrl(decodeHtml(match[1] || ''))
+    const title = decodeHtml(match[2] || '')
+    if (!url || !title || /privacy|disclaimer|contact/i.test(title)) continue
+    if (!candidates.has(url)) candidates.set(url, { url, title })
+  }
+  return Array.from(candidates.values()).slice(0, 12)
+}
+
+function extractPokemonkaartDetail(html: string, url: string): PokemonkaartCard | null {
+  const name = decodeHtml(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '')
+  const localId = decodeHtml(html.match(/<h1[^>]*>\s*#([^<]+)<\/h1>/i)?.[1] || html.match(/#\s*([A-Z0-9-]+\s*\/\s*\d{1,3})/i)?.[1] || '')
+  const crumbs = decodeHtml(html.match(/←\s*Terug([\s\S]*?)<h1/i)?.[1] || '')
+  const crumbParts = crumbs.split('»').map((part) => part.trim()).filter(Boolean)
+  const setName = crumbParts.length >= 2 ? crumbParts[crumbParts.length - 2] : ''
+  const priceSection = html.match(/Actuele marktprijs([\s\S]*?)Prijzen worden dagelijks bijgewerkt/i)?.[1] || ''
+  const priceMatches = Array.from(priceSection.matchAll(/€\s*[0-9.]+,[0-9]{2}(?:[\s\S]{0,80}?)(?:<[^>]+>)*\s*([^<€]{3,40})?/gi))
+  const firstPrice = priceMatches[0]?.[0] || priceSection
+  const marketValue = parseEuro(firstPrice)
+  const finish = decodeHtml((firstPrice.replace(/€\s*[0-9.]+,[0-9]{2}/, '').match(/([A-Za-z][A-Za-z\s-]{2,40})/)?.[1] || '').trim())
+  const rarityBlock = html.match(/RARITY([\s\S]*?)ARTIST/i)?.[1] || ''
+  const rarity = decodeHtml(rarityBlock).replace(/^RARITY\s*/i, '').trim()
+  const imageAltMatch = html.match(/<img[^>]+alt=["']([^"']+)["'][^>]*>/i)
+  const imageSrcMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i)
+  const image = imageSrcMatch?.[1] ? absolutePokemonkaartUrl(decodeHtml(imageSrcMatch[1])) : '/products/asorta-product-fallback.svg'
+
+  if (!name || !marketValue) return null
+  return { url, name, localId, setName, image, marketValue, finish, rarity }
+}
+
+function mapPokemonkaartCard(card: PokemonkaartCard, scannedQuery: string): CardScannerResult {
+  const result: CardScannerResult = {
+    id: `pokemonkaart:${card.url}`,
+    name: card.name,
+    slug: '',
+    category: 'Pokémon kaart',
+    image: card.image || '/products/asorta-product-fallback.svg',
+    price: 0,
+    compareAt: null,
+    marketValue: card.marketValue,
+    suggestedPrice: null,
+    marketSource: 'Pokemonkaart.nl dagelijkse marktprijs',
+    conditionLabel: card.finish || 'Conditie/variant controleren',
+    sealedStatus: '',
+    inventoryOnline: 0,
+    inventoryMarket: 0,
+    inventoryTotal: 0,
+    cardmarketUrl: card.url,
+    tags: [card.setName, card.localId, card.finish, card.rarity].filter(Boolean),
+    source: 'pokemonkaart',
+    setName: card.setName,
+    setId: '',
+    localId: card.localId,
+    rarity: card.rarity || card.finish,
+    cardmarketUpdatedAt: '',
+  }
+  return { ...result, score: scoreScannerResult(result, scannedQuery) + 8 }
+}
+
+async function fetchText(url: string, signal: AbortSignal): Promise<string> {
+  const response = await fetch(url, {
+    signal,
+    headers: {
+      accept: 'text/html,application/xhtml+xml',
+      'user-agent': 'ASORTA-card-scanner/1.0 (+https://asorta.nl/card-scanner; polite cached lookup)',
+    },
+    next: { revalidate: 60 * 60 * 12 },
+  })
+  if (!response.ok) return ''
+  return response.text()
+}
+
+async function searchPokemonkaart(scannedQuery: string, maxResults: number) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 9000)
+  try {
+    const candidates = extractLikelyCardSearches(scannedQuery)
+    const cardNumber = normalizeScannerText(extractCardNumber(scannedQuery))
+    const links = new Map<string, PokemonkaartCandidate>()
+
+    for (const candidate of candidates.slice(0, 4)) {
+      for (const url of searchUrlsForPokemonkaart(candidate).slice(0, 2)) {
+        const html = await fetchText(url, controller.signal)
+        for (const link of extractPokemonkaartCandidates(html)) {
+          const titleScore = scoreScannerResult({
+            id: link.url,
+            name: link.title,
+            slug: '',
+            category: '',
+            image: '',
+            price: 0,
+            compareAt: null,
+            marketValue: null,
+            suggestedPrice: null,
+            marketSource: '',
+            conditionLabel: '',
+            sealedStatus: '',
+            inventoryOnline: 0,
+            inventoryMarket: 0,
+            inventoryTotal: 0,
+            cardmarketUrl: '',
+            tags: [],
+            source: 'pokemonkaart',
+          }, scannedQuery) + (cardNumber && normalizeScannerText(link.title).includes(cardNumber) ? 35 : 0)
+          if (titleScore > 0 && !links.has(link.url)) links.set(link.url, link)
+        }
+        if (links.size >= 12) break
+      }
+      if (links.size >= 12) break
+    }
+
+    const rankedLinks = Array.from(links.values())
+      .map((link) => ({ link, score: scoreScannerResult({
+        id: link.url,
+        name: link.title,
+        slug: '',
+        category: '',
+        image: '',
+        price: 0,
+        compareAt: null,
+        marketValue: null,
+        suggestedPrice: null,
+        marketSource: '',
+        conditionLabel: '',
+        sealedStatus: '',
+        inventoryOnline: 0,
+        inventoryMarket: 0,
+        inventoryTotal: 0,
+        cardmarketUrl: '',
+        tags: [],
+        source: 'pokemonkaart',
+      }, scannedQuery) + (cardNumber && normalizeScannerText(link.title).includes(cardNumber) ? 35 : 0) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+
+    const details = await Promise.all(rankedLinks.map(async ({ link }) => {
+      const html = await fetchText(link.url, controller.signal)
+      return extractPokemonkaartDetail(html, link.url)
+    }))
+
+    return details
+      .filter((card): card is PokemonkaartCard => Boolean(card))
+      .map((card) => mapPokemonkaartCard(card, scannedQuery))
+      .filter((row) => (row.score || 0) > 0)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .slice(0, maxResults)
+  } catch {
+    return []
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 async function searchTcgDex(scannedQuery: string, maxResults: number) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 8500)
@@ -212,13 +419,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ query: q, results: [], message: 'Richt de camera op de kaart of typ minimaal 2 tekens.' })
   }
 
-  const [local, tcgdex] = await Promise.all([
+  const [local, pokemonkaart, tcgdex] = await Promise.all([
     searchLocalProducts(q, limit),
+    external ? searchPokemonkaart(q, Math.max(4, limit)) : Promise.resolve([]),
     external ? searchTcgDex(q, Math.max(3, limit)) : Promise.resolve([]),
   ])
 
   const seen = new Set<string>()
-  const results = [...local.results, ...tcgdex]
+  const results = [...local.results, ...pokemonkaart, ...tcgdex]
     .sort((a, b) => (b.score || 0) - (a.score || 0))
     .filter((item) => {
       const key = `${item.source}:${normalizeScannerText(item.name)}:${normalizeScannerText(item.setName)}:${normalizeScannerText(item.localId)}`
@@ -232,8 +440,10 @@ export async function GET(request: Request) {
     query: q,
     results,
     localCount: local.results.length,
-    externalCount: tcgdex.length,
+    externalCount: pokemonkaart.length + tcgdex.length,
+    pokemonkaartCount: pokemonkaart.length,
+    tcgdexCount: tcgdex.length,
     error: local.error,
-    sourceNote: 'ASORTA database + TCGdex/Cardmarket prijsindicatie zonder API-key. Controleer exacte variant, taal en conditie altijd in Cardmarket.',
+    sourceNote: 'ASORTA database + Pokemonkaart.nl dagelijkse marktprijs + TCGdex fallback. Controleer exacte variant, taal en conditie altijd.',
   })
 }

@@ -16,7 +16,7 @@ export type CardScannerResult = {
   inventoryTotal: number
   cardmarketUrl: string
   tags: string[]
-  source?: 'asorta' | 'tcgdex'
+  source?: 'asorta' | 'tcgdex' | 'pokemonkaart'
   setName?: string
   setId?: string
   localId?: string
@@ -163,12 +163,13 @@ export function scoreScannerResult(row: CardScannerResult, query: string) {
   if (exactName === normalizedQuery) score += 25
   if (exactName.startsWith(normalizedQuery) || normalizedQuery.startsWith(exactName)) score += 10
   if (number && normalizeScannerText(row.localId).includes(normalizeScannerText(number))) score += 18
+  if (row.source === 'pokemonkaart' && row.marketValue) score += 10
   if (row.source === 'tcgdex' && row.marketValue) score += 6
   return score
 }
 
 export function bestScannerValue(row: CardScannerResult) {
-  if (typeof row.marketValue === 'number' && row.marketValue > 0) return { label: row.source === 'tcgdex' ? 'Cardmarket trend' : 'Marktwaarde', value: row.marketValue }
+  if (typeof row.marketValue === 'number' && row.marketValue > 0) return { label: row.source === 'pokemonkaart' ? 'Pokemonkaart waarde' : row.source === 'tcgdex' ? 'Cardmarket trend' : 'Marktwaarde', value: row.marketValue }
   if (typeof row.suggestedPrice === 'number' && row.suggestedPrice > 0) return { label: 'Adviesprijs', value: row.suggestedPrice }
   return { label: row.price > 0 ? 'Webshopprijs' : 'Geen prijs', value: row.price }
 }

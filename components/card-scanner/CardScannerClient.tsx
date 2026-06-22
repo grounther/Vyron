@@ -90,7 +90,7 @@ export default function CardScannerClient() {
       else {
         const external = Number(payload.externalCount || 0)
         const local = Number(payload.localCount || 0)
-        setMessage(`${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} Cardmarket/TCGdex). Controleer variant, taal en conditie.`)
+        setMessage(`${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} externe bronnen). Controleer variant, taal en conditie.`)
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Zoeken mislukt.')
@@ -304,14 +304,14 @@ export default function CardScannerClient() {
     <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025))] p-4 md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[.25em] text-white/35">ASORTA + Cardmarket indicatie</p>
+          <p className="text-xs font-black uppercase tracking-[.25em] text-white/35">ASORTA + Pokemonkaart.nl</p>
           <h2 className="mt-2 text-2xl font-black">Matches</h2>
         </div>
         <ShieldCheck className="text-[#b7c8ad]"/>
       </div>
 
       {!results.length ? <div className="rounded-[1.5rem] border border-dashed border-white/15 bg-black/25 p-6 text-sm leading-6 text-white/55">
-        Nog geen kaart gevonden. Start de camera en houd de bovenkant van de kaart scherp in beeld. De scanner gebruikt ASORTA-data plus TCGdex/Cardmarket-prijsindicatie zonder API-key.
+        Nog geen kaart gevonden. Start de camera en houd de bovenkant van de kaart scherp in beeld. De scanner gebruikt ASORTA-data, Pokemonkaart.nl-prijsdata en TCGdex als fallback.
       </div> : <div className="grid gap-3">
         {results.map((item) => {
           const value = bestScannerValue(item)
@@ -336,7 +336,7 @@ export default function CardScannerClient() {
               {item.cardmarketUpdatedAt && <p className="mt-2 text-xs text-white/40">Cardmarket-prijs bijgewerkt: {new Date(item.cardmarketUpdatedAt).toLocaleDateString('nl-NL')}</p>}
               <div className="mt-3 flex flex-wrap gap-2">
                 {item.slug && <Link href={`/product/${item.slug}`} className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">Product <ExternalLink size={13}/></Link>}
-                {item.cardmarketUrl && <a href={item.cardmarketUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">Cardmarket controleren <ExternalLink size={13}/></a>}
+                {item.cardmarketUrl && <a href={item.cardmarketUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">{item.source === 'pokemonkaart' ? 'Pokemonkaart openen' : 'Bron controleren'} <ExternalLink size={13}/></a>}
               </div>
             </div>
           </article>
