@@ -243,7 +243,15 @@ export default function CardScannerClient() {
       else {
         const external = Number(payload.externalCount || 0)
         const local = Number(payload.localCount || 0)
-        setMessage(`${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} externe bronnen). Controleer variant, taal en conditie.`)
+        const cameraWasActive = Boolean(streamRef.current)
+        if (cameraWasActive) {
+          stopCamera()
+          setAutoScan(false)
+          setStatus('idle')
+        }
+        setMessage(cameraWasActive
+          ? `${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} externe bronnen). Camera gesloten om batterij te besparen. Controleer variant, taal en conditie.`
+          : `${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} externe bronnen). Controleer variant, taal en conditie.`)
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Zoeken mislukt.')
