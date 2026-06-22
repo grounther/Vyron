@@ -16,10 +16,16 @@ type TesseractWorkerLike = {
   terminate: () => Promise<void>
 }
 
+type BrowserTesseract = {
+  createWorker?: (language?: string) => Promise<TesseractWorkerLike>
+  recognize?: (image: HTMLCanvasElement, language?: string, options?: Record<string, unknown>) => Promise<{ data?: { text?: string } }>
+}
+
 declare global {
   interface Window {
     TextDetector?: BrowserTextDetector
     BarcodeDetector?: BrowserBarcodeDetector
+    Tesseract?: BrowserTesseract
   }
 }
 
@@ -136,7 +142,8 @@ export default function CardScannerClient() {
   const fileRef = useRef<HTMLInputElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const autoScanTimerRef = useRef<number | null>(null)
-  const ocrWorkerRef = useRef<Promise<TesseractWorkerLike> | null>(null)
+  const ocrWorkerRef = useRef<Promise<TesseractWorkerLike | null> | null>(null)
+  const ocrScriptRef = useRef<Promise<BrowserTesseract | null> | null>(null)
   const autoScanBusyRef = useRef(false)
   const stableCandidateRef = useRef({ text: '', count: 0 })
   const lastAutoSearchAtRef = useRef(0)
@@ -155,7 +162,7 @@ export default function CardScannerClient() {
   useEffect(() => () => {
     stopCamera()
     if (ocrWorkerRef.current) {
-      void ocrWorkerRef.current.then((worker) => worker.terminate()).catch(() => undefined)
+      void ocrWorkerRef.current.then((worker) => worker?.terminate()).catch(() => undefined)
     }
   }, [])
 
@@ -175,12 +182,39 @@ export default function CardScannerClient() {
     return () => stopAutoScanLoop()
   }, [status, autoScan])
 
+  async function loadTesseractFromCdn() {
+    if (typeof window === 'undefined') return null
+    if (window.Tesseract) return window.Tesseract
+    if (!ocrScriptRef.current) {
+      setOcrLoading(true)
+      ocrScriptRef.current = new Promise<BrowserTesseract | null>((resolve, reject) => {
+        const existing = document.querySelector<HTMLScriptElement>('script[data-asorta-tesseract]')
+        if (existing) {
+          existing.addEventListener('load', () => resolve(window.Tesseract || null), { once: true })
+          existing.addEventListener('error', () => reject(new Error('OCR-script kon niet worden geladen.')), { once: true })
+          return
+        }
+        const script = document.createElement('script')
+        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
+        script.async = true
+        script.defer = true
+        script.crossOrigin = 'anonymous'
+        script.dataset.asortaTesseract = 'true'
+        script.onload = () => resolve(window.Tesseract || null)
+        script.onerror = () => reject(new Error('OCR-script kon niet worden geladen. Handmatig zoeken blijft beschikbaar.'))
+        document.head.appendChild(script)
+      }).finally(() => setOcrLoading(false))
+    }
+    return ocrScriptRef.current
+  }
+
   async function getOcrWorker() {
     if (!ocrWorkerRef.current) {
       setOcrLoading(true)
-      ocrWorkerRef.current = import('tesseract.js')
-        .then(async ({ createWorker }) => {
-          const worker = await createWorker('eng') as unknown as TesseractWorkerLike
+      ocrWorkerRef.current = loadTesseractFromCdn()
+        .then(async (tesseract) => {
+          if (!tesseract?.createWorker) return null
+          const worker = await tesseract.createWorker('eng')
           await worker.setParameters?.({
             tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789éÉèÈáÁàÀöÖüÜ'’:-/# .",
             preserve_interword_spaces: '1',
@@ -243,7 +277,7 @@ export default function CardScannerClient() {
       }
       setStatus('camera')
       setAutoScan(true)
-      setMessage(hasDeviceRecognition ? 'Camera actief. Hij scant automatisch naam bovenaan en nummer onderaan.' : 'Camera actief. Browser-OCR wordt geladen; hij scant daarna automatisch zonder knop.')
+      setMessage(hasDeviceRecognition ? 'Camera actief. Hij scant automatisch naam bovenaan en nummer onderaan.' : 'Camera actief. Lokale browser-OCR wordt geladen; hij scant daarna automatisch zonder knop.')
     } catch (error) {
       setStatus('error')
       setMessage(error instanceof Error ? error.message : 'Camera kon niet worden geopend.')
@@ -336,8 +370,14 @@ export default function CardScannerClient() {
     }
     if (!snippets.length) {
       const worker = await getOcrWorker()
-      const result = await worker.recognize(canvas)
-      snippets.push(result.data?.text || '')
+      if (worker) {
+        const result = await worker.recognize(canvas)
+        snippets.push(result.data?.text || '')
+      } else {
+        const tesseract = await loadTesseractFromCdn()
+        const result = await tesseract?.recognize?.(canvas, 'eng')
+        snippets.push(result?.data?.text || '')
+      }
     }
     return cleanDetectedText(snippets.join('\n'))
   }
@@ -475,7 +515,7 @@ export default function CardScannerClient() {
 
       {detectedText && <div className="mt-4 max-h-52 overflow-auto rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4 text-sm text-[#e6f2df]"><strong>Analyse:</strong> <span className="whitespace-pre-wrap">{shortText(detectedText, 520)}</span></div>}
       <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm leading-6 text-white/55">
-        {loading || ocrLoading ? <Loader2 className="mt-1 shrink-0 animate-spin text-[#b7c8ad]" size={18}/> : results.length ? <CheckCircle2 className="mt-1 shrink-0 text-[#b7c8ad]" size={18}/> : <XCircle className="mt-1 shrink-0 text-white/35" size={18}/>}<span>{ocrLoading ? 'OCR wordt geladen op je apparaat. Dit gebruikt geen token of externe AI-limiet.' : message}</span>
+        {loading || ocrLoading ? <Loader2 className="mt-1 shrink-0 animate-spin text-[#b7c8ad]" size={18}/> : results.length ? <CheckCircle2 className="mt-1 shrink-0 text-[#b7c8ad]" size={18}/> : <XCircle className="mt-1 shrink-0 text-white/35" size={18}/>}<span>{ocrLoading ? 'OCR wordt op je apparaat geladen via de browser. Dit gebruikt geen npm-package in de build, geen token en geen externe AI-limiet.' : message}</span>
       </div>
     </section>
 
