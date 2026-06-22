@@ -99,6 +99,14 @@ function seedHue(seed: number, offset = 0) {
   return (seed % 360 + offset) % 360
 }
 
+
+function artworkUrlFor(card: Pick<TcgCard, 'id' | 'series'>) {
+  if (card.series !== 'perfect-order') return null
+  const match = card.id.match(/^po-(\d{3})$/)
+  if (!match) return null
+  return `/tcg/perfect-order/po-${match[1]}.png`
+}
+
 export default function TcgCardArt({ card, className = '', compact = false, hideMeta = false }: TcgCardArtProps) {
   const seed = hashString(`${card.id}-${card.name}-${card.rarity}-${card.type}`)
   const palette = getPalette(card.type, card.series)
@@ -110,6 +118,7 @@ export default function TcgCardArt({ card, className = '', compact = false, hide
   const isHolo = ['reverse_holo', 'holo', 'full_art', 'ultra_rare', 'secret_rare', 'gold_rare'].includes(card.rarity)
   const glyph = typeGlyphs[card.type] || typeGlyphs.Arcane
   const titleSize = compact ? 'text-[11px]' : 'text-sm sm:text-base'
+  const artworkUrl = hideMeta ? null : artworkUrlFor(card)
 
   return (
     <div
@@ -145,34 +154,54 @@ export default function TcgCardArt({ card, className = '', compact = false, hide
         </div>
 
         <div className="relative my-2.5 min-h-0 flex-1 overflow-hidden rounded-[.9rem] border border-white/10 bg-black/25">
-          <svg viewBox="0 0 100 100" role="img" aria-label={hideMeta ? 'Verborgen ASORTA kaart' : `${card.name} artwork`} className="absolute inset-0 h-full w-full">
-            <defs>
-              <radialGradient id={`orb-${seed}`} cx="50%" cy="40%" r="55%">
-                <stop offset="0%" stopColor={palette.foil} stopOpacity="0.92" />
-                <stop offset="42%" stopColor={palette.mid} stopOpacity="0.46" />
-                <stop offset="100%" stopColor={palette.base} stopOpacity="0" />
-              </radialGradient>
-              <linearGradient id={`line-${seed}`} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor={palette.line} stopOpacity="0.92" />
-                <stop offset="55%" stopColor={palette.mid} stopOpacity="0.55" />
-                <stop offset="100%" stopColor={palette.glow} stopOpacity="0.82" />
-              </linearGradient>
-              <filter id={`soft-${seed}`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2.3" />
-              </filter>
-            </defs>
-            <rect width="100" height="100" fill="transparent" />
-            <circle cx="50" cy="43" r={isPremium ? 36 : 30} fill={`url(#orb-${seed})`} opacity={hideMeta ? 0.22 : 0.75} />
-            <polygon points={pointsTwo} fill={palette.glow} opacity={hideMeta ? 0.08 : 0.16} filter={`url(#soft-${seed})`} />
-            <polygon points={points} fill="none" stroke={`url(#line-${seed})`} strokeWidth={isPremium ? 2.8 : 1.7} opacity={hideMeta ? 0.24 : 0.72} />
-            <path d={glyph} fill={hideMeta ? 'rgba(255,255,255,.10)' : palette.mid} opacity={isPremium ? 0.62 : 0.48} />
-            <path d={glyph} fill="none" stroke={palette.line} strokeWidth={isPremium ? 2.1 : 1.3} opacity={hideMeta ? 0.22 : 0.84} />
-            {isPremium ? <circle cx="50" cy="50" r="38" fill="none" stroke={palette.foil} strokeWidth="1.2" strokeDasharray="5 4" opacity=".62" /> : null}
-            <g opacity={hideMeta ? 0.12 : 0.36}>
-              <path d={`M12 ${20 + (seed % 22)} C32 12, 46 38, 88 ${18 + (seed % 18)}`} stroke={palette.line} strokeWidth="1" fill="none" />
-              <path d={`M8 ${70 - (seed % 16)} C29 85, 62 55, 92 ${78 - (seed % 22)}`} stroke={palette.foil} strokeWidth="1" fill="none" />
-            </g>
-          </svg>
+          {artworkUrl ? (
+            <>
+              <img
+                src={artworkUrl}
+                alt={`${card.name} artwork`}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,transparent,rgba(0,0,0,.18)_58%,rgba(0,0,0,.72))]" />
+              {isHolo ? (
+                <div
+                  className="absolute inset-0 opacity-35 mix-blend-screen"
+                  style={{
+                    background: `linear-gradient(118deg, transparent 0%, ${palette.foil}44 22%, transparent 42%, rgba(255,255,255,.34) 52%, transparent 68%, ${palette.line}33 82%, transparent 100%)`,
+                  }}
+                />
+              ) : null}
+            </>
+          ) : (
+            <svg viewBox="0 0 100 100" role="img" aria-label={hideMeta ? 'Verborgen ASORTA kaart' : `${card.name} artwork`} className="absolute inset-0 h-full w-full">
+              <defs>
+                <radialGradient id={`orb-${seed}`} cx="50%" cy="40%" r="55%">
+                  <stop offset="0%" stopColor={palette.foil} stopOpacity="0.92" />
+                  <stop offset="42%" stopColor={palette.mid} stopOpacity="0.46" />
+                  <stop offset="100%" stopColor={palette.base} stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id={`line-${seed}`} x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor={palette.line} stopOpacity="0.92" />
+                  <stop offset="55%" stopColor={palette.mid} stopOpacity="0.55" />
+                  <stop offset="100%" stopColor={palette.glow} stopOpacity="0.82" />
+                </linearGradient>
+                <filter id={`soft-${seed}`} x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.3" />
+                </filter>
+              </defs>
+              <rect width="100" height="100" fill="transparent" />
+              <circle cx="50" cy="43" r={isPremium ? 36 : 30} fill={`url(#orb-${seed})`} opacity={hideMeta ? 0.22 : 0.75} />
+              <polygon points={pointsTwo} fill={palette.glow} opacity={hideMeta ? 0.08 : 0.16} filter={`url(#soft-${seed})`} />
+              <polygon points={points} fill="none" stroke={`url(#line-${seed})`} strokeWidth={isPremium ? 2.8 : 1.7} opacity={hideMeta ? 0.24 : 0.72} />
+              <path d={glyph} fill={hideMeta ? 'rgba(255,255,255,.10)' : palette.mid} opacity={isPremium ? 0.62 : 0.48} />
+              <path d={glyph} fill="none" stroke={palette.line} strokeWidth={isPremium ? 2.1 : 1.3} opacity={hideMeta ? 0.22 : 0.84} />
+              {isPremium ? <circle cx="50" cy="50" r="38" fill="none" stroke={palette.foil} strokeWidth="1.2" strokeDasharray="5 4" opacity=".62" /> : null}
+              <g opacity={hideMeta ? 0.12 : 0.36}>
+                <path d={`M12 ${20 + (seed % 22)} C32 12, 46 38, 88 ${18 + (seed % 18)}`} stroke={palette.line} strokeWidth="1" fill="none" />
+                <path d={`M8 ${70 - (seed % 16)} C29 85, 62 55, 92 ${78 - (seed % 22)}`} stroke={palette.foil} strokeWidth="1" fill="none" />
+              </g>
+            </svg>
+          )}
           {hideMeta ? <div className="absolute inset-0 grid place-items-center bg-black/20 text-center text-[10px] font-black uppercase tracking-[.24em] text-white/35">Nog niet gevonden</div> : null}
         </div>
 

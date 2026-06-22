@@ -29,9 +29,9 @@ const rarityOrder: TcgRarity[] = [
 
 const rarityThemes: Record<TcgRarity, { chip: string; panel: string; title: string; glow: string }> = {
   common: {
-    chip: 'border-white/15 bg-white/8 text-white/70',
+    chip: 'border-white/15 bg-white/[.08] text-white/70',
     panel: 'border-white/10 bg-white/[.03]',
-    title: 'text-white/92',
+    title: 'text-white/[.92]',
     glow: 'shadow-[0_0_0_rgba(255,255,255,0)]',
   },
   uncommon: {
@@ -175,7 +175,7 @@ export default async function AccountCollectionPage() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="#pack-opener" className="rounded-full border border-[#f1d279]/25 bg-[#f1d279]/10 px-5 py-3 text-sm font-black text-[#f6e8b6] transition hover:bg-[#f1d279]/18">Open pakjes</Link>
-              <Link href="/account" className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/72 transition hover:bg-white/8 hover:text-white">Terug naar account</Link>
+              <Link href="/account" className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/72 transition hover:bg-white/[.08] hover:text-white">Terug naar account</Link>
             </div>
           </div>
 
@@ -194,7 +194,7 @@ export default async function AccountCollectionPage() {
               </div>
               <p className="text-xl font-black text-[#f3d88c]">{masterProgress}%</p>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-white/8">
+            <div className="h-3 overflow-hidden rounded-full bg-white/[.08]">
               <div className="h-full rounded-full bg-[linear-gradient(90deg,#d4af54,#f6df9a,#7dd3fc)]" style={{ width: `${masterProgress}%` }} />
             </div>
           </div>
@@ -227,7 +227,7 @@ export default async function AccountCollectionPage() {
                       </div>
                       <p className="text-xs font-black uppercase tracking-[.2em] text-white/35">{pct}%</p>
                     </div>
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/8">
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/[.08]">
                       <div className="h-full rounded-full bg-[linear-gradient(90deg,rgba(255,255,255,.5),rgba(255,255,255,.95))]" style={{ width: `${pct}%` }} />
                     </div>
                     <p className="mt-3 text-xs text-white/48">Doubles: x{duplicateCount}</p>
@@ -280,7 +280,7 @@ export default async function AccountCollectionPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/8">
+                <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/[.08]">
                   <div className={`h-full rounded-full bg-gradient-to-r ${seriesTheme.line}`} style={{ width: `${pct}%` }} />
                 </div>
 
@@ -296,7 +296,7 @@ export default async function AccountCollectionPage() {
                         className={`group relative overflow-hidden rounded-[1.6rem] border p-3 transition duration-200 ${
                           isOwned
                             ? `${rarityTheme.panel} ${rarityTheme.glow} hover:-translate-y-1 hover:border-white/18`
-                            : 'border-white/7 bg-black/28 opacity-65'
+                            : 'border-white/[.07] bg-black/28 opacity-[.65]'
                         }`}
                       >
                         <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
