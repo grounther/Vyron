@@ -1,41 +1,30 @@
-# ASORTA kaartscanner
+# ASORTA kaartscanner - automatische herkenning
 
-Deze update voegt een kaartwaarde-scanner toe zonder externe AI/API tokens.
+Deze versie maakt `/card-scanner` automatisch:
 
-## Nieuwe publieke route
+- camera starten is genoeg; de scanner loopt daarna zelf iedere paar seconden;
+- geen verplichte scan-knop meer;
+- gebruikt browser-native `TextDetector`/`BarcodeDetector` wanneer beschikbaar;
+- handmatig zoeken en foto-upload blijven fallback;
+- zoekt eerst in ASORTA producten/pricing;
+- vergelijkt daarnaast met TCGdex Cardmarket-prijsdata zonder API-key;
+- toont Cardmarket-trend/avg prijsindicatie wanneer beschikbaar;
+- toont een Cardmarket zoeklink om variant, taal en conditie te controleren.
 
-- `/card-scanner`
+## Belangrijke technische beperking
 
-De scanner gebruikt:
+Cardmarket geeft officieel geen nieuwe API-toegang uit. Direct live Cardmarket ophalen zonder token/limiet is daarom niet betrouwbaar en kan door Cardmarket worden geblokkeerd. Daarom gebruikt ASORTA:
 
-- camera-preview in de browser;
-- browser-native `TextDetector` en `BarcodeDetector` als de browser/device dit ondersteunt;
-- handmatige zoekfallback die altijd blijft werken;
-- ASORTA's eigen `products`/pricing velden als bron voor waarde.
+1. eigen product/pricing database als betrouwbare fallback;
+2. TCGdex publieke Pokémon TCG API als no-key bron voor kaartcatalogus en Cardmarket prijsindicatie.
 
-## Nieuwe API route
+## Beste scanresultaat
 
-- `/api/card-scanner?q=...`
+Voor beste herkenning:
 
-Deze route zoekt server-side in Supabase `products` met de service role en geeft alleen publieke/pricing scanner velden terug.
+- houd de bovenkant van de kaart scherp in beeld;
+- zorg dat kaartnaam en kaartnummer zichtbaar zijn;
+- scan bij daglicht of onder felle lamp;
+- controleer altijd exacte variant, taal en conditie via de Cardmarket-link.
 
-## Geen externe limieten
-
-Er wordt geen Cardmarket/TCGplayer/OCR/AI API aangeroepen. De getoonde waarde komt uit je eigen database:
-
-- `market_value`
-- `suggested_price`
-- `price`
-- `market_source`
-- `condition_label`
-- `sealed_status`
-- voorraadvelden
-- `cardmarket_url`
-
-## Belangrijk voor waardes
-
-Voor beste resultaten: voeg losse kaarten als product toe in Atlas en vul de Cardmarket paste-helper of handmatige marktwaarde in bij Prijsbeheer.
-
-## Geen SQL nodig
-
-Deze update gebruikt bestaande product/pricing velden. Er hoeft geen nieuwe SQL gedraaid te worden.
+Geen SQL of env vars nodig.

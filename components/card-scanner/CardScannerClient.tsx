@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Camera, CheckCircle2, ExternalLink, ImagePlus, Loader2, RotateCcw, Search, ScanLine, ShieldCheck, Sparkles, XCircle } from 'lucide-react'
+import { Camera, CheckCircle2, ExternalLink, ImagePlus, Loader2, PauseCircle, PlayCircle, RotateCcw, Search, ScanLine, ShieldCheck, Sparkles, XCircle } from 'lucide-react'
 import { bestScannerValue, type CardScannerResult } from '@/lib/card-scanner'
 
 type ScanStatus = 'idle' | 'camera' | 'scanning' | 'unsupported' | 'error'
@@ -18,14 +18,22 @@ declare global {
 }
 
 function euro(value: number) {
+  if (!value) return '—'
   return `€${Number(value || 0).toFixed(2)}`
 }
 
 function cleanDetectedText(value: string) {
   return String(value || '')
-    .replace(/\s+/g, ' ')
-    .replace(/[^a-zA-Z0-9À-ÿ .:/#'’\-]+/g, ' ')
+    .split(/[\n\r]+/)
+    .map((line) => line.replace(/\s+/g, ' ').replace(/[^a-zA-Z0-9À-ÿ .:/#'’\-]+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n')
     .trim()
+}
+
+function shortText(value: string, max = 180) {
+  const clean = value.replace(/\s+/g, ' ').trim()
+  return clean.length > max ? `${clean.slice(0, max)}…` : clean
 }
 
 export default function CardScannerClient() {
@@ -33,24 +41,37 @@ export default function CardScannerClient() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const fileRef = useRef<HTMLInputElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const autoScanTimerRef = useRef<number | null>(null)
+  const lastAutoTextRef = useRef('')
+  const lastAutoSearchAtRef = useRef(0)
   const [status, setStatus] = useState<ScanStatus>('idle')
   const [query, setQuery] = useState('')
   const [detectedText, setDetectedText] = useState('')
   const [results, setResults] = useState<CardScannerResult[]>([])
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('Richt je camera op de kaartnaam, setnaam of nummer. Je kunt ook gewoon typen; dat blijft altijd werken.')
+  const [autoScan, setAutoScan] = useState(true)
+  const [message, setMessage] = useState('Start de camera. De scanner zoekt daarna automatisch zonder knop; handmatig typen blijft als fallback werken.')
 
   const canUseCamera = useMemo(() => typeof navigator !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia), [])
-  const hasDeviceText = typeof window !== 'undefined' && Boolean(window.TextDetector || window.BarcodeDetector)
+  const hasDeviceRecognition = typeof window !== 'undefined' && Boolean(window.TextDetector || window.BarcodeDetector)
 
   useEffect(() => () => stopCamera(), [])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       void searchCards(query)
-    }, 300)
+    }, 350)
     return () => window.clearTimeout(timeout)
   }, [query])
+
+  useEffect(() => {
+    if (status !== 'camera' || !autoScan) {
+      stopAutoScanLoop()
+      return
+    }
+    startAutoScanLoop()
+    return () => stopAutoScanLoop()
+  }, [status, autoScan])
 
   async function searchCards(value: string) {
     const q = value.trim()
@@ -60,12 +81,17 @@ export default function CardScannerClient() {
     }
     setLoading(true)
     try {
-      const response = await fetch(`/api/card-scanner?q=${encodeURIComponent(q)}`, { cache: 'no-store' })
+      const response = await fetch(`/api/card-scanner?q=${encodeURIComponent(q)}&external=1`, { cache: 'no-store' })
       const payload = await response.json()
-      setResults(Array.isArray(payload.results) ? payload.results : [])
+      const nextResults = Array.isArray(payload.results) ? payload.results : []
+      setResults(nextResults)
       if (payload.error) setMessage(payload.error)
-      else if (!payload.results?.length) setMessage('Geen match gevonden. Probeer kaartnaam + setnummer, of voeg deze kaart eerst toe aan Atlas producten/pricing.')
-      else setMessage(`${payload.results.length} mogelijke match${payload.results.length === 1 ? '' : 'es'} gevonden.`)
+      else if (!nextResults.length) setMessage('Nog geen match. Houd de kaartnaam bovenin scherp in beeld of typ kaartnaam + setnummer.')
+      else {
+        const external = Number(payload.externalCount || 0)
+        const local = Number(payload.localCount || 0)
+        setMessage(`${nextResults.length} match${nextResults.length === 1 ? '' : 'es'} gevonden (${local} ASORTA, ${external} Cardmarket/TCGdex). Controleer variant, taal en conditie.`)
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Zoeken mislukt.')
       setResults([])
@@ -82,14 +108,18 @@ export default function CardScannerClient() {
     }
     try {
       stopCamera()
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
+      })
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         await videoRef.current.play()
       }
       setStatus('camera')
-      setMessage(hasDeviceText ? 'Camera actief. Maak een scan; tekstherkenning gebeurt op je eigen apparaat.' : 'Camera actief. Deze browser ondersteunt geen ingebouwde tekstherkenning; gebruik foto/manual fallback.')
+      setAutoScan(true)
+      setMessage(hasDeviceRecognition ? 'Camera actief. Automatische herkenning loopt; richt vooral op de kaartnaam en het nummer.' : 'Camera actief, maar deze browser ondersteunt geen ingebouwde tekst/barcodeherkenning. Upload een foto of typ handmatig.')
     } catch (error) {
       setStatus('error')
       setMessage(error instanceof Error ? error.message : 'Camera kon niet worden geopend.')
@@ -97,27 +127,57 @@ export default function CardScannerClient() {
   }
 
   function stopCamera() {
+    stopAutoScanLoop()
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     if (videoRef.current) videoRef.current.srcObject = null
+  }
+
+  function startAutoScanLoop() {
+    stopAutoScanLoop()
+    if (!hasDeviceRecognition) return
+    autoScanTimerRef.current = window.setInterval(() => {
+      void captureAndScan({ automatic: true })
+    }, 1500)
+  }
+
+  function stopAutoScanLoop() {
+    if (autoScanTimerRef.current) {
+      window.clearInterval(autoScanTimerRef.current)
+      autoScanTimerRef.current = null
+    }
   }
 
   function drawVideoToCanvas() {
     const video = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas || !video.videoWidth || !video.videoHeight) return false
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    const sourceWidth = video.videoWidth
+    const sourceHeight = video.videoHeight
+    const cropY = Math.floor(sourceHeight * 0.02)
+    const cropHeight = Math.floor(sourceHeight * 0.58)
+    canvas.width = sourceWidth
+    canvas.height = cropHeight
     const ctx = canvas.getContext('2d')
     if (!ctx) return false
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    ctx.filter = 'contrast(1.18) saturate(1.05)'
+    ctx.drawImage(video, 0, cropY, sourceWidth, cropHeight, 0, 0, canvas.width, canvas.height)
+    ctx.filter = 'none'
     return true
   }
 
-  async function scanCanvas() {
+  async function scanCanvas(options: { automatic?: boolean } = {}) {
     const canvas = canvasRef.current
     if (!canvas) return
-    setStatus('scanning')
+    if (!window.TextDetector && !window.BarcodeDetector) {
+      if (!options.automatic) {
+        setStatus('unsupported')
+        setMessage('Automatische herkenning wordt door deze browser niet ondersteund. Handmatig zoeken of foto-upload blijft beschikbaar.')
+      }
+      return
+    }
+
+    if (!options.automatic) setStatus('scanning')
     try {
       const snippets: string[] = []
       if (window.TextDetector) {
@@ -130,28 +190,42 @@ export default function CardScannerClient() {
         const codes = await detector.detect(canvas)
         snippets.push(...codes.map((code) => code.rawValue || '').filter(Boolean))
       }
-      const text = cleanDetectedText(snippets.join(' '))
-      if (!text) {
+      const text = cleanDetectedText(snippets.join('\n'))
+      const comparable = text.toLowerCase().replace(/\s+/g, ' ').trim()
+      if (!text || comparable.length < 3) {
+        if (!options.automatic) {
+          setDetectedText('')
+          setMessage('Geen tekst herkend. Richt op de kaartnaam of typ kaartnaam + setnummer.')
+        }
         setStatus('camera')
-        setDetectedText('')
-        setMessage('Geen tekst herkend. Typ de kaartnaam/setcode handmatig; die fallback werkt altijd.')
         return
       }
+
+      const now = Date.now()
+      const changedEnough = comparable !== lastAutoTextRef.current
+      const cooledDown = now - lastAutoSearchAtRef.current > 2600
       setDetectedText(text)
-      setQuery(text)
+      if (!options.automatic || (changedEnough && cooledDown)) {
+        lastAutoTextRef.current = comparable
+        lastAutoSearchAtRef.current = now
+        setQuery(text)
+        if (options.automatic) setMessage(`Automatisch herkend: ${shortText(text, 100)}`)
+      }
       setStatus('camera')
     } catch {
-      setStatus('unsupported')
-      setMessage('Automatische herkenning wordt door deze browser niet ondersteund. Handmatig zoeken blijft beschikbaar.')
+      if (!options.automatic) {
+        setStatus('unsupported')
+        setMessage('Automatische herkenning wordt door deze browser niet ondersteund. Handmatig zoeken blijft beschikbaar.')
+      }
     }
   }
 
-  async function captureAndScan() {
+  async function captureAndScan(options: { automatic?: boolean } = {}) {
     if (!drawVideoToCanvas()) {
-      setMessage('Kon geen camerabeeld vastleggen. Probeer opnieuw of upload een foto.')
+      if (!options.automatic) setMessage('Kon geen camerabeeld vastleggen. Probeer opnieuw of upload een foto.')
       return
     }
-    await scanCanvas()
+    await scanCanvas(options)
   }
 
   async function scanUploadedFile(file: File | undefined) {
@@ -164,8 +238,10 @@ export default function CardScannerClient() {
       canvas.height = image.naturalHeight
       const ctx = canvas.getContext('2d')
       if (!ctx) return
+      ctx.filter = 'contrast(1.15) saturate(1.05)'
       ctx.drawImage(image, 0, 0)
-      await scanCanvas()
+      ctx.filter = 'none'
+      await scanCanvas({ automatic: false })
       URL.revokeObjectURL(image.src)
     }
     image.src = URL.createObjectURL(file)
@@ -175,8 +251,8 @@ export default function CardScannerClient() {
     <section className="rounded-[2rem] border border-white/10 bg-white/[.045] p-4 shadow-[0_24px_90px_rgba(0,0,0,.28)] md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[.25em] text-[#b7c8ad]">Scanner zonder externe API</p>
-          <h2 className="mt-2 text-2xl font-black">Scan of zoek een kaart</h2>
+          <p className="text-xs font-black uppercase tracking-[.25em] text-[#b7c8ad]">Automatische scanner</p>
+          <h2 className="mt-2 text-2xl font-black">Scan kaartwaarde live</h2>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={startCamera} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-black transition hover:-translate-y-0.5"><Camera size={16}/> Camera</button>
@@ -192,30 +268,34 @@ export default function CardScannerClient() {
             <div>
               <ScanLine className="mx-auto mb-3 text-[#b7c8ad]" size={42}/>
               <p className="text-lg font-black">Camera-preview</p>
-              <p className="mt-2 max-w-md text-sm leading-6 text-white/55">Gebruik de camera, upload een foto of zoek direct op kaartnaam. Er is geen betaalde AI/OCR-token nodig.</p>
+              <p className="mt-2 max-w-md text-sm leading-6 text-white/55">Start de camera. Daarna scant hij automatisch; je hoeft niet meer op herkennen te drukken.</p>
             </div>
           </div>}
+          <div className="pointer-events-none absolute left-6 right-6 top-8 rounded-2xl border border-[#b7c8ad]/55 bg-[#b7c8ad]/5 p-3 text-center text-[11px] font-black uppercase tracking-[.18em] text-[#e9f7e2] shadow-[0_0_35px_rgba(183,200,173,.35)]">Houd kaartnaam + nummer in dit vlak</div>
           <div className="pointer-events-none absolute inset-x-8 top-1/2 h-px bg-[#b7c8ad]/70 shadow-[0_0_30px_rgba(183,200,173,.8)]"/>
         </div>
       </div>
       <canvas ref={canvasRef} className="hidden"/>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" onClick={captureAndScan} disabled={status !== 'camera'} className="inline-flex items-center gap-2 rounded-full bg-[#b7c8ad] px-5 py-3 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-45">
-          {status === 'scanning' ? <Loader2 className="animate-spin" size={16}/> : <Sparkles size={16}/>} Herken kaarttekst
+        <button type="button" onClick={() => setAutoScan((value) => !value)} disabled={status !== 'camera'} className="inline-flex items-center gap-2 rounded-full bg-[#b7c8ad] px-5 py-3 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-45">
+          {autoScan ? <PauseCircle size={16}/> : <PlayCircle size={16}/>} {autoScan ? 'Auto-scan pauzeren' : 'Auto-scan starten'}
         </button>
-        <button type="button" onClick={() => { stopCamera(); setStatus('idle') }} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/65 transition hover:bg-white/10 hover:text-white"><RotateCcw size={16}/> Stop/reset</button>
+        <button type="button" onClick={() => void captureAndScan({ automatic: false })} disabled={status !== 'camera'} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/75 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45">
+          {status === 'scanning' ? <Loader2 className="animate-spin" size={16}/> : <Sparkles size={16}/>} Scan nu
+        </button>
+        <button type="button" onClick={() => { stopCamera(); setStatus('idle'); setAutoScan(false) }} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white/65 transition hover:bg-white/10 hover:text-white"><RotateCcw size={16}/> Stop/reset</button>
       </div>
 
       <label className="mt-5 grid gap-2">
-        <span className="text-xs font-black uppercase tracking-[.22em] text-white/40">Kaartnaam, setcode, nummer of SKU</span>
+        <span className="text-xs font-black uppercase tracking-[.22em] text-white/40">Automatisch herkend of handmatig corrigeren</span>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35" size={18}/>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Bijv. Charizard 199/165, Obsidian Flames, Pikachu..." className="w-full rounded-2xl border border-white/10 bg-black/50 py-4 pl-12 pr-4 font-bold text-white outline-none transition placeholder:text-white/25 focus:border-[#b7c8ad]"/>
         </div>
       </label>
 
-      {detectedText && <div className="mt-4 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4 text-sm text-[#e6f2df]"><strong>Herkende tekst:</strong> {detectedText}</div>}
+      {detectedText && <div className="mt-4 rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 p-4 text-sm text-[#e6f2df]"><strong>Herkende tekst:</strong> <span className="whitespace-pre-wrap">{shortText(detectedText, 260)}</span></div>}
       <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm leading-6 text-white/55">
         {loading ? <Loader2 className="mt-1 shrink-0 animate-spin text-[#b7c8ad]" size={18}/> : results.length ? <CheckCircle2 className="mt-1 shrink-0 text-[#b7c8ad]" size={18}/> : <XCircle className="mt-1 shrink-0 text-white/35" size={18}/>}<span>{message}</span>
       </div>
@@ -224,14 +304,14 @@ export default function CardScannerClient() {
     <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025))] p-4 md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[.25em] text-white/35">Waarde uit ASORTA database</p>
+          <p className="text-xs font-black uppercase tracking-[.25em] text-white/35">ASORTA + Cardmarket indicatie</p>
           <h2 className="mt-2 text-2xl font-black">Matches</h2>
         </div>
         <ShieldCheck className="text-[#b7c8ad]"/>
       </div>
 
       {!results.length ? <div className="rounded-[1.5rem] border border-dashed border-white/15 bg-black/25 p-6 text-sm leading-6 text-white/55">
-        Nog geen kaart gevonden. De scanner gebruikt je eigen product- en pricingdata. Voeg losse kaarten toe in Atlas en vul `market_value`/Cardmarket paste in voor de beste waardes.
+        Nog geen kaart gevonden. Start de camera en houd de bovenkant van de kaart scherp in beeld. De scanner gebruikt ASORTA-data plus TCGdex/Cardmarket-prijsindicatie zonder API-key.
       </div> : <div className="grid gap-3">
         {results.map((item) => {
           const value = bestScannerValue(item)
@@ -241,7 +321,7 @@ export default function CardScannerClient() {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="truncate text-lg font-black">{item.name}</h3>
-                  <p className="mt-1 text-xs font-black uppercase tracking-[.16em] text-white/35">{item.conditionLabel || 'Conditie onbekend'} {item.category ? `• ${item.category}` : ''}</p>
+                  <p className="mt-1 text-xs font-black uppercase tracking-[.16em] text-white/35">{item.setName || item.conditionLabel || 'Variant controleren'} {item.localId ? `• #${item.localId}` : item.category ? `• ${item.category}` : ''}</p>
                 </div>
                 <div className="rounded-2xl border border-[#b7c8ad]/20 bg-[#b7c8ad]/10 px-3 py-2 text-right">
                   <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#dbe9d4]/75">{value.label}</p>
@@ -249,13 +329,14 @@ export default function CardScannerClient() {
                 </div>
               </div>
               <div className="mt-3 grid gap-2 text-sm text-white/58 sm:grid-cols-3">
-                <Info label="Webshop" value={euro(item.price)}/>
-                <Info label="Voorraad" value={String(item.inventoryTotal || item.inventoryOnline || item.inventoryMarket || 0)}/>
-                <Info label="Bron" value={item.marketSource || 'Handmatig'}/>
+                <Info label="Bron" value={item.marketSource || (item.source === 'tcgdex' ? 'TCGdex' : 'Handmatig')}/>
+                <Info label="Rarity" value={item.rarity || item.conditionLabel || '—'}/>
+                <Info label="Voorraad" value={item.source === 'asorta' ? String(item.inventoryTotal || item.inventoryOnline || item.inventoryMarket || 0) : 'Extern'}/>
               </div>
+              {item.cardmarketUpdatedAt && <p className="mt-2 text-xs text-white/40">Cardmarket-prijs bijgewerkt: {new Date(item.cardmarketUpdatedAt).toLocaleDateString('nl-NL')}</p>}
               <div className="mt-3 flex flex-wrap gap-2">
                 {item.slug && <Link href={`/product/${item.slug}`} className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">Product <ExternalLink size={13}/></Link>}
-                {item.cardmarketUrl && <a href={item.cardmarketUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">Cardmarket <ExternalLink size={13}/></a>}
+                {item.cardmarketUrl && <a href={item.cardmarketUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-black text-white/65 transition hover:bg-white/10 hover:text-white">Cardmarket controleren <ExternalLink size={13}/></a>}
               </div>
             </div>
           </article>
