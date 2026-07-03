@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
 import { ArrowRight, Leaf, Scissors, Sparkles } from 'lucide-react'
+import OkFashionGarment from '@/components/OkFashionGarment'
+import { okFashionProducts } from '@/lib/ok-fashion'
 
 export const metadata = {
   title: 'OK Fashion | ASORTA',
@@ -216,6 +218,35 @@ export default function OKFashionPage() {
             <PrincipleCard key={principle.title} icon={principle.icon} title={principle.title} text={principle.text} />
           ))}
         </section>
+
+        <section className="mt-6 overflow-hidden rounded-[2rem] border border-[#1f1712]/10 bg-[#f7f2e9] p-5 shadow-[0_35px_120px_rgba(95,73,48,.12)] sm:p-8">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">Werkelijke productlijn</p>
+              <h2 className="mt-3 font-serif text-4xl tracking-[-.04em] sm:text-5xl">Producten en kleuren die wij gaan verkopen</h2>
+            </div>
+            <Link href="/okfashion/shop" className="inline-flex items-center gap-2 rounded-full bg-[#1f1712] px-6 py-3 text-sm font-black text-[#f7f2e9] transition hover:-translate-y-0.5">
+              Open volledige shop <ArrowRight size={17} />
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {okFashionProducts.map((product) => (
+              <Link key={product.slug} href={`/okfashion/product/${product.slug}`} className="rounded-[1.5rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-4 shadow-[0_18px_60px_rgba(95,73,48,.08)] transition hover:-translate-y-1">
+                <div className="rounded-[1.2rem] border border-[#1f1712]/8 bg-[linear-gradient(180deg,#f4ebdf,#e0d0ba)] p-4">
+                  <OkFashionGarment kind={product.garment} tone={product.heroTone} accent={product.accent} />
+                </div>
+                <p className="mt-4 text-[11px] font-black uppercase tracking-[.24em] text-[#7a6248]">{product.category}</p>
+                <h3 className="mt-2 font-serif text-2xl leading-none tracking-[-.04em]">{product.name}</h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {product.colors.slice(0, 5).map((color) => (
+                    <span key={color.name} title={color.name} style={{ backgroundColor: color.hex }} className="h-6 w-6 rounded-full border border-black/10 shadow-inner" />
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
       </div>
     </main>
   )
