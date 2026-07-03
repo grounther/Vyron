@@ -2,8 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Check, Ruler, Shirt, Sparkles } from 'lucide-react'
-import OkFashionGarment from '@/components/OkFashionGarment'
-import { getOkFashionProduct, okFashionProducts } from '@/lib/ok-fashion'
+import { getOkFashionProduct, okFashionColorStories, okFashionProducts } from '@/lib/ok-fashion'
 
 export function generateStaticParams() {
   return okFashionProducts.map((product) => ({ slug: product.slug }))
@@ -24,6 +23,8 @@ export default async function OKFashionProductPage({ params }: { params: Promise
   const product = getOkFashionProduct(slug)
   if (!product) return notFound()
 
+  const relatedStories = okFashionColorStories.filter((story) => product.storyNames.includes(story.name))
+
   return (
     <main className="ok-fashion min-h-screen bg-[#f3ecdf] px-4 py-6 text-[#1f1712] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -33,11 +34,15 @@ export default async function OKFashionProductPage({ params }: { params: Promise
 
         <section className="grid overflow-hidden rounded-[2rem] border border-[#1f1712]/10 bg-[#f7f2e9] shadow-[0_35px_120px_rgba(95,73,48,.16)] lg:grid-cols-[1.05fr_.95fr]">
           <div className="grid min-h-[620px] place-items-center border-b border-[#1f1712]/10 bg-[radial-gradient(circle_at_70%_20%,#fff7ec,transparent_34%),linear-gradient(180deg,#f5ecdf,#ddc6a7)] p-8 lg:border-b-0 lg:border-r">
-            <div className="w-full max-w-md rounded-[2rem] border border-[#1f1712]/10 bg-[#fcf8f1]/72 p-8 shadow-[0_24px_90px_rgba(95,73,48,.14)] backdrop-blur">
-              <OkFashionGarment kind={product.garment} tone={product.heroTone} accent={product.accent} className="scale-125" />
-              <div className="mt-10 rounded-[1.4rem] border border-[#1f1712]/10 bg-[#f7f2e9] p-4">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-[#1f1712]/10 bg-[#fcf8f1]/72 shadow-[0_24px_90px_rgba(95,73,48,.14)] backdrop-blur">
+              <img src={product.image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
+              <div className="border-t border-[#1f1712]/10 bg-[#f7f2e9] p-4">
                 <p className="text-[11px] font-black uppercase tracking-[.26em] text-[#7a6248]">Logo placement</p>
-                <p className="mt-2 text-sm leading-6 text-[#4b3d31]/70">Klein sierlijk OK-monogram op de linker mouwnaad, ton-sur-ton of laag contrast.</p>
+                <p className="mt-2 text-sm leading-6 text-[#4b3d31]/70">
+                  {product.garment === 'tee'
+                    ? 'Klein sierlijk OK-monogram op het einde van de linker mouw.'
+                    : 'Klein sierlijk OK-monogram onderaan aan de binnenkant van de omgeslagen linker manchet.'}
+                </p>
               </div>
             </div>
           </div>
@@ -69,6 +74,18 @@ export default async function OKFashionProductPage({ params }: { params: Promise
             </div>
 
             <div className="mt-8 rounded-[1.5rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-5">
+              <p className="text-xs font-black uppercase tracking-[.28em] text-[#7a6248]">Color story match</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {product.storyNames.map((story) => (
+                  <span key={story} className="rounded-full border border-[#1f1712]/10 bg-[#f7f1e7] px-3 py-1 text-sm font-bold text-[#4b3d31]/76">{story}</span>
+                ))}
+              </div>
+              <p className="mt-3 text-sm leading-6 text-[#4b3d31]/70">
+                Dit product is op de site direct gekoppeld aan deze color stories, zodat de productafbeelding op de juiste plek binnen de collectie staat.
+              </p>
+            </div>
+
+            <div className="mt-8 rounded-[1.5rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-5">
               <p className="text-xs font-black uppercase tracking-[.28em] text-[#7a6248]">Status</p>
               <h2 className="mt-2 font-serif text-3xl tracking-[-.04em]">{product.status}</h2>
               <p className="mt-3 text-sm leading-6 text-[#4b3d31]/70">
@@ -82,6 +99,28 @@ export default async function OKFashionProductPage({ params }: { params: Promise
           <DetailCard icon={<Sparkles size={20} />} title="Belangrijkste kenmerken" items={product.features} />
           <DetailCard icon={<Ruler size={20} />} title="Specificaties" items={product.specs} />
           <DetailCard icon={<Shirt size={20} />} title="Combineert met" items={product.pairsWith} />
+        </section>
+
+        <section className="rounded-[1.8rem] border border-[#1f1712]/10 bg-[#f7f2e9] p-5 shadow-[0_18px_60px_rgba(95,73,48,.08)] sm:p-6">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.28em] text-[#7a6248]">Gerelateerde color stories</p>
+              <h2 className="mt-2 font-serif text-3xl tracking-[-.04em]">Waar dit product op de site terugkomt</h2>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {relatedStories.map((story) => (
+              <article key={story.name} className="rounded-[1.4rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-4">
+                <div className="flex gap-2">
+                  {story.swatches.map((swatch) => (
+                    <span key={swatch} style={{ backgroundColor: swatch }} className="h-9 flex-1 rounded-xl border border-black/8" />
+                  ))}
+                </div>
+                <h3 className="mt-4 font-serif text-2xl tracking-[-.03em]">{story.shortName}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#4b3d31]/70">{story.text}</p>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </main>

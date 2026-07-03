@@ -22,6 +22,16 @@ export type OkFashionProduct = {
   garment: 'tee' | 'shirt' | 'trouser' | 'short' | 'overshirt' | 'silk'
   heroTone: string
   accent: string
+  image: string
+  storyNames: string[]
+}
+
+export type OkFashionColorStory = {
+  name: string
+  shortName: string
+  text: string
+  swatches: string[]
+  products: { slug: string; label: string; color: string }[]
 }
 
 export const okFashionColorLibrary: Record<string, OkFashionColor> = {
@@ -62,6 +72,8 @@ export const okFashionProducts: OkFashionProduct[] = [
     garment: 'tee',
     heroTone: '#f1e4d1',
     accent: '#d1b188',
+    image: '/okfashion/products/premium-cotton-tshirt.png',
+    storyNames: ['Camel + White + Navy', 'Olive + Cream', 'Chocolate + Beige'],
   },
   {
     slug: 'relaxed-cotton-trouser',
@@ -82,6 +94,8 @@ export const okFashionProducts: OkFashionProduct[] = [
     garment: 'trouser',
     heroTone: '#d1bda0',
     accent: '#8d7152',
+    image: '/okfashion/products/relaxed-cotton-trouser.png',
+    storyNames: ['Camel + White + Navy', 'Chocolate + Beige', 'Black + Grey'],
   },
   {
     slug: 'linen-shirt',
@@ -96,12 +110,14 @@ export const okFashionProducts: OkFashionProduct[] = [
     description:
       'Het OK Linen Shirt is bedoeld voor warme dagen, city summer en resort-achtige outfits. De stof mag natuurlijk bewegen, maar de pasvorm blijft verzorgd en stijlvol.',
     colors: c('Cream', 'White', 'Olive', 'Beige', 'Navy'),
-    features: ['Ademend linnen', 'Relaxed maar nette schouderlijn', 'Parelmoer-look knopen', 'OK-logo op linker mouw'],
+    features: ['Ademend linnen', 'Relaxed maar nette schouderlijn', 'Parelmoer-look knopen', 'OK-logo onderaan aan de binnenkant van de omgeslagen linker manchet'],
     specs: ['140-180 gsm linnen', 'Klassieke kraag of resort collar', 'Ton-sur-ton borduring circa 1,7 cm', 'Clean front zonder drukke details'],
     pairsWith: ['Linen Trouser', 'Linen Short', 'Relaxed Cotton Trouser'],
     garment: 'shirt',
     heroTone: '#eee1cb',
     accent: '#cab28f',
+    image: '/okfashion/products/linen-shirt.png',
+    storyNames: ['Olive + Cream', 'Chocolate + Beige', 'Camel + White + Navy'],
   },
   {
     slug: 'linen-trouser',
@@ -122,6 +138,8 @@ export const okFashionProducts: OkFashionProduct[] = [
     garment: 'trouser',
     heroTone: '#e4d6c0',
     accent: '#b99d78',
+    image: '/okfashion/products/linen-trouser.png',
+    storyNames: ['Olive + Cream', 'Camel + White + Navy', 'Black + Grey'],
   },
   {
     slug: 'linen-short',
@@ -142,6 +160,8 @@ export const okFashionProducts: OkFashionProduct[] = [
     garment: 'short',
     heroTone: '#e7dac6',
     accent: '#9d896c',
+    image: '/okfashion/products/linen-short.png',
+    storyNames: ['Olive + Cream', 'Chocolate + Beige'],
   },
   {
     slug: 'overshirt',
@@ -156,12 +176,14 @@ export const okFashionProducts: OkFashionProduct[] = [
     description:
       'Het Overshirt is het item dat de collectie kracht geeft. Het draagt als een lichte jas over een T-shirt of shirt, met een rustige structuur en subtiele OK-borduring op de linker mouw.',
     colors: c('Olive', 'Chocolate', 'Navy', 'Camel', 'Charcoal'),
-    features: ['Stevige maar comfortabele stof', 'Layering piece tussen shirt en jas', 'Premium knopen', 'OK-logo op linker mouwnaad'],
+    features: ['Stevige maar comfortabele stof', 'Layering piece tussen shirt en jas', 'Premium knopen', 'OK-logo onderaan aan de binnenkant van de omgeslagen linker manchet'],
     specs: ['280-420 gsm stofgewicht', 'Relaxed structured fit', 'Manchetten met knoopsluiting', 'Borstzakken of clean front afhankelijk van sample'],
     pairsWith: ['Premium Cotton T-shirt', 'Relaxed Cotton Trouser', 'Linen Short'],
     garment: 'overshirt',
     heroTone: '#d6d2bb',
     accent: '#6b7054',
+    image: '/okfashion/products/overshirt.png',
+    storyNames: ['Olive + Cream', 'Chocolate + Beige', 'Camel + White + Navy'],
   },
   {
     slug: 'silk-blend-shirt',
@@ -176,12 +198,14 @@ export const okFashionProducts: OkFashionProduct[] = [
     description:
       'Een elegant shirt met zachte glans en soepele valling. Bedoeld voor diner, avond, resort en momenten waar comfort en luxe samen moeten komen.',
     colors: c('Black', 'Chocolate', 'Pearl', 'Taupe', 'Beige'),
-    features: ['Zachte glans', 'Soepele premium valling', 'Lichte borduring zodat de stof niet trekt', 'Geen overbodige details'],
+    features: ['Zachte glans', 'Soepele premium valling', 'Lichte borduring zodat de stof niet trekt', 'OK-logo onderaan aan de binnenkant van de omgeslagen linker manchet'],
     specs: ['Zijdeblend', 'Relaxed elegant fit', 'Subtiel OK-logo circa 1,5-1,7 cm', 'Zachte kraag en fijne stiknaden'],
     pairsWith: ['Fluid Trouser', 'Linen Trouser', 'Relaxed Cotton Trouser'],
     garment: 'silk',
     heroTone: '#dfd2c1',
     accent: '#8e715f',
+    image: '/okfashion/products/silk-blend-shirt.png',
+    storyNames: ['Chocolate + Beige', 'Black + Grey'],
   },
   {
     slug: 'fluid-trouser',
@@ -202,6 +226,8 @@ export const okFashionProducts: OkFashionProduct[] = [
     garment: 'trouser',
     heroTone: '#cec1b0',
     accent: '#4b4b4b',
+    image: '/okfashion/products/fluid-trouser.png',
+    storyNames: ['Black + Grey', 'Chocolate + Beige'],
   },
 ]
 
@@ -232,6 +258,61 @@ export const okFashionSets = [
   },
 ]
 
+export const okFashionColorStories: OkFashionColorStory[] = [
+  {
+    name: 'Camel + White + Navy',
+    shortName: 'Camel + White + Navy',
+    text: 'Klassiek, rijk en clean. Een rustig old-money palet met heldere contrasten.',
+    swatches: ['#b58b61', '#f4efe6', '#16233a'],
+    products: [
+      { slug: 'premium-cotton-t-shirt', label: 'Premium Cotton T-shirt', color: 'White' },
+      { slug: 'relaxed-cotton-trouser', label: 'Relaxed Cotton Trouser', color: 'Beige / Camel family' },
+      { slug: 'linen-shirt', label: 'Linen Shirt', color: 'Navy or Cream' },
+    ],
+  },
+  {
+    name: 'Olive + Cream',
+    shortName: 'Olive + Cream',
+    text: 'Aards, zomers en verfijnd. De meest natuurlijke OK Fashion combinatie.',
+    swatches: ['#667255', '#f2e9da', '#d9cab1'],
+    products: [
+      { slug: 'overshirt', label: 'Overshirt', color: 'Olive' },
+      { slug: 'linen-shirt', label: 'Linen Shirt', color: 'Cream / Olive' },
+      { slug: 'linen-trouser', label: 'Linen Trouser', color: 'Cream' },
+    ],
+  },
+  {
+    name: 'Chocolate + Beige',
+    shortName: 'Chocolate + Beige',
+    text: 'Warm, volwassen en luxe. Geschikt voor de meer geklede en rijke uitstraling.',
+    swatches: ['#3c271c', '#cdb89f', '#f0e3cf'],
+    products: [
+      { slug: 'silk-blend-shirt', label: 'Silk-Blend Shirt', color: 'Chocolate / Beige' },
+      { slug: 'relaxed-cotton-trouser', label: 'Relaxed Cotton Trouser', color: 'Beige' },
+      { slug: 'linen-short', label: 'Linen Short', color: 'Beige / Cream' },
+    ],
+  },
+  {
+    name: 'Black + Grey',
+    shortName: 'Black + Grey',
+    text: 'Modern, strak en minimalistisch. Voor avond en meer stedelijke styling.',
+    swatches: ['#090909', '#505050', '#d8d5cf'],
+    products: [
+      { slug: 'silk-blend-shirt', label: 'Silk-Blend Shirt', color: 'Black / Taupe' },
+      { slug: 'fluid-trouser', label: 'Fluid Trouser', color: 'Charcoal' },
+      { slug: 'relaxed-cotton-trouser', label: 'Relaxed Cotton Trouser', color: 'Charcoal' },
+    ],
+  },
+]
+
 export function getOkFashionProduct(slug: string) {
   return okFashionProducts.find((product) => product.slug === slug)
+}
+
+export function getOkFashionProductsByStory(storyName: string) {
+  const story = okFashionColorStories.find((entry) => entry.name === storyName)
+  if (!story) return []
+  return story.products
+    .map((entry) => okFashionProducts.find((product) => product.slug === entry.slug))
+    .filter((product): product is OkFashionProduct => Boolean(product))
 }

@@ -1,11 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
-import OkFashionGarment from '@/components/OkFashionGarment'
-import { okFashionProducts, okFashionSets } from '@/lib/ok-fashion'
+import { getOkFashionProduct, okFashionColorStories, okFashionProducts, okFashionSets } from '@/lib/ok-fashion'
 
 export const metadata = {
   title: 'OK Fashion Shop | ASORTA',
-  description: 'De afzonderlijke OK Fashion shop binnen ASORTA met de geplande OK Fashion producten en verkoopkleuren.',
+  description: 'De afzonderlijke OK Fashion shop binnen ASORTA met de geplande OK Fashion producten, echte visuals en verkoopkleuren.',
 }
 
 export default function OKFashionShopPage() {
@@ -18,13 +17,13 @@ export default function OKFashionShopPage() {
               <p className="text-xs font-black uppercase tracking-[.34em] text-[#7a6248]">OK Fashion shop</p>
               <h1 className="mt-4 max-w-3xl font-serif text-5xl leading-[.9] tracking-[-.06em] sm:text-6xl lg:text-7xl">Onze producten en verkoopkleuren</h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-[#4b3d31]/78 sm:text-base">
-                Dit is nu geen algemene placeholder meer. De shop toont de echte OK Fashion productlijn die wij gaan ontwikkelen: de bovenstukken, broeken en shorts, met de kleurstijlen die wij daadwerkelijk gaan verkopen.
+                De shop toont nu echte productafbeeldingen per item. Elke kaart is gekoppeld aan de color stories die wij daadwerkelijk willen verkopen.
               </p>
               <div className="mt-6 space-y-3">
                 {[
                   '8 kernproducten voor The First Edit.',
-                  'Kleurvarianten per product zoals wij ze willen verkopen.',
-                  'Productkaarten met mockup, materiaal, pasvorm, set en OK-logo detail.',
+                  'Echte visuals per product voor de OK Fashion shop.',
+                  'Kleurencombinaties afgestemd op de color stories sectie.',
                 ].map((point) => (
                   <p key={point} className="flex items-start gap-2 text-sm text-[#4b3d31]/74">
                     <Check size={16} className="mt-1 shrink-0 text-[#7a6248]" />
@@ -54,7 +53,7 @@ export default function OKFashionShopPage() {
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {set.colors.map((color) => (
-                      <span key={color} className="rounded-full border border-[#1f1712]/10 bg-[#f4eadc] px-3 py-1 text-xs font-black text-[#4b3d31]/76">{color}</span>
+                      <span key={color} className="rounded-full border border-[#1f1712]/10 bg-[#f4eadc] px-3 py-1 text-xs font-black uppercase tracking-[.12em] text-[#4b3d31]/76">{color}</span>
                     ))}
                   </div>
                 </article>
@@ -62,44 +61,78 @@ export default function OKFashionShopPage() {
             </div>
           </div>
 
-          <div id="products" className="px-5 py-7 sm:px-8">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div className="border-b border-[#1f1712]/10 px-5 py-6 sm:px-8">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">The First Edit</p>
-                <h2 className="mt-3 font-serif text-4xl tracking-[-.04em] sm:text-5xl">Productlijn</h2>
+                <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">Color story placement</p>
+                <h2 className="mt-3 font-serif text-3xl tracking-[-.04em] sm:text-4xl">Producten op de juiste plek</h2>
               </div>
-              <p className="max-w-md text-sm leading-6 text-[#4b3d31]/68">
-                Elke kaart toont de geplande verkoopkleuren. Zodra samples en prijzen definitief zijn, kunnen deze kaarten direct worden omgezet naar koopbare producten in hetzelfde admin panel.
+              <p className="max-w-md text-sm leading-6 text-[#4b3d31]/70">
+                Per color story zie je hieronder direct welke producten daarbij horen en in welke kleurcombinatie ze verkocht worden.
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-4">
+              {okFashionColorStories.map((story) => (
+                <article key={story.name} className="rounded-[1.5rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-4 shadow-[0_14px_55px_rgba(95,73,48,.08)]">
+                  <div className="flex gap-2">
+                    {story.swatches.map((swatch) => (
+                      <span key={swatch} style={{ backgroundColor: swatch }} className="h-10 flex-1 rounded-2xl border border-black/8" />
+                    ))}
+                  </div>
+                  <h3 className="mt-4 text-xs font-black uppercase tracking-[.24em] text-[#7a6248]">{story.name}</h3>
+                  <p className="mt-2 text-sm text-[#4b3d31]/66">{story.text}</p>
+                  <div className="mt-4 space-y-2">
+                    {story.products.map((entry) => {
+                      const product = getOkFashionProduct(entry.slug)
+                      if (!product) return null
+                      return (
+                        <Link key={entry.slug} href={`/okfashion/product/${entry.slug}`} className="flex items-center gap-3 rounded-[1.1rem] border border-[#1f1712]/8 bg-[#f7f1e7] p-2.5 transition hover:bg-[#f1e7d9]">
+                          <img src={product.image} alt={product.name} className="h-16 w-14 rounded-lg object-cover" />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-black text-[#1f1712]">{product.name}</p>
+                            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[.18em] text-[#7a6248]">{entry.color}</p>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div id="products" className="px-5 py-6 sm:px-8">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">All products</p>
+                <h2 className="mt-3 font-serif text-3xl tracking-[-.04em] sm:text-4xl">De volledige OK Fashion productlijn</h2>
+              </div>
+              <p className="max-w-md text-sm leading-6 text-[#4b3d31]/70">
+                Elke productkaart toont nu de echte productafbeelding, set, materiaal, verkoopkleuren en de color story match.
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {okFashionProducts.map((product) => (
-                <Link
-                  key={product.slug}
-                  href={`/okfashion/product/${product.slug}`}
-                  className="group overflow-hidden rounded-[1.6rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-4 shadow-[0_18px_60px_rgba(95,73,48,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_90px_rgba(95,73,48,.13)]"
-                >
-                  <div className="rounded-[1.3rem] border border-[#1f1712]/8 bg-[linear-gradient(180deg,#f4ebdf,#e0d0ba)] p-5 transition group-hover:bg-[linear-gradient(180deg,#f7f1e8,#d9c4a6)]">
-                    <OkFashionGarment kind={product.garment} tone={product.heroTone} accent={product.accent} />
+                <Link key={product.slug} href={`/okfashion/product/${product.slug}`} className="rounded-[1.5rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-4 shadow-[0_18px_60px_rgba(95,73,48,.08)] transition hover:-translate-y-1">
+                  <div className="overflow-hidden rounded-[1.2rem] border border-[#1f1712]/8 bg-[#f3eadf]">
+                    <img src={product.image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <p className="text-[11px] font-black uppercase tracking-[.24em] text-[#7a6248]">{product.category}</p>
-                    <p className="rounded-full bg-[#1f1712]/5 px-3 py-1 text-[11px] font-black text-[#4b3d31]/70">{product.status}</p>
-                  </div>
-                  <h3 className="mt-3 font-serif text-2xl leading-none tracking-[-.04em]">{product.name}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[#4b3d31]/66">{product.short}</p>
+                  <p className="mt-4 text-[11px] font-black uppercase tracking-[.24em] text-[#7a6248]">{product.category}</p>
+                  <h3 className="mt-2 font-serif text-2xl leading-none tracking-[-.04em]">{product.name}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#4b3d31]/66">{product.short}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {product.colors.map((color) => (
-                      <span key={color.name} className="flex items-center gap-1.5 rounded-full border border-[#1f1712]/10 bg-[#f8f1e5] px-2.5 py-1 text-[11px] font-bold text-[#4b3d31]/74">
-                        <span style={{ backgroundColor: color.hex }} className="h-3.5 w-3.5 rounded-full border border-black/10" />
-                        {color.name}
-                      </span>
+                      <span key={color.name} title={color.name} style={{ backgroundColor: color.hex }} className="h-6 w-6 rounded-full border border-black/10 shadow-inner" />
                     ))}
                   </div>
-                  <div className="mt-5 flex items-center justify-between border-t border-[#1f1712]/8 pt-4">
-                    <p className="text-sm font-black">{product.priceRange}</p>
-                    <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-[.18em] text-[#7a6248]">Details <ArrowRight size={14} /></span>
+                  <div className="mt-4 rounded-[1rem] border border-[#1f1712]/8 bg-[#f7f1e7] p-3">
+                    <p className="text-[10px] font-black uppercase tracking-[.24em] text-[#7a6248]">Color stories</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {product.storyNames.map((story) => (
+                        <span key={story} className="rounded-full border border-[#1f1712]/10 bg-[#fffaf3] px-2.5 py-1 text-[11px] font-bold text-[#4b3d31]/72">{story}</span>
+                      ))}
+                    </div>
                   </div>
                 </Link>
               ))}
