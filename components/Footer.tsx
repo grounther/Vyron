@@ -28,9 +28,9 @@ export default async function Footer(){
   <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-5 sm:py-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
     <div>
       <div className="font-black tracking-[.35em] text-white sm:tracking-[.45em]">ASORTA</div>
-      <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">{content['footer.brandText']}</p>
+      <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">ASORTA brengt twee werelden samen: Trading Card Game producten en OK Fashion premium kleding. Eén platform, twee eigen shops.</p>
     </div>
-    <div><h4 className="font-black">{content['footer.shopTitle']}</h4><div className="mt-4 grid gap-2 text-sm text-white/55">{categories.slice(0,5).map(c=><Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-white">{categoryName(locale, c.slug, c.name)}</Link>)}</div></div>
+    <div><h4 className="font-black">Shops</h4><div className="mt-4 grid gap-2 text-sm text-white/55"><Link href="/tcg" className="hover:text-white">Trading Card Game</Link><Link href="/okfashion" className="hover:text-white">OK Fashion</Link><Link href="/shop" className="hover:text-white">TCG shop</Link>{categories.slice(0,3).map(c=><Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-white">{categoryName(locale, c.slug, c.name)}</Link>)}</div></div>
     <div><h4 className="font-black">{content['footer.supportTitle']}</h4><div className="mt-4 grid gap-2 text-sm text-white/55"><Link href="/about">Over ASORTA</Link><Link href="/track-order">Order volgen</Link><Link href="/shipping">Shipping</Link><Link href="/returns">Returns</Link><Link href="/contact">Contact</Link><Link href="/faq">FAQ</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></div>
     <div><h4 className="font-black">{content['footer.paymentsTitle']}</h4><div className="mt-4 grid gap-2 text-sm text-white/55">{payments.map((payment) => <span key={payment}>{payment}</span>)}</div></div>
   </div>

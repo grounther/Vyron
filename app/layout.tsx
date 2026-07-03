@@ -9,10 +9,10 @@ import { organizationJsonLd, stringifyJsonLd, websiteJsonLd } from '@/lib/seo/st
 
 export const metadata: Metadata = {
   title: {
-    default: 'ASORTA | Pokemon TCG, Collectibles & Events',
+    default: 'ASORTA | TCG & OK Fashion',
     template: '%s | ASORTA',
   },
-  description: 'ASORTA is een Pokemon TCG shop voor trading cards, collectibles, sealed producten, eigen voorraad en markt/events verkoop.',
+  description: 'ASORTA is het platform voor Trading Card Game producten en OK Fashion premium kleding.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://asorta.nl'),
   icons: { icon: '/asorta-icon.png', apple: '/asorta-icon.png' },
   alternates: { canonical: '/' },
@@ -31,18 +31,18 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
   openGraph: {
-    title: 'ASORTA | Pokemon TCG, Collectibles & Events',
-    description: 'Pokemon TCG, sealed producten, collectibles en marktdeals uit eigen voorraad.',
+    title: 'ASORTA | TCG & OK Fashion',
+    description: 'Kies tussen ASORTA Trading Card Game en OK Fashion premium kleding.',
     url: 'https://asorta.nl',
     siteName: 'ASORTA',
     type: 'website',
     locale: 'nl_NL',
-    images: [{ url: '/asorta-tcg-hero.jpeg', width: 1536, height: 768, alt: 'ASORTA Trading Cards Collectibles Events' }],
+    images: [{ url: '/asorta-tcg-hero.jpeg', width: 1536, height: 768, alt: 'ASORTA Trading Card Game en OK Fashion' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ASORTA | Pokemon TCG, Collectibles & Events',
-    description: 'Pokemon TCG, sealed producten, collectibles en marktdeals uit eigen voorraad.',
+    title: 'ASORTA | TCG & OK Fashion',
+    description: 'Kies tussen ASORTA Trading Card Game en OK Fashion premium kleding.',
     images: ['/asorta-tcg-hero.jpeg'],
   },
 }

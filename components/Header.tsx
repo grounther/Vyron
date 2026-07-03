@@ -44,6 +44,8 @@ export default function Header(){
 
   const dict = getDictionary(locale)
   const links = useMemo(() => [
+    ['TCG', '/tcg'],
+    ['OK Fashion', '/okfashion'],
     [dict.nav.shop, '/shop'],
     ['Scanner', '/card-scanner'],
     ['Markten', '/market'],

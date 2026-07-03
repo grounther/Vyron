@@ -136,6 +136,36 @@ export const categories: Category[] = [
     text: 'Bundles, acties en producten die ook meegaan naar markten en braderieen.',
     short: 'Bundles en event deals.',
   },
+  {
+    slug: 'ok-cotton',
+    name: 'OK Fashion - Cotton Essentials',
+    text: 'Premium katoen basics van OK Fashion.',
+    short: 'Premium katoen essentials.',
+  },
+  {
+    slug: 'ok-linen',
+    name: 'OK Fashion - Linen Resort',
+    text: 'Linnen shirts, trousers en shorts van OK Fashion.',
+    short: 'Linnen resortwear.',
+  },
+  {
+    slug: 'ok-tailoring',
+    name: 'OK Fashion - Relaxed Tailoring',
+    text: 'Comfortabele broeken en fluid trousers met premium uitstraling.',
+    short: 'Relaxed tailoring.',
+  },
+  {
+    slug: 'ok-overshirts',
+    name: 'OK Fashion - Overshirts',
+    text: 'Luxe overshirts en structured sets van OK Fashion.',
+    short: 'Luxe overshirts.',
+  },
+  {
+    slug: 'ok-silk',
+    name: 'OK Fashion - Silk Evening',
+    text: 'Zijdeblends en elegante avondgerichte items van OK Fashion.',
+    short: 'Silk evening pieces.',
+  },
 ]
 
 export function getCategory(slug: string): Category | undefined {
