@@ -106,6 +106,44 @@ export default function OKFashionPage() {
             </div>
           </div>
 
+          <div className="border-b border-[#1f1712]/10 px-5 py-6 sm:px-8">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">Lookbook sets</p>
+                <h2 className="mt-3 font-serif text-3xl tracking-[-.04em] sm:text-4xl">Complete looks met model styling</h2>
+              </div>
+              <p className="max-w-md text-sm leading-6 text-[#4b3d31]/70">
+                De sets gebruiken de rustige mannelijke model-sfeer uit het OK Fashion moodboard en tonen direct welke producten samen verkocht worden.
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-4">
+              <LookbookSetCard
+                title="The Cotton Essential Set"
+                subtitle="White + Beige"
+                position="76% 18%"
+                products={["premium-cotton-t-shirt", "relaxed-cotton-trouser"]}
+              />
+              <LookbookSetCard
+                title="The Linen Resort Set"
+                subtitle="Olive + Cream"
+                position="82% 17%"
+                products={["linen-shirt", "linen-trouser", "linen-short"]}
+              />
+              <LookbookSetCard
+                title="The Overshirt Uniform Set"
+                subtitle="Olive + Cream / Chocolate + Beige"
+                position="70% 34%"
+                products={["overshirt", "premium-cotton-t-shirt", "relaxed-cotton-trouser"]}
+              />
+              <LookbookSetCard
+                title="The Silk Evening Set"
+                subtitle="Black + Grey"
+                position="82% 35%"
+                products={["silk-blend-shirt", "fluid-trouser"]}
+              />
+            </div>
+          </div>
+
           <div id="first-edit" className="grid gap-6 px-5 py-6 sm:px-8 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
             <aside className="rounded-[1.6rem] border border-[#1f1712]/10 bg-[#fcf8f1] p-5 shadow-[0_18px_60px_rgba(95,73,48,.08)]">
               <p className="text-xs font-black uppercase tracking-[.30em] text-[#7a6248]">Key materials</p>
@@ -250,6 +288,40 @@ function EssentialPieceCard({ product }: { product: NonNullable<ReturnType<typeo
         <img src={product.image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
       </div>
       <p className="mt-4 text-sm leading-6 text-[#4b3d31]/66">{product.short}</p>
+    </article>
+  )
+}
+
+function LookbookSetCard({ title, subtitle, position, products }: { title: string; subtitle: string; position: string; products: string[] }) {
+  const style = {
+    backgroundImage: "linear-gradient(180deg, rgba(31,23,18,.08), rgba(31,23,18,.58)), url('/okfashion/ok-fashion-moodboard.png')",
+    backgroundPosition: position,
+    backgroundSize: '240%',
+  } satisfies CSSProperties
+
+  return (
+    <article className="overflow-hidden rounded-[1.6rem] border border-[#1f1712]/10 bg-[#fcf8f1] shadow-[0_18px_60px_rgba(95,73,48,.10)]">
+      <div style={style} className="relative min-h-[310px] p-4">
+        <div className="absolute inset-x-4 bottom-4 rounded-[1.2rem] border border-white/15 bg-[#1f1712]/58 p-4 text-[#f7f2e9] backdrop-blur-md">
+          <p className="text-[10px] font-black uppercase tracking-[.24em] text-[#e6d2b7]">{subtitle}</p>
+          <h3 className="mt-2 font-serif text-2xl leading-none tracking-[-.04em]">{title}</h3>
+        </div>
+      </div>
+      <div className="grid gap-2 p-4">
+        {products.map((slug) => {
+          const product = getOkFashionProduct(slug)
+          if (!product) return null
+          return (
+            <Link key={slug} href={`/okfashion/product/${slug}`} className="flex items-center gap-3 rounded-[1.05rem] border border-[#1f1712]/8 bg-[#f7f1e7] p-2.5 transition hover:bg-[#f1e7d9]">
+              <img src={product.image} alt={product.name} className="h-14 w-12 rounded-lg object-cover" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black text-[#1f1712]">{product.name}</p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-[.18em] text-[#7a6248]">{product.category}</p>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
     </article>
   )
 }

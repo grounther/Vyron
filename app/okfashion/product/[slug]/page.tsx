@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Check, Ruler, Shirt, Sparkles } from 'lucide-react'
 import { getOkFashionProduct, okFashionColorStories, okFashionProducts } from '@/lib/ok-fashion'
+import OkFashionColorSelector from '@/components/OkFashionColorSelector'
 
 export function generateStaticParams() {
   return okFashionProducts.map((product) => ({ slug: product.slug }))
@@ -34,17 +35,14 @@ export default async function OKFashionProductPage({ params }: { params: Promise
 
         <section className="grid overflow-hidden rounded-[2rem] border border-[#1f1712]/10 bg-[#f7f2e9] shadow-[0_35px_120px_rgba(95,73,48,.16)] lg:grid-cols-[1.05fr_.95fr]">
           <div className="grid min-h-[620px] place-items-center border-b border-[#1f1712]/10 bg-[radial-gradient(circle_at_70%_20%,#fff7ec,transparent_34%),linear-gradient(180deg,#f5ecdf,#ddc6a7)] p-8 lg:border-b-0 lg:border-r">
-            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-[#1f1712]/10 bg-[#fcf8f1]/72 shadow-[0_24px_90px_rgba(95,73,48,.14)] backdrop-blur">
-              <img src={product.image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
-              <div className="border-t border-[#1f1712]/10 bg-[#f7f2e9] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[.26em] text-[#7a6248]">Logo placement</p>
-                <p className="mt-2 text-sm leading-6 text-[#4b3d31]/70">
-                  {product.garment === 'tee'
-                    ? 'Klein sierlijk OK-monogram op het einde van de linker mouw.'
-                    : 'Klein sierlijk OK-monogram onderaan aan de binnenkant van de omgeslagen linker manchet.'}
-                </p>
-              </div>
-            </div>
+            <OkFashionColorSelector
+              image={product.image}
+              name={product.name}
+              colors={product.colors}
+              logoText={product.garment === 'tee'
+                ? 'Klein sierlijk OK-monogram op het einde van de linker mouw.'
+                : 'Klein sierlijk OK-monogram onderaan aan de binnenkant van de omgeslagen linker manchet.'}
+            />
           </div>
 
           <div className="p-6 sm:p-8 lg:p-10">
