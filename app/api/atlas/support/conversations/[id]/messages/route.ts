@@ -51,12 +51,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       assigned_to: user.email,
       last_message_at: now,
       updated_at: now,
-      metadata: {
-        ...((conversation as any).metadata || {}),
-        sorkai_human_takeover: true,
-        sorkai_human_takeover_at: now,
-        sorkai_human_takeover_by: user.email,
-      },
+      metadata: { ...((conversation as any).metadata || {}), handled_by: user.email, handled_at: now },
     })
     .eq('id', id)
 

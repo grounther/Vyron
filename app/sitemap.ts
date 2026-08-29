@@ -1,12 +1,3 @@
 import type { MetadataRoute } from 'next'
-import { categories } from '@/lib/products'
-import { getProducts } from '@/lib/catalog'
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base='https://asorta.nl'
-  const staticRoutes=['','/tcg','/okfashion','/okfashion/shop','/shop','/account','/login','/register','/about','/track-order','/shipping','/returns','/contact','/faq','/privacy','/terms'].map(route=>({url:`${base}${route}`,lastModified:new Date()}))
-  const products = await getProducts()
-  const productRoutes=products.map(p=>({url:`${base}/product/${p.slug}`,lastModified:new Date()}))
-  const categoryRoutes=categories.map(c=>({url:`${base}/category/${c.slug}`,lastModified:new Date()}))
-  return [...staticRoutes,...categoryRoutes,...productRoutes]
-}
+import { events } from '@/lib/tickets'
+export default function sitemap():MetadataRoute.Sitemap{const base='https://asorta.nl';const routes=['','/events','/sell','/organizers','/pricing','/account','/login','/register','/about','/contact','/faq','/privacy','/terms'];return [...routes.map(route=>({url:`${base}${route}`,lastModified:new Date()})),...events.map(event=>({url:`${base}/events/${event.slug}`,lastModified:new Date()}))]}

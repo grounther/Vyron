@@ -1,6 +1,3 @@
-import { getSiteContent, splitParagraphs } from '@/lib/site-content'
-
-export default async function Privacy(){
-  const content = await getSiteContent()
-  return <main className="mx-auto max-w-4xl px-5 py-12"><h1 className="text-5xl font-black">{content['privacy.title']}</h1><div className="card mt-8 rounded-3xl p-8 text-white/65">{splitParagraphs(content['privacy.body']).map((p)=><p key={p} className="mt-4 first:mt-0">{p}</p>)}</div></main>
-}
+export const metadata={title:'Privacy'}
+export default function Privacy(){return <Policy title="Privacyverklaring"><p>ASORTA verwerkt alleen gegevens die nodig zijn voor accounts, tickettransacties, verificatie, fraudepreventie en ondersteuning.</p><p>Voorbeelden zijn naam, contactgegevens, accountgegevens, transactiegegevens en informatie die je zelf bij support verstrekt. Betaalgegevens worden verwerkt door de aangesloten betaalprovider.</p><p>Gebruikers kunnen verzoeken om inzage, correctie of verwijdering sturen naar info@asorta.nl. Deze concepttekst moet vóór commerciële lancering juridisch worden gecontroleerd.</p></Policy>}
+function Policy({title,children}:{title:string;children:React.ReactNode}){return <main className="mx-auto min-h-screen max-w-3xl px-4 py-16 sm:px-5"><h1 className="text-4xl font-black sm:text-6xl">{title}</h1><div className="mt-9 space-y-5 text-sm leading-7 text-white/55">{children}</div></main>}

@@ -1,23 +1,19 @@
-# ASORTA Store
+# ASORTA Tickets
 
-Premium ecommerce storefront for ASORTA — Just what you need.
+Nederlands platform voor primaire ticketverkoop en veilige doorverkoop.
 
-## Run locally
+## Stack
+
+- Next.js 16
+- TypeScript en Tailwind CSS
+- Supabase voor accounts, tickets en live support
+- Vercel deployment
+
+## Lokaal starten
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Version
-
-Current handoff: v5.5.1
-
-## Notes
-
-- v5.5.1 builds on the current v5.4/v5.5 repo state.
-- Hero is cleaned into a split premium layout.
-- Homepage trust info moved to footer.
-- Opening promotion added to the homepage slider.
-- Atlas promotions foundation added at `/atlas/promotions`.
-- Keep `.env.local` private and never commit Supabase service role keys or CJ API tokens.
+Voer `supabase/v7_0_ticket_platform_foundation.sql` en daarna `supabase/v7_1_ticket_support.sql` uit voor tickets, accounts en live support.

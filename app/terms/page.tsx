@@ -1,6 +1,2 @@
-import { getSiteContent, splitParagraphs } from '@/lib/site-content'
-
-export default async function Terms(){
-  const content = await getSiteContent()
-  return <main className="mx-auto max-w-4xl px-5 py-12"><h1 className="text-5xl font-black">{content['terms.title']}</h1><div className="card mt-8 rounded-3xl p-8 text-white/65">{splitParagraphs(content['terms.body']).map((p)=><p key={p} className="mt-4 first:mt-0">{p}</p>)}</div></main>
-}
+export const metadata={title:'Voorwaarden'}
+export default function Terms(){return <main className="mx-auto min-h-screen max-w-3xl px-4 py-16 sm:px-5"><h1 className="text-4xl font-black sm:text-6xl">Platformvoorwaarden</h1><div className="mt-9 space-y-5 text-sm leading-7 text-white/55"><p>ASORTA faciliteert primaire ticketverkoop en doorverkoop tussen gebruikers. De verkoper is verantwoordelijk voor juiste ticketinformatie en een geldig overdraagbaar ticket.</p><p>Koperskosten bedragen 8,5% en verkoperskosten 4,5%, tenzij vóór de transactie duidelijk een ander tarief wordt vermeld. Organisatoren betalen voor primaire verkoop €0,75 plus 2,5% per betaald ticket.</p><p>Fraude, dubbele verkoop en verkoop in strijd met evenementvoorwaarden zijn niet toegestaan. ASORTA kan advertenties blokkeren en uitbetalingen opschorten tijdens onderzoek.</p><p>Deze voorwaarden zijn een concept en moeten vóór commerciële lancering juridisch worden gecontroleerd.</p></div></main>}

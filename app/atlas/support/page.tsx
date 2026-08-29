@@ -1,7 +1,7 @@
 import { ShieldAlert } from 'lucide-react'
 import AtlasSupportClient from './AtlasSupportClient'
 import { getAtlasSupportSnapshot } from '@/lib/support-admin'
-import { assertAtlasPermission, hasAtlasPermission } from '@/lib/atlas-auth'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
 
 export const metadata = { title: 'Atlas Support | ASORTA', robots: { index: false, follow: false } }
 export const dynamic = 'force-dynamic'
@@ -12,10 +12,9 @@ export default async function AtlasSupportPage({ searchParams }: { searchParams:
   const params = await searchParams
 
   try {
-    const { admin, staff } = await assertAtlasPermission('support', '/atlas/support')
+    const { admin } = await assertAtlasPermission('support', '/atlas/support')
     const snapshot = await getAtlasSupportSnapshot(admin, params.id || null)
-    const canManageSorkai = hasAtlasPermission(staff, 'settings') || hasAtlasPermission(staff, 'head_support')
-    return <AtlasSupportClient initialSnapshot={snapshot} canManageSorkai={canManageSorkai} canAskSorkai />
+    return <AtlasSupportClient initialSnapshot={snapshot} />
   } catch (error) {
     if (error instanceof Error && error.message.includes('SUPABASE_SERVICE_ROLE_KEY')) {
       return (

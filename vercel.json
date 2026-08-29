@@ -1,12 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/shopify-sync",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/orders-cleanup",
-      "schedule": "0 4 * * *"
-    }
-  ]
-}
+{}

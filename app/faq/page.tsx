@@ -1,12 +1,3 @@
-import { getSiteContent, parseFaqItems } from '@/lib/site-content'
-
-export default async function FAQ(){
-  const content = await getSiteContent()
-  const faqs = parseFaqItems(content['faq.items'])
-  return <main className="mx-auto max-w-4xl px-5 py-12">
-    <h1 className="text-5xl font-black">{content['faq.title']}</h1>
-    <div className="mt-8 grid gap-4">
-      {faqs.map(({question, answer})=><div key={question} className="card rounded-3xl p-6"><h2 className="font-black">{question}</h2><p className="mt-3 text-white/60">{answer}</p></div>)}
-    </div>
-  </main>
-}
+export const metadata={title:'Veelgestelde vragen'}
+const items=[['Wat kost een ticket kopen?','De koper betaalt 8,5% servicekosten. De volledige totaalprijs staat vooraf in beeld.'],['Wat kost verkopen?','Aanbieden is gratis. Na een succesvolle verkoop houden we 4,5% in.'],['Wanneer ontvang ik mijn geld?','De uitbetaling volgt volgens de veiligheidsvoorwaarden. Bij risicovolle externe tickets kan dit na het evenement zijn.'],['Hoe werkt een ASORTA-ticket?','Bij veilige doorverkoop wordt de oude QR-code ongeldig en ontvangt de koper een nieuwe unieke code.'],['Kan ik als organisator tickets verkopen?','Ja. Organisatoren kunnen nieuwe tickets uitgeven en de doorverkoopregels per evenement bepalen.']]
+export default function Faq(){return <main className="mx-auto min-h-screen max-w-4xl px-4 py-16 sm:px-5"><p className="text-xs font-black uppercase tracking-[.25em] text-[#b8ff5a]">Hulp</p><h1 className="mt-4 text-4xl font-black sm:text-6xl">Veelgestelde vragen</h1><div className="mt-10 grid gap-3">{items.map(([q,a])=><details key={q} className="rounded-2xl border border-white/10 bg-white/[.035] p-5"><summary className="cursor-pointer font-black">{q}</summary><p className="mt-4 text-sm leading-7 text-white/50">{a}</p></details>)}</div></main>}

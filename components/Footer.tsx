@@ -1,31 +1,4 @@
-import { categories } from '@/lib/products'
-import { categoryName } from '@/lib/i18n/config'
-import { getServerLocale } from '@/lib/i18n/server'
-import { getSiteContent, splitLines } from '@/lib/site-content'
-import FooterClient from './FooterClient'
-
-export default async function Footer() {
-  const [locale, content] = await Promise.all([getServerLocale(), getSiteContent()])
-  const trust = [
-    { icon: 'Lock' as const, title: content['footer.trust1.title'], text: content['footer.trust1.text'] },
-    { icon: 'BadgeCheck' as const, title: content['footer.trust2.title'], text: content['footer.trust2.text'] },
-    { icon: 'Truck' as const, title: content['footer.trust3.title'], text: content['footer.trust3.text'] },
-    { icon: 'Headphones' as const, title: content['footer.trust4.title'], text: content['footer.trust4.text'] },
-  ]
-  const payments = splitLines(content['footer.payments'])
-  const tcgLinks = categories.slice(0, 3).map((category) => ({
-    href: `/category/${category.slug}`,
-    label: categoryName(locale, category.slug, category.name),
-  }))
-
-  return (
-    <FooterClient
-      trust={trust}
-      payments={payments}
-      supportTitle={content['footer.supportTitle']}
-      paymentsTitle={content['footer.paymentsTitle']}
-      copyright={content['footer.copyright']}
-      tcgLinks={tcgLinks}
-    />
-  )
-}
+import Link from 'next/link'
+import { BadgeCheck, Headphones, LockKeyhole, ScanLine } from 'lucide-react'
+const trust=[[LockKeyhole,'Veilig betalen','Betalen via een erkende betaalprovider.'],[ScanLine,'Unieke QR-code','ASORTA-tickets zijn volledig traceerbaar.'],[BadgeCheck,'Geverifieerde verkopers','Identiteitscontrole beperkt fraude.'],[Headphones,'Nederlandse support','Hulp voor, tijdens en na je aankoop.']] as const
+export default function Footer(){return <footer className="mt-16 border-t border-white/10 bg-black/35"><div className="mx-auto grid max-w-7xl gap-3 px-4 pt-10 sm:grid-cols-2 sm:px-5 lg:grid-cols-4">{trust.map(([Icon,title,text])=><div key={title} className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><Icon size={20} className="text-[#b8ff5a]"/><h4 className="mt-3 text-sm font-black">{title}</h4><p className="mt-1 text-xs leading-5 text-white/45">{text}</p></div>)}</div><div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-5 md:grid-cols-[1.5fr_1fr_1fr]"><div><div className="font-black tracking-[.32em]">ASORTA TICKETS</div><p className="mt-4 max-w-md text-sm leading-6 text-white/52">Het Nederlandse platform voor nieuwe tickets en veilige doorverkoop. Duidelijke prijzen, zonder verrassingen bij het afrekenen.</p></div><div><h4 className="font-black">Platform</h4><div className="mt-4 grid gap-2 text-sm text-white/52"><Link href="/events">Evenementen</Link><Link href="/sell">Ticket verkopen</Link><Link href="/organizers">Voor organisatoren</Link><Link href="/pricing">Tarieven</Link></div></div><div><h4 className="font-black">Hulp & regels</h4><div className="mt-4 grid gap-2 text-sm text-white/52"><Link href="/faq">Veelgestelde vragen</Link><Link href="/contact">Contact</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Voorwaarden</Link></div></div></div><div className="border-t border-white/10 px-4 py-5 text-center text-xs text-white/32">© {new Date().getFullYear()} ASORTA Tickets · Nederland</div></footer>}

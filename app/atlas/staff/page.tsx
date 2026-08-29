@@ -21,8 +21,8 @@ type StaffMember = {
 }
 
 const BADGES = [
-  { key: 'support', label: 'Support', text: 'Supportportaal, klantdossiers, Sorkai checks.' },
-  { key: 'head_support', label: 'Head support', text: 'Support lead: mag Sorkai instellingen beheren.' },
+  { key: 'support', label: 'Support', text: 'Live support voor kopers, verkopers en organisatoren.' },
+  { key: 'head_support', label: 'Head support', text: 'Support lead met toegang tot teaminstellingen.' },
   { key: 'orders', label: 'Orders', text: 'Orderoverzicht en orderinformatie.' },
   { key: 'products', label: 'Producten', text: 'Producten beheren.' },
   { key: 'inventory', label: 'Voorraad', text: 'Online/marktvoorraad beheren.' },
