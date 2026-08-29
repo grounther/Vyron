@@ -23,6 +23,44 @@ export async function mollie(path: string, init?: RequestInit) {
   return body;
 }
 
+export async function fulfillResaleOrder(orderId: string, paymentId: string) {
+  const admin = createAdminClient();
+  if (!admin) throw new Error("Supabase service key ontbreekt.");
+  const { data: order, error } = await admin
+    .from("ticket_resale_orders")
+    .select("id,status,mollie_payment_id")
+    .eq("id", orderId)
+    .single();
+  if (error || !order) throw new Error("Doorverkooporder niet gevonden.");
+  if (order.status === "paid") return order;
+  const payment = await mollie(`/payments/${encodeURIComponent(paymentId)}`);
+  if (payment.status !== "paid") return order;
+  if (
+    payment.metadata?.kind !== "resale" ||
+    payment.metadata?.order_id !== orderId
+  )
+    throw new Error("Betalingsreferentie klopt niet.");
+  const { error: finalizeError } = await admin.rpc("finalize_resale_order", {
+    p_order_id: orderId,
+    p_payment_id: paymentId,
+  });
+  if (finalizeError) throw finalizeError;
+  return { ...order, status: "paid" };
+}
+
+export async function releaseResaleOrder(
+  orderId: string,
+  status: "failed" | "cancelled" | "expired",
+) {
+  const admin = createAdminClient();
+  if (!admin) return;
+  const { error } = await admin.rpc("release_resale_order", {
+    p_order_id: orderId,
+    p_status: status,
+  });
+  if (error) console.error("Resale release failed", error.message);
+}
+
 export async function fulfillOrder(orderId: string, paymentId: string) {
   const admin = createAdminClient();
   if (!admin) throw new Error("Supabase service key ontbreekt.");

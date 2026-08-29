@@ -18,18 +18,34 @@ export default async function AccountPage() {
     )
     .eq("owner_id", user.id)
     .order("issued_at", { ascending: false });
+  const { count: offeredCount } = await s
+    .from("ticket_listings")
+    .select("*", { count: "exact", head: true })
+    .eq("seller_id", user.id)
+    .in("status", ["active", "reserved"]);
   const tickets = await Promise.all(
     (rows || []).map(async (t: any) => ({
       ...t,
-      qr: await QRCode.toDataURL(
-        `${process.env.NEXT_PUBLIC_SITE_URL || "https://asorta.nl"}/validate/${t.qr_code}`,
-        { width: 260, margin: 2, color: { dark: "#050505", light: "#ffffff" } },
-      ),
+      qr:
+        t.status === "listed"
+          ? ""
+          : await QRCode.toDataURL(
+              `${process.env.NEXT_PUBLIC_SITE_URL || "https://asorta.nl"}/validate/${t.qr_code}`,
+              {
+                width: 260,
+                margin: 2,
+                color: { dark: "#050505", light: "#ffffff" },
+              },
+            ),
     })),
   );
   const cards = [
     { Icon: TicketCheck, label: "Mijn tickets", value: String(tickets.length) },
-    { Icon: WalletCards, label: "Aangeboden", value: "0" },
+    {
+      Icon: WalletCards,
+      label: "Aangeboden",
+      value: String(offeredCount || 0),
+    },
     { Icon: CalendarDays, label: "Evenementen", value: "0" },
     { Icon: Heart, label: "Favorieten", value: "0" },
   ];
@@ -60,8 +76,12 @@ export default async function AccountPage() {
           </p>
           <div className="mt-5 grid gap-5 md:grid-cols-2">
             {tickets.map((t: any) => {
-              const type = t.ticket_types,
-                event = type?.ticket_events;
+              const type: any = Array.isArray(t.ticket_types)
+                  ? t.ticket_types[0]
+                  : t.ticket_types,
+                event: any = Array.isArray(type?.ticket_events)
+                  ? type.ticket_events[0]
+                  : type?.ticket_events;
               return (
                 <article
                   key={t.id}
@@ -80,14 +100,20 @@ export default async function AccountPage() {
                       {event?.venue}, {event?.city}
                     </p>
                   </div>
-                  <Image
-                    src={t.qr}
-                    alt="Unieke ticket QR-code"
-                    width={150}
-                    height={150}
-                    unoptimized
-                    className="rounded-xl"
-                  />
+                  {t.qr ? (
+                    <Image
+                      src={t.qr}
+                      alt="Unieke ticket QR-code"
+                      width={150}
+                      height={150}
+                      unoptimized
+                      className="rounded-xl"
+                    />
+                  ) : (
+                    <div className="grid h-[150px] place-items-center rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 text-center text-xs font-black text-amber-100">
+                      QR tijdelijk geblokkeerd tijdens verkoop
+                    </div>
+                  )}
                 </article>
               );
             })}

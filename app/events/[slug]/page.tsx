@@ -26,6 +26,18 @@ export default async function EventDetail({
     .maybeSingle();
   const demo = events.find((x) => x.slug === slug);
   if (!db && !demo) notFound();
+  await createAdminClient()?.rpc("expire_resale_reservations");
+  const { data: resaleListings = [] } = db
+    ? await s
+        .from("ticket_listings")
+        .select(
+          "id,asking_price,buyer_fee_rate,tickets!inner(status,ticket_types!inner(name,event_id))",
+        )
+        .eq("status", "active")
+        .eq("tickets.status", "listed")
+        .eq("tickets.ticket_types.event_id", db.id)
+        .order("asking_price", { ascending: true })
+    : { data: [] as any[] };
   const title = db?.title || demo!.title,
     venue = db?.venue || demo!.venue,
     city = db?.city || demo!.city,
@@ -164,6 +176,47 @@ export default async function EventDetail({
             <ShieldCheck size={18} className="shrink-0 text-[#b8ff5a]" />
             Je aankoop valt onder ASORTA kopersbescherming.
           </p>
+          {db && resaleListings?.length ? (
+            <div className="mt-7 border-t border-white/10 pt-6">
+              <h2 className="text-xl font-black">Veilige doorverkoop</h2>
+              <p className="mt-2 text-xs text-white/40">
+                Nieuwe QR-code na betaling. Prijsgrens gecontroleerd.
+              </p>
+              <div className="mt-4 grid gap-3">
+                {resaleListings.map((l: any) => {
+                  const type = l.tickets?.ticket_types,
+                    total =
+                      Number(l.asking_price) * (1 + Number(l.buyer_fee_rate));
+                  return (
+                    <form
+                      key={l.id}
+                      action="/api/checkout/resale"
+                      method="post"
+                      className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                    >
+                      <input type="hidden" name="listing_id" value={l.id} />
+                      <input
+                        type="hidden"
+                        name="return_to"
+                        value={`/events/${slug}`}
+                      />
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <strong>{type?.name}</strong>
+                          <p className="mt-1 text-xs text-white/40">
+                            Totaal incl. kosten {euro(total)}
+                          </p>
+                        </div>
+                        <button className="btn-primary">
+                          Koop {euro(Number(l.asking_price))}
+                        </button>
+                      </div>
+                    </form>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </aside>
       </div>
     </main>

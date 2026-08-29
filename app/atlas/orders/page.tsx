@@ -14,6 +14,13 @@ export default async function Orders() {
     )
     .order("created_at", { ascending: false })
     .limit(200);
+  const { data: resale = [] } = await admin
+    .from("ticket_resale_orders")
+    .select(
+      "id,asking_price,buyer_fee,seller_fee,total,seller_payout,status,payout_status,created_at,paid_at",
+    )
+    .order("created_at", { ascending: false })
+    .limit(200);
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex items-end justify-between">
@@ -67,6 +74,52 @@ export default async function Orders() {
         {!data?.length && (
           <div className="p-8 text-center text-white/45">
             Nog geen bestellingen.
+          </div>
+        )}
+      </div>
+      <h2 className="mt-12 text-2xl font-black">Doorverkoop</h2>
+      <p className="mt-2 text-sm text-white/45">
+        Uitbetaling blijft pending totdat ASORTA deze na het evenement
+        vrijgeeft.
+      </p>
+      <div className="mt-5 overflow-x-auto rounded-[2rem] border border-white/10">
+        <table className="w-full min-w-[900px] text-left text-sm">
+          <thead className="bg-white/[.05] text-xs uppercase tracking-wider text-white/45">
+            <tr>
+              <th className="p-4">Order</th>
+              <th className="p-4">Vraagprijs</th>
+              <th className="p-4">Koperskosten</th>
+              <th className="p-4">Verkoperskosten</th>
+              <th className="p-4">Uitbetaling</th>
+              <th className="p-4">Orderstatus</th>
+              <th className="p-4">Payout</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(resale || []).map((o: any) => (
+              <tr key={o.id} className="border-t border-white/10">
+                <td className="p-4 font-mono text-xs">{o.id.slice(0, 8)}</td>
+                <td className="p-4">
+                  € {Number(o.asking_price).toFixed(2).replace(".", ",")}
+                </td>
+                <td className="p-4">
+                  € {Number(o.buyer_fee).toFixed(2).replace(".", ",")}
+                </td>
+                <td className="p-4">
+                  € {Number(o.seller_fee).toFixed(2).replace(".", ",")}
+                </td>
+                <td className="p-4 font-black text-[#b8ff5a]">
+                  € {Number(o.seller_payout).toFixed(2).replace(".", ",")}
+                </td>
+                <td className="p-4 uppercase">{o.status}</td>
+                <td className="p-4 uppercase">{o.payout_status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!resale?.length && (
+          <div className="p-8 text-center text-white/45">
+            Nog geen doorverkooporders.
           </div>
         )}
       </div>
