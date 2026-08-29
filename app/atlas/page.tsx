@@ -1,5 +1,47 @@
-import Link from 'next/link'
-import { MessageCircle,TicketCheck,Users } from 'lucide-react'
-import { assertAtlasPermission } from '@/lib/atlas-auth'
-export const dynamic='force-dynamic'
-export default async function Atlas(){const{staff}=await assertAtlasPermission('support','/atlas');return <main className="mx-auto min-h-screen max-w-6xl px-4 py-14 sm:px-5"><p className="text-xs font-black uppercase tracking-[.25em] text-[#b8ff5a]">Beheeromgeving</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">ASORTA Ticket Atlas</h1><p className="mt-3 text-white/45">Ingelogd als {staff.displayName}</p><div className="mt-10 grid gap-5 md:grid-cols-3"><Link href="/atlas/support" className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"><MessageCircle className="text-[#b8ff5a]"/><h2 className="mt-8 text-2xl font-black">Live support</h2><p className="mt-3 text-sm leading-6 text-white/48">Beantwoord vragen van kopers, verkopers en organisatoren.</p></Link><div className="rounded-[1.7rem] border border-white/10 bg-white/[.025] p-6 opacity-60"><TicketCheck className="text-[#b8ff5a]"/><h2 className="mt-8 text-2xl font-black">Tickets</h2><p className="mt-3 text-sm text-white/48">Volgende bouwfase</p></div><div className="rounded-[1.7rem] border border-white/10 bg-white/[.025] p-6 opacity-60"><Users className="text-[#b8ff5a]"/><h2 className="mt-8 text-2xl font-black">Organisatoren</h2><p className="mt-3 text-sm text-white/48">Volgende bouwfase</p></div></div></main>}
+import Link from "next/link";
+import { MessageCircle, TicketCheck, Users } from "lucide-react";
+import { assertAtlasPermission } from "@/lib/atlas-auth";
+export const dynamic = "force-dynamic";
+export default async function Atlas() {
+  const { staff } = await assertAtlasPermission("support", "/atlas");
+  return (
+    <main className="mx-auto min-h-screen max-w-6xl px-4 py-14 sm:px-5">
+      <p className="text-xs font-black uppercase tracking-[.25em] text-[#b8ff5a]">
+        Beheeromgeving
+      </p>
+      <h1 className="mt-3 text-4xl font-black sm:text-6xl">
+        ASORTA Ticket Atlas
+      </h1>
+      <p className="mt-3 text-white/45">Ingelogd als {staff.displayName}</p>
+      <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <Link
+          href="/atlas/support"
+          className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"
+        >
+          <MessageCircle className="text-[#b8ff5a]" />
+          <h2 className="mt-8 text-2xl font-black">Live support</h2>
+          <p className="mt-3 text-sm leading-6 text-white/48">
+            Beantwoord vragen van kopers, verkopers en organisatoren.
+          </p>
+        </Link>
+        <div className="rounded-[1.7rem] border border-white/10 bg-white/[.025] p-6 opacity-60">
+          <TicketCheck className="text-[#b8ff5a]" />
+          <h2 className="mt-8 text-2xl font-black">Tickets</h2>
+          <p className="mt-3 text-sm text-white/48">
+            Orderbeheer volgt met de betaalintegratie.
+          </p>
+        </div>
+        <Link
+          href="/atlas/organizers"
+          className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"
+        >
+          <Users className="text-[#b8ff5a]" />
+          <h2 className="mt-8 text-2xl font-black">Organisatoren</h2>
+          <p className="mt-3 text-sm text-white/48">
+            Beoordeel aanmeldingen en beheer toegang.
+          </p>
+        </Link>
+      </div>
+    </main>
+  );
+}
