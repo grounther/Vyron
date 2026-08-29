@@ -70,6 +70,7 @@ export async function createEvent(formData: FormData) {
     .select("id,status")
     .eq("owner_id", user.id)
     .maybeSingle();
+  let createdEventId = "";
   try {
     if (!org || org.status !== "verified")
       throw new Error("Je organisatoraccount moet eerst zijn goedgekeurd.");
@@ -98,12 +99,13 @@ export async function createEvent(formData: FormData) {
       .select("id")
       .single();
     if (error) throw error;
-    redirect(`/organizer/events/${data.id}?created=1`);
+    createdEventId = data.id;
   } catch (e) {
     go("/organizer/events/new", {
       error: e instanceof Error ? e.message : "Evenement aanmaken mislukt.",
     });
   }
+  redirect(`/organizer/events/${createdEventId}?created=1`);
 }
 
 async function ownedEvent(supabase: any, userId: string, eventId: string) {
