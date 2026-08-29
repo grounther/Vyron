@@ -19,12 +19,31 @@ export async function POST(req: NextRequest) {
     const { data: type, error } = await s
       .from("ticket_types")
       .select(
-        "id,name,face_value,capacity,event_id,ticket_events!inner(id,title,status,slug)",
+        "id,name,face_value,capacity,event_id,ticket_events!inner(id,title,status,slug,starts_at)",
       )
       .eq("id", typeId)
       .eq("ticket_events.status", "published")
       .single();
     if (error || !type) throw new Error("Dit ticket is niet beschikbaar.");
+    const event = Array.isArray(type.ticket_events)
+      ? type.ticket_events[0]
+      : type.ticket_events;
+    if (!event || new Date(event.starts_at).getTime() <= Date.now())
+      throw new Error("De ticketverkoop voor dit evenement is gesloten.");
+    const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+    const { count: sold } = admin
+      ? await admin
+          .from("tickets")
+          .select("*", { count: "exact", head: true })
+          .eq("ticket_type_id", type.id)
+          .not("status", "in", '("cancelled","refunded")')
+      : { count: 0 };
+    if ((sold || 0) + quantity > Number(type.capacity))
+      throw new Error(
+        (sold || 0) >= Number(type.capacity)
+          ? "Deze ticketsoort is uitverkocht."
+          : `Er zijn nog maar ${Number(type.capacity) - (sold || 0)} tickets beschikbaar.`,
+      );
     const subtotal = Number(type.face_value) * quantity,
       buyerFee = Math.round(subtotal * 0.085 * 100) / 100,
       total = subtotal + buyerFee;
@@ -44,9 +63,6 @@ export async function POST(req: NextRequest) {
       .single();
     if (orderError) throw orderError;
     const origin = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
-    const event = Array.isArray(type.ticket_events)
-      ? type.ticket_events[0]
-      : type.ticket_events;
     const payment = await mollie("/payments", {
       method: "POST",
       body: JSON.stringify({
@@ -57,7 +73,6 @@ export async function POST(req: NextRequest) {
         metadata: { order_id: order.id },
       }),
     });
-    const admin = (await import("@/lib/supabase/admin")).createAdminClient();
     await admin
       ?.from("ticket_orders")
       .update({

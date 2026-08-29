@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { addTicketType, setEventStatus } from "../../actions";
+import DeleteEventButton from "./DeleteEventButton";
 export const dynamic = "force-dynamic";
 export default async function Manage({
   params,
@@ -113,6 +114,14 @@ export default async function Manage({
           <Field label="Capaciteit" name="capacity" type="number" />
           <button className="btn-primary">Toevoegen</button>
         </form>
+      </section>
+      <section className="mt-10 border-t border-white/10 pt-8">
+        <h2 className="text-xl font-black">Gevarenzone</h2>
+        <p className="mt-2 mb-5 text-sm text-white/45">
+          Evenementen met bestellingen of tickets worden beschermd tegen
+          verwijderen.
+        </p>
+        <DeleteEventButton eventId={id} eventTitle={e.title} />
       </section>
     </main>
   );

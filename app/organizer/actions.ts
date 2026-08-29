@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const clean = (v: FormDataEntryValue | null, n = 500) =>
   typeof v === "string" ? v.trim().slice(0, n) : "";
@@ -27,22 +28,20 @@ export async function applyOrganizer(formData: FormData) {
       throw new Error("Vul je bedrijfs- of organisatienaam in.");
     if (kvk.length !== 8)
       throw new Error("Een KvK-nummer bestaat uit 8 cijfers.");
-    const { error } = await supabase
-      .from("ticket_organizers")
-      .upsert(
-        {
-          owner_id: user.id,
-          name,
-          kvk_number: kvk,
-          website: clean(formData.get("website"), 240) || null,
-          phone: clean(formData.get("phone"), 40) || null,
-          description: clean(formData.get("description"), 1200) || null,
-          status: "pending",
-          rejection_reason: null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "owner_id" },
-      );
+    const { error } = await supabase.from("ticket_organizers").upsert(
+      {
+        owner_id: user.id,
+        name,
+        kvk_number: kvk,
+        website: clean(formData.get("website"), 240) || null,
+        phone: clean(formData.get("phone"), 40) || null,
+        description: clean(formData.get("description"), 1200) || null,
+        status: "pending",
+        rejection_reason: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "owner_id" },
+    );
     if (error) throw error;
     revalidatePath("/organizer");
   } catch (e) {
@@ -177,4 +176,47 @@ export async function setEventStatus(formData: FormData) {
     });
   }
   go(`/organizer/events/${eventId}`, { saved: "status" });
+}
+
+export async function deleteEvent(formData: FormData) {
+  const eventId = clean(formData.get("event_id"), 80);
+  const { supabase, user } = await session(`/organizer/events/${eventId}`);
+  try {
+    if (!(await ownedEvent(supabase, user.id, eventId)))
+      throw new Error("Evenement niet gevonden.");
+    const admin = createAdminClient();
+    if (!admin) throw new Error("Beheerverbinding ontbreekt.");
+    const { count: orderCount } = await admin
+      .from("ticket_orders")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId);
+    const { data: typeRows = [] } = await admin
+      .from("ticket_types")
+      .select("id")
+      .eq("event_id", eventId);
+    const typeIds = (typeRows || []).map((row: any) => row.id);
+    let ticketCount = 0;
+    if (typeIds.length) {
+      const result = await admin
+        .from("tickets")
+        .select("*", { count: "exact", head: true })
+        .in("ticket_type_id", typeIds);
+      ticketCount = result.count || 0;
+    }
+    if ((orderCount || 0) > 0 || ticketCount > 0)
+      throw new Error(
+        "Dit evenement heeft bestellingen of uitgegeven tickets en kan daarom niet worden verwijderd. Zet het evenement op geannuleerd.",
+      );
+    const { error } = await admin
+      .from("ticket_events")
+      .delete()
+      .eq("id", eventId);
+    if (error) throw error;
+    revalidatePath("/organizer");
+  } catch (e) {
+    go(`/organizer/events/${eventId}`, {
+      error: e instanceof Error ? e.message : "Evenement verwijderen mislukt.",
+    });
+  }
+  redirect("/organizer?deleted=1");
 }

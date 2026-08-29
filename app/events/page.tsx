@@ -1,6 +1,7 @@
 import EventCard from "@/components/EventCard";
 import { events } from "@/lib/tickets";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Search } from "lucide-react";
 export const metadata = { title: "Evenementen" };
 export const dynamic = "force-dynamic";
@@ -9,26 +10,52 @@ export default async function EventsPage() {
     { data = [] } = await s
       .from("ticket_events")
       .select(
-        "slug,title,venue,city,starts_at,category,ticket_types(face_value)",
+        "slug,title,venue,city,starts_at,category,ticket_types(id,face_value,capacity)",
       )
       .eq("status", "published")
-      .order("starts_at", { ascending: true });
-  const live = (data || []).map((e: any) => ({
-    slug: e.slug,
-    title: e.title,
-    venue: e.venue,
-    city: e.city,
-    date: new Date(e.starts_at).toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+      .order("starts_at", { ascending: true }),
+    admin = createAdminClient();
+  const live = await Promise.all(
+    (data || []).map(async (e: any) => {
+      const types = e.ticket_types || [];
+      let sold = 0;
+      if (admin && types.length) {
+        const { count } = await admin
+          .from("tickets")
+          .select("*", { count: "exact", head: true })
+          .in(
+            "ticket_type_id",
+            types.map((t: any) => t.id),
+          )
+          .not("status", "in", '("cancelled","refunded")');
+        sold = count || 0;
+      }
+      const capacity = types.reduce(
+          (n: number, t: any) => n + Number(t.capacity),
+          0,
+        ),
+        expired = new Date(e.starts_at).getTime() <= Date.now(),
+        soldOut = capacity > 0 && sold >= capacity;
+      return {
+        slug: e.slug,
+        title: e.title,
+        venue: e.venue,
+        city: e.city,
+        date: new Date(e.starts_at).toLocaleDateString("nl-NL", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        category: e.category,
+        price: types.length
+          ? Math.min(...types.map((t: any) => Number(t.face_value)))
+          : 0,
+        color: "#b8ff5a",
+        closed: expired || soldOut,
+        closedLabel: expired ? "Afgelopen" : "Uitverkocht",
+      };
     }),
-    category: e.category,
-    price: e.ticket_types?.length
-      ? Math.min(...e.ticket_types.map((t: any) => Number(t.face_value)))
-      : 0,
-    color: "#b8ff5a",
-  }));
+  );
   const all = [
     ...live,
     ...events.filter((d) => !live.some((e: any) => e.slug === d.slug)),

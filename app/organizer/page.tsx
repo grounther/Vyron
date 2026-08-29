@@ -41,7 +41,7 @@ export default async function Organizer({
     .select("id,title,city,starts_at,status,ticket_types(capacity)")
     .eq("organizer_id", org.id)
     .order("starts_at", { ascending: true });
-  const events = data || []
+  const events = data || [];
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-5">
@@ -70,6 +70,7 @@ export default async function Organizer({
           </Link>
         )}
       </div>
+      {p.deleted && <Notice>Evenement is definitief verwijderd.</Notice>}
       {p.applied && (
         <Notice>
           Je aanmelding is ontvangen. We controleren je gegevens zo snel

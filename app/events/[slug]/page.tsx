@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { events, euro, buyerFeeRate } from "@/lib/tickets";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
 export const dynamic = "force-dynamic";
 export default async function EventDetail({
@@ -40,6 +41,29 @@ export default async function EventDetail({
     price = db ? (types[0] ? Number(types[0].face_value) : 0) : demo!.price,
     total = price * (1 + buyerFeeRate),
     color = demo?.color || "#b8ff5a";
+  const admin = createAdminClient();
+  const soldByType = new Map<string, number>();
+  if (admin && types.length) {
+    const { data: issued = [] } = await admin
+      .from("tickets")
+      .select("ticket_type_id")
+      .in(
+        "ticket_type_id",
+        types.map((t: any) => t.id),
+      )
+      .not("status", "in", '("cancelled","refunded")');
+    for (const ticket of issued || [])
+      soldByType.set(
+        ticket.ticket_type_id,
+        (soldByType.get(ticket.ticket_type_id) || 0) + 1,
+      );
+  }
+  const availableTypes = types.filter(
+    (t: any) => (soldByType.get(t.id) || 0) < Number(t.capacity),
+  );
+  const expired = Boolean(db && new Date(db.starts_at).getTime() <= Date.now());
+  const soldOut = Boolean(db && types.length && !availableTypes.length);
+  const closed = expired || soldOut;
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-4 py-14 sm:px-5">
       <Link
@@ -82,7 +106,7 @@ export default async function EventDetail({
           <strong className="mt-2 block text-4xl font-black">
             {euro(price)}
           </strong>
-          {db && types.length ? (
+          {db && types.length && !closed ? (
             <form
               action="/api/checkout"
               method="post"
@@ -92,7 +116,7 @@ export default async function EventDetail({
               <label className="grid gap-2 text-sm font-bold text-white/65">
                 Ticketsoort
                 <select name="ticket_type_id" className="support-input">
-                  {types.map((t: any) => (
+                  {availableTypes.map((t: any) => (
                     <option key={t.id} value={t.id}>
                       {t.name} — {euro(Number(t.face_value))}
                     </option>
@@ -125,8 +149,14 @@ export default async function EventDetail({
                 <span>Totaal</span>
                 <span>{euro(total)}</span>
               </div>
-              <p className="text-xs text-white/35">
-                Dit is een demonstratie-evenement; afrekenen is uitgeschakeld.
+              <p
+                className={`text-sm font-black ${closed ? "text-red-300" : "text-white/35"}`}
+              >
+                {expired
+                  ? "Dit evenement is afgelopen."
+                  : soldOut
+                    ? "Alle tickets zijn uitverkocht."
+                    : "Dit is een demonstratie-evenement; afrekenen is uitgeschakeld."}
               </p>
             </div>
           )}
