@@ -42,23 +42,28 @@ export default async function Manage({
             {e.city}
           </p>
         </div>
-        <form action={setEventStatus}>
-          <input type="hidden" name="event_id" value={id} />
-          <input
-            type="hidden"
-            name="status"
-            value={e.status === "published" ? "draft" : "published"}
-          />
-          <button
-            className={
-              e.status === "published" ? "btn-secondary" : "btn-primary"
-            }
-          >
-            {e.status === "published"
-              ? "Terug naar concept"
-              : "Evenement publiceren"}
-          </button>
-        </form>
+        <div className="flex flex-wrap gap-3">
+          <Link href={`/organizer/events/${id}/scan`} className="btn-primary">
+            Tickets scannen
+          </Link>
+          <form action={setEventStatus}>
+            <input type="hidden" name="event_id" value={id} />
+            <input
+              type="hidden"
+              name="status"
+              value={e.status === "published" ? "draft" : "published"}
+            />
+            <button
+              className={
+                e.status === "published" ? "btn-secondary" : "btn-primary"
+              }
+            >
+              {e.status === "published"
+                ? "Terug naar concept"
+                : "Evenement publiceren"}
+            </button>
+          </form>
+        </div>
       </div>
       {p.error && (
         <div className="mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 p-4 text-red-100">
