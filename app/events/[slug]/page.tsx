@@ -4,6 +4,7 @@ import { events, euro, buyerFeeRate } from "@/lib/tickets";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
+import { eventCover } from "@/lib/event-images";
 export const dynamic = "force-dynamic";
 export default async function EventDetail({
   params,
@@ -39,8 +40,7 @@ export default async function EventDetail({
       (a: any, b: any) => Number(a.face_value) - Number(b.face_value),
     ),
     price = db ? (types[0] ? Number(types[0].face_value) : 0) : demo!.price,
-    total = price * (1 + buyerFeeRate),
-    color = demo?.color || "#b8ff5a";
+    total = price * (1 + buyerFeeRate);
   const admin = createAdminClient();
   const soldByType = new Map<string, number>();
   if (admin && types.length) {
@@ -79,9 +79,9 @@ export default async function EventDetail({
       )}
       <div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_.85fr]">
         <div
-          className="min-h-[440px] rounded-[2rem] border border-white/10 p-8"
+          className="min-h-[440px] rounded-[2rem] border border-white/10 bg-cover bg-center p-8"
           style={{
-            background: `radial-gradient(circle at 75% 25%,${color}55,transparent 35%),#090909`,
+            backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url(${eventCover(category)})`,
           }}
         >
           <span className="rounded-full border border-white/15 bg-black/30 px-3 py-2 text-xs font-black uppercase tracking-[.2em]">

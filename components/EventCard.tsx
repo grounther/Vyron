@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, MapPin } from "lucide-react";
 import { euro, type EventItem } from "@/lib/tickets";
+import { eventCover } from "@/lib/event-images";
 export default function EventCard({ event }: { event: EventItem }) {
   return (
     <Link
@@ -8,9 +9,9 @@ export default function EventCard({ event }: { event: EventItem }) {
       className="group overflow-hidden rounded-[1.45rem] border border-white/10 bg-white/[.035] transition duration-300 hover:-translate-y-1 hover:border-white/22"
     >
       <div
-        className="relative h-44 overflow-hidden p-5"
+        className="relative h-44 overflow-hidden bg-cover bg-center p-5"
         style={{
-          background: `radial-gradient(circle at 76% 24%,${event.color}55,transparent 34%),linear-gradient(145deg,#181818,#080808)`,
+          backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.7)),url(${eventCover(event.category)})`,
         }}
       >
         <span
