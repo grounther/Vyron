@@ -24,13 +24,13 @@ export default async function Atlas() {
             Beantwoord vragen van kopers, verkopers en organisatoren.
           </p>
         </Link>
-        <div className="rounded-[1.7rem] border border-white/10 bg-white/[.025] p-6 opacity-60">
+      <Link href="/atlas/orders" className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35">
           <TicketCheck className="text-[#b8ff5a]" />
           <h2 className="mt-8 text-2xl font-black">Tickets</h2>
           <p className="mt-3 text-sm text-white/48">
-            Orderbeheer volgt met de betaalintegratie.
+          Bekijk betaalstatus, omzet en uitgegeven tickets.
           </p>
-        </div>
+        </Link>
         <Link
           href="/atlas/organizers"
           className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"

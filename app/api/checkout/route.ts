@@ -1,118 +1,78 @@
-import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { createOrderFromCheckout } from '@/lib/checkout/orders'
-import { createMolliePayment, hasMollieConfig, normalizeMollieMethod } from '@/lib/checkout/mollie'
-import { createPayPalOrder, hasPayPalConfig } from '@/lib/checkout/paypal'
-import { createClient } from '@/lib/supabase/server'
-
-export const runtime = 'nodejs'
-
-export async function POST(request: Request) {
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mollie } from "@/lib/mollie";
+export async function POST(req: NextRequest) {
+  const s = await createClient(),
+    {
+      data: { user },
+    } = await s.auth.getUser();
+  const form = await req.formData(),
+    typeId = String(form.get("ticket_type_id") || ""),
+    quantity = Math.min(10, Math.max(1, Number(form.get("quantity") || 1)));
+  const back = String(form.get("return_to") || "/events");
+  if (!user)
+    return NextResponse.redirect(
+      new URL(`/login?next=${encodeURIComponent(back)}`, req.url),
+      303,
+    );
   try {
-    const body = await request.json().catch(() => ({}))
-    const admin = createAdminClient()
-    if (!admin) return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY ontbreekt. Checkout is fail-closed.' }, { status: 503 })
-
-    let authUserId = ''
-    try {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      authUserId = user?.id || ''
-    } catch {
-      authUserId = ''
-    }
-
-    const provider = String(body.provider || process.env.CHECKOUT_PROVIDER || process.env.PAYMENT_PROVIDER || 'paypal').toLowerCase()
-    const mollieMethods = new Set([
-      'mollie',
-      'ideal',
-      'wero',
-      'bancontact',
-      'creditcard',
-      'debitcard',
-      'applepay',
-      'googlepay',
-      'klarnapaylater',
-      'klarnaachteraf',
-      'klarnasliceit',
-      'klarnain3',
-      'in3',
-      'riverty',
-    ])
-    const wantsMollie = mollieMethods.has(provider)
-
-    if (wantsMollie && !hasMollieConfig()) {
-      return NextResponse.json({
-        error: 'Mollie is nog niet geconfigureerd. Voeg MOLLIE_API_KEY toe in Vercel Environment Variables.',
-      }, { status: 503 })
-    }
-
-    if (!wantsMollie && !hasPayPalConfig()) {
-      return NextResponse.json({
-        error: 'PayPal is nog niet geconfigureerd. Voeg PAYPAL_CLIENT_ID en PAYPAL_CLIENT_SECRET toe in Vercel Environment Variables.',
-      }, { status: 503 })
-    }
-
-    const result = await createOrderFromCheckout(admin, {
-      items: body.items,
-      shipping: body.shipping,
-      source: 'site_checkout',
-      authUserId,
-    })
-
-    if (authUserId) {
-      await admin.from('orders').update({ auth_user_id: authUserId, updated_at: new Date().toISOString() }).eq('id', result.order.id)
-    }
-
-    if (wantsMollie) {
-      const mollieMethod = normalizeMollieMethod(provider === 'mollie' ? 'ideal' : provider)
-      const payment = await createMolliePayment(result.order, mollieMethod, result.items, result.shipping)
-      await admin
-        .from('orders')
-        .update({
-          payment_id: payment.id,
-          payment_provider: `mollie:${mollieMethod}`,
-          payment_status: payment.status || 'open',
-          fulfillment_status: 'pending_payment',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', result.order.id)
-
-      return NextResponse.json({
-        ok: true,
-        paymentProvider: 'mollie',
-        checkoutUrl: payment._links?.checkout?.href || null,
-        order: {
-          id: result.order.id,
-          orderNumber: result.order.order_number,
-          total: result.order.total,
-        },
+    const { data: type, error } = await s
+      .from("ticket_types")
+      .select(
+        "id,name,face_value,capacity,event_id,ticket_events!inner(id,title,status,slug)",
+      )
+      .eq("id", typeId)
+      .eq("ticket_events.status", "published")
+      .single();
+    if (error || !type) throw new Error("Dit ticket is niet beschikbaar.");
+    const subtotal = Number(type.face_value) * quantity,
+      buyerFee = Math.round(subtotal * 0.085 * 100) / 100,
+      total = subtotal + buyerFee;
+    const { data: order, error: orderError } = await s
+      .from("ticket_orders")
+      .insert({
+        buyer_id: user.id,
+        event_id: type.event_id,
+        ticket_type_id: type.id,
+        quantity,
+        subtotal,
+        buyer_fee: buyerFee,
+        total,
+        status: "pending",
       })
-    }
-
-    const paypal = await createPayPalOrder(result.order, result.items, result.shipping)
+      .select("id")
+      .single();
+    if (orderError) throw orderError;
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+    const event = Array.isArray(type.ticket_events)
+      ? type.ticket_events[0]
+      : type.ticket_events;
+    const payment = await mollie("/payments", {
+      method: "POST",
+      body: JSON.stringify({
+        amount: { currency: "EUR", value: total.toFixed(2) },
+        description: `${quantity}× ${type.name} — ${event.title}`,
+        redirectUrl: `${origin}/orders/${order.id}`,
+        webhookUrl: `${origin}/api/mollie/webhook`,
+        metadata: { order_id: order.id },
+      }),
+    });
+    const admin = (await import("@/lib/supabase/admin")).createAdminClient();
     await admin
-      .from('orders')
+      ?.from("ticket_orders")
       .update({
-        payment_id: paypal.id,
-        payment_provider: 'paypal',
-        payment_status: 'open',
-        fulfillment_status: 'pending_payment',
+        mollie_payment_id: payment.id,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', result.order.id)
-
-    return NextResponse.json({
-      ok: true,
-      paymentProvider: 'paypal',
-      checkoutUrl: paypal.approvalUrl,
-      order: {
-        id: result.order.id,
-        orderNumber: result.order.order_number,
-        total: result.order.total,
-      },
-    })
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Checkout failed.' }, { status: 500 })
+      .eq("id", order.id);
+    return NextResponse.redirect(payment._links.checkout.href, 303);
+  } catch (e) {
+    return NextResponse.redirect(
+      new URL(
+        `${back}?error=${encodeURIComponent(e instanceof Error ? e.message : "Afrekenen mislukt.")}`,
+        req.url,
+      ),
+      303,
+    );
   }
 }

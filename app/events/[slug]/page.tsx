@@ -1,6 +1,141 @@
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { events,euro,buyerFeeRate } from '@/lib/tickets'
-import { CalendarDays,MapPin,ShieldCheck } from 'lucide-react'
-export function generateStaticParams(){return events.map(({slug})=>({slug}))}
-export default async function EventDetail({params}:{params:Promise<{slug:string}>}){const{slug}=await params;const event=events.find(x=>x.slug===slug);if(!event)notFound();const total=event.price*(1+buyerFeeRate);return <main className="mx-auto min-h-screen max-w-7xl px-4 py-14 sm:px-5"><Link href="/events" className="text-sm font-black text-white/45 hover:text-white">← Alle evenementen</Link><div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_.85fr]"><div className="min-h-[440px] rounded-[2rem] border border-white/10 p-8" style={{background:`radial-gradient(circle at 75% 25%,${event.color}55,transparent 35%),#090909`}}><span className="rounded-full border border-white/15 bg-black/30 px-3 py-2 text-xs font-black uppercase tracking-[.2em]">{event.category}</span><h1 className="mt-52 max-w-2xl text-4xl font-black sm:text-6xl">{event.title}</h1><p className="mt-5 flex flex-wrap gap-5 text-sm text-white/55"><span className="flex items-center gap-2"><CalendarDays size={17}/>{event.date}</span><span className="flex items-center gap-2"><MapPin size={17}/>{event.venue}, {event.city}</span></p></div><aside className="h-fit rounded-[2rem] border border-white/10 bg-white/[.04] p-7"><span className="text-sm text-white/42">Beschikbaar vanaf</span><strong className="mt-2 block text-4xl font-black">{euro(event.price)}</strong><div className="mt-7 grid gap-3 border-y border-white/10 py-5 text-sm"><div className="flex justify-between text-white/55"><span>Ticket</span><span>{euro(event.price)}</span></div><div className="flex justify-between text-white/55"><span>Servicekosten 8,5%</span><span>{euro(event.price*buyerFeeRate)}</span></div><div className="flex justify-between font-black"><span>Totaal</span><span>{euro(total)}</span></div></div><button className="mt-6 w-full rounded-full bg-[#b8ff5a] px-6 py-4 font-black text-black">Kies tickets</button><p className="mt-5 flex items-start gap-3 text-xs leading-5 text-white/40"><ShieldCheck size={18} className="shrink-0 text-[#b8ff5a]"/>Je aankoop valt onder ASORTA kopersbescherming.</p></aside></div></main>}
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { events, euro, buyerFeeRate } from "@/lib/tickets";
+import { createClient } from "@/lib/supabase/server";
+import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
+export const dynamic = "force-dynamic";
+export default async function EventDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { slug } = await params,
+    p = await searchParams,
+    s = await createClient();
+  const { data: db } = await s
+    .from("ticket_events")
+    .select(
+      "id,slug,title,venue,city,starts_at,category,description,ticket_types(id,name,face_value,capacity)",
+    )
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  const demo = events.find((x) => x.slug === slug);
+  if (!db && !demo) notFound();
+  const title = db?.title || demo!.title,
+    venue = db?.venue || demo!.venue,
+    city = db?.city || demo!.city,
+    date = db
+      ? new Date(db.starts_at).toLocaleString("nl-NL", {
+          dateStyle: "long",
+          timeStyle: "short",
+        })
+      : demo!.date,
+    category = db?.category || demo!.category,
+    types = (db?.ticket_types || []).sort(
+      (a: any, b: any) => Number(a.face_value) - Number(b.face_value),
+    ),
+    price = db ? (types[0] ? Number(types[0].face_value) : 0) : demo!.price,
+    total = price * (1 + buyerFeeRate),
+    color = demo?.color || "#b8ff5a";
+  return (
+    <main className="mx-auto min-h-screen max-w-7xl px-4 py-14 sm:px-5">
+      <Link
+        href="/events"
+        className="text-sm font-black text-white/45 hover:text-white"
+      >
+        ← Alle evenementen
+      </Link>
+      {p.error && (
+        <div className="mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 p-4 text-red-100">
+          {p.error}
+        </div>
+      )}
+      <div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_.85fr]">
+        <div
+          className="min-h-[440px] rounded-[2rem] border border-white/10 p-8"
+          style={{
+            background: `radial-gradient(circle at 75% 25%,${color}55,transparent 35%),#090909`,
+          }}
+        >
+          <span className="rounded-full border border-white/15 bg-black/30 px-3 py-2 text-xs font-black uppercase tracking-[.2em]">
+            {category}
+          </span>
+          <h1 className="mt-52 max-w-2xl text-4xl font-black sm:text-6xl">
+            {title}
+          </h1>
+          <p className="mt-5 flex flex-wrap gap-5 text-sm text-white/55">
+            <span className="flex items-center gap-2">
+              <CalendarDays size={17} />
+              {date}
+            </span>
+            <span className="flex items-center gap-2">
+              <MapPin size={17} />
+              {venue}, {city}
+            </span>
+          </p>
+        </div>
+        <aside className="h-fit rounded-[2rem] border border-white/10 bg-white/[.04] p-7">
+          <span className="text-sm text-white/42">Beschikbaar vanaf</span>
+          <strong className="mt-2 block text-4xl font-black">
+            {euro(price)}
+          </strong>
+          {db && types.length ? (
+            <form
+              action="/api/checkout"
+              method="post"
+              className="mt-7 grid gap-4"
+            >
+              <input type="hidden" name="return_to" value={`/events/${slug}`} />
+              <label className="grid gap-2 text-sm font-bold text-white/65">
+                Ticketsoort
+                <select name="ticket_type_id" className="support-input">
+                  {types.map((t: any) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} — {euro(Number(t.face_value))}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-white/65">
+                Aantal
+                <select name="quantity" className="support-input">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                    <option key={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <button className="w-full rounded-full bg-[#b8ff5a] px-6 py-4 font-black text-black">
+                Veilig afrekenen
+              </button>
+            </form>
+          ) : (
+            <div className="mt-7 grid gap-3 border-y border-white/10 py-5 text-sm">
+              <div className="flex justify-between text-white/55">
+                <span>Ticket</span>
+                <span>{euro(price)}</span>
+              </div>
+              <div className="flex justify-between text-white/55">
+                <span>Servicekosten 8,5%</span>
+                <span>{euro(price * buyerFeeRate)}</span>
+              </div>
+              <div className="flex justify-between font-black">
+                <span>Totaal</span>
+                <span>{euro(total)}</span>
+              </div>
+              <p className="text-xs text-white/35">
+                Dit is een demonstratie-evenement; afrekenen is uitgeschakeld.
+              </p>
+            </div>
+          )}
+          <p className="mt-5 flex items-start gap-3 text-xs leading-5 text-white/40">
+            <ShieldCheck size={18} className="shrink-0 text-[#b8ff5a]" />
+            Je aankoop valt onder ASORTA kopersbescherming.
+          </p>
+        </aside>
+      </div>
+    </main>
+  );
+}
