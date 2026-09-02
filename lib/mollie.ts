@@ -23,6 +23,35 @@ export async function mollie(path: string, init?: RequestInit) {
   return body;
 }
 
+export async function fulfillHousingPayment(localPaymentId: string, providerPaymentId: string) {
+  const admin=createAdminClient()
+  if(!admin)throw new Error('Supabase service key ontbreekt.')
+  const {data:local,error}=await admin.from('payments').select('*').eq('id',localPaymentId).single()
+  if(error||!local)throw new Error('Asorta-betaling niet gevonden.')
+  if(local.status==='paid')return local
+  if(local.provider_payment_id!==providerPaymentId)throw new Error('Betalingsreferentie klopt niet.')
+  const payment=await mollie(`/payments/${encodeURIComponent(providerPaymentId)}`)
+  if(payment.status!=='paid')return {...local,status:payment.status}
+  if(payment.metadata?.kind!=='housing_access'||payment.metadata?.payment_id!==localPaymentId)throw new Error('Betalingsmetadata klopt niet.')
+  const now=new Date(),nowIso=now.toISOString()
+  const {data:claimed}=await admin.from('payments').update({status:'paid',paid_at:nowIso,updated_at:nowIso}).eq('id',local.id).in('status',['open','pending']).select('id').maybeSingle()
+  if(!claimed)return local
+  if(local.purpose==='listing_activation'){
+    const due=new Date(now.getTime()+90*24*60*60*1000).toISOString()
+    const {error:listingError}=await admin.from('listings').update({status:'active',activated_at:nowIso,last_confirmed_at:nowIso,confirmation_due_at:due,updated_at:nowIso}).eq('id',local.listing_id).eq('user_id',local.user_id).in('status',['pending_payment','draft'])
+    if(listingError)throw listingError
+  }else{
+    const expires=new Date(now.getTime()+365*24*60*60*1000).toISOString()
+    const {data:existing}=await admin.from('access_passes').select('id').eq('user_id',local.user_id).eq('status','active').maybeSingle()
+    const passResult=existing
+      ? await admin.from('access_passes').update({payment_id:local.id,starts_at:nowIso,expires_at:expires,status:'active'}).eq('id',existing.id)
+      : await admin.from('access_passes').insert({user_id:local.user_id,payment_id:local.id,starts_at:nowIso,expires_at:expires,status:'active'})
+    if(passResult.error)throw passResult.error
+  }
+  await admin.from('notifications').insert({user_id:local.user_id,type:'payment_success',title:'Betaling geslaagd',body:local.purpose==='listing_activation'?'Je woning is actief en doet mee met matching.':'Je zoek- en matchtoegang is één jaar actief.',href:'/account'})
+  return {...local,status:'paid',paid_at:nowIso}
+}
+
 export async function fulfillResaleOrder(orderId: string, paymentId: string) {
   const admin = createAdminClient();
   if (!admin) throw new Error("Supabase service key ontbreekt.");

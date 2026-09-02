@@ -1,12 +1,12 @@
-# ASORTA Tickets
+# ASORTA Woningruil
 
-Nederlands platform voor primaire ticketverkoop en veilige doorverkoop.
+Nederlands platform voor huurders die veilig en gericht van woning willen ruilen.
 
 ## Stack
 
 - Next.js 16
 - TypeScript en Tailwind CSS
-- Supabase voor accounts, tickets en live support
+- Supabase voor accounts, woningen, matches, chat en live support
 - Mollie voor iDEAL en andere Nederlandse betaalmethoden
 - Vercel deployment
 
@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor deze versie zijn ook `v7_2_organizer_portal.sql` en `v7_3_orders_and_payments.sql` nodig.
+Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil is `v8_0_housing_swap_foundation.sql` de nieuwe hoofdmigratie. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
 
 ## Vercel-variabelen
 
@@ -27,6 +27,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=https://asorta.nl
 MOLLIE_API_KEY=test_...
+RESEND_API_KEY=
+NEWSLETTER_FROM=ASORTA <info@asorta.nl>
+CRON_SECRET=
 ```
 
 Begin altijd met een Mollie test-key. Zet pas na een volledige proefbestelling een live-key in productie.
+
+`CRON_SECRET` beschermt de dagelijkse controle van verlopen zoekpassen en woningen die opnieuw bevestigd moeten worden.

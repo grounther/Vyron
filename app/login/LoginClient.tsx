@@ -47,11 +47,11 @@ export default function LoginClient({ next = '/account', mode = 'login' }: { nex
   }
 
   return <div className="card rounded-[2rem] p-6">
-    <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">ASORTA account</p>
+    <p className="text-xs font-black uppercase tracking-[.35em] text-[#b8ff5a]">ASORTA Woningruil</p>
     <h1 className="mt-4 text-4xl font-black">{isRegister ? 'Account maken' : 'Login'}</h1>
     <p className="mt-3 text-sm leading-6 text-white/55">
       {isRegister
-        ? 'Maak veilig een account aan met je e-mailadres. Je ontvangt een bevestigingslink per e-mail.'
+        ? 'Maak veilig een account aan met je e-mailadres. Je krijgt automatisch een anonieme Ruiler-ID.'
         : 'Log veilig in met een magic link. Open de link op hetzelfde apparaat als waar je wilt inloggen.'}
     </p>
 
@@ -67,8 +67,8 @@ export default function LoginClient({ next = '/account', mode = 'login' }: { nex
     </div>
 
     <div className="mt-5 grid gap-2 text-center text-sm font-bold">
-      <Link href="/checkout" className="text-white/45 hover:text-white">Continue as guest</Link>
-      {!isRegister && <Link href="/register" className="text-[#b7c8ad] hover:text-white">Nog geen account? Registreer hier</Link>}
+      <Link href="/homes" className="text-white/45 hover:text-white">Eerst woningen bekijken</Link>
+      {!isRegister && <Link href="/register" className="text-[#b8ff5a] hover:text-white">Nog geen account? Registreer hier</Link>}
     </div>
   </div>
 }

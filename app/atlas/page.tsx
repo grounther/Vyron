@@ -1,47 +1,6 @@
-import Link from "next/link";
-import { MessageCircle, TicketCheck, Users } from "lucide-react";
-import { assertAtlasPermission } from "@/lib/atlas-auth";
-export const dynamic = "force-dynamic";
-export default async function Atlas() {
-  const { staff } = await assertAtlasPermission("support", "/atlas");
-  return (
-    <main className="mx-auto min-h-screen max-w-6xl px-4 py-14 sm:px-5">
-      <p className="text-xs font-black uppercase tracking-[.25em] text-[#b8ff5a]">
-        Beheeromgeving
-      </p>
-      <h1 className="mt-3 text-4xl font-black sm:text-6xl">
-        ASORTA Ticket Atlas
-      </h1>
-      <p className="mt-3 text-white/45">Ingelogd als {staff.displayName}</p>
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
-        <Link
-          href="/atlas/support"
-          className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"
-        >
-          <MessageCircle className="text-[#b8ff5a]" />
-          <h2 className="mt-8 text-2xl font-black">Live support</h2>
-          <p className="mt-3 text-sm leading-6 text-white/48">
-            Beantwoord vragen van kopers, verkopers en organisatoren.
-          </p>
-        </Link>
-      <Link href="/atlas/orders" className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35">
-          <TicketCheck className="text-[#b8ff5a]" />
-          <h2 className="mt-8 text-2xl font-black">Tickets</h2>
-          <p className="mt-3 text-sm text-white/48">
-          Bekijk betaalstatus, omzet en uitgegeven tickets.
-          </p>
-        </Link>
-        <Link
-          href="/atlas/organizers"
-          className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"
-        >
-          <Users className="text-[#b8ff5a]" />
-          <h2 className="mt-8 text-2xl font-black">Organisatoren</h2>
-          <p className="mt-3 text-sm text-white/48">
-            Beoordeel aanmeldingen en beheer toegang.
-          </p>
-        </Link>
-      </div>
-    </main>
-  );
-}
+import Link from 'next/link'
+import { Building2, CreditCard, Home, MessageCircle, ShieldAlert, Sparkles, Users } from 'lucide-react'
+import { assertAtlasPermission } from '@/lib/atlas-auth'
+export const dynamic='force-dynamic'
+export default async function Atlas(){const{admin,staff}=await assertAtlasPermission('support','/atlas');const[countUsers,countListings,countMatches,countPayments,countReports]=await Promise.all([admin.from('profiles').select('*',{count:'exact',head:true}),admin.from('listings').select('*',{count:'exact',head:true}).eq('status','active'),admin.from('matches').select('*',{count:'exact',head:true}).in('status',['active','swap_in_progress']),admin.from('payments').select('*',{count:'exact',head:true}).eq('status','paid'),admin.from('reports').select('*',{count:'exact',head:true}).eq('status','open')]);const stats=[[Users,'Gebruikers',countUsers.count||0],[Home,'Actieve woningen',countListings.count||0],[Sparkles,'Open matches',countMatches.count||0],[CreditCard,'Betaalde transacties',countPayments.count||0],[ShieldAlert,'Open meldingen',countReports.count||0]] as const;return <main className="mx-auto min-h-screen max-w-6xl px-4 py-14 sm:px-5"><p className="kicker">Beheeromgeving</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">ASORTA Woningruil Atlas</h1><p className="mt-3 text-white/45">Ingelogd als {staff.displayName}</p><div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{stats.map(([Icon,label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/[.035] p-5"><Icon className="text-[#b8ff5a]" size={20}/><strong className="mt-7 block text-3xl">{value}</strong><span className="text-xs text-white/42">{label}</span></div>)}</div><div className="mt-8 grid gap-5 md:grid-cols-3"><Tile href="/atlas/support" icon={<MessageCircle/>} title="Live support" text="Beantwoord vragen en herroepingsverzoeken."/><Tile href="/atlas/housing" icon={<Building2/>} title="Woningen & matches" text="Beheer woningen, betalingen, matches en rapportages."/><Tile href="/atlas/providers" icon={<Home/>} title="Corporaties" text="Controleer officiële contact- en woningruilgegevens."/></div></main>}
+function Tile({href,icon,title,text}:{href:string;icon:React.ReactNode;title:string;text:string}){return <Link href={href} className="rounded-[1.7rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/35"><span className="text-[#b8ff5a] [&_svg]:h-6 [&_svg]:w-6">{icon}</span><h2 className="mt-8 text-2xl font-black">{title}</h2><p className="mt-3 text-sm leading-6 text-white/48">{text}</p></Link>}

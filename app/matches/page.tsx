@@ -1,0 +1,27 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Sparkles } from 'lucide-react'
+
+export const dynamic='force-dynamic'
+export const metadata={title:'Mijn matches'}
+export default async function MatchesPage({searchParams}:{searchParams:Promise<{cancelled?:string}>}){
+  const p=await searchParams,s=await createClient(),{data:{user}}=await s.auth.getUser()
+  if(!user)redirect('/login?next=/matches')
+  const [{data:pass},{data:matches=[]}]=await Promise.all([
+    s.from('access_passes').select('expires_at').eq('user_id',user.id).eq('status','active').gt('expires_at',new Date().toISOString()).maybeSingle(),
+    s.from('matches').select('*').or(`user_a_id.eq.${user.id},user_b_id.eq.${user.id}`).order('created_at',{ascending:false}),
+  ])
+  if(!pass&&!(matches||[]).some((m:any)=>['swap_in_progress','completed'].includes(m.status)))return <main className="mx-auto grid min-h-[72vh] max-w-3xl place-items-center px-4 py-16"><section className="card w-full rounded-[2rem] p-8 text-center sm:p-12"><Sparkles size={50} className="mx-auto text-[#b8ff5a]"/><p className="kicker mt-6">Er kan al een match klaarstaan</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">Activeer je zoektoegang</h1><p className="mx-auto mt-4 max-w-xl leading-7 text-white/50">Voor €5 krijg je één jaar toegang tot woningdetails, wederzijdse matches en privéchat. Er wordt niets automatisch verlengd.</p><Link href="/checkout-access?purpose=search_year" className="btn-primary mt-7">Activeer voor €5</Link></section></main>
+  const ids=(matches||[]).map((m:any)=>m.id)
+  const [{data:homes=[]},{data:profiles=[]}]=ids.length?await Promise.all([
+    s.from('match_listings').select('*').in('match_id',ids),
+    s.from('public_profiles').select('*').in('id',(matches||[]).map((m:any)=>m.user_a_id===user.id?m.user_b_id:m.user_a_id)),
+  ]):[{data:[]},{data:[]}]
+  const nameMap=new Map((profiles||[]).map((x:any)=>[x.id,x.display_name]))
+  return <main className="mx-auto min-h-screen max-w-6xl px-4 py-12 sm:px-5"><p className="kicker">Mijn matches</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">Woningen die écht passen.</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-white/52">Hier staan alleen wederzijdse matches: jij zoekt hun woning en zij zoeken die van jou.</p>{p.cancelled&&<div className="mt-6 rounded-2xl border border-[#b8ff5a]/25 bg-[#b8ff5a]/10 p-4 text-sm font-bold text-[#dcffb5]">De ruil is gestopt. Beide woningen doen automatisch weer mee met matching.</div>}
+    {(matches||[]).length?<div className="mt-8 grid gap-5">{(matches||[]).map((m:any)=>{const otherId=m.user_a_id===user.id?m.user_b_id:m.user_a_id,otherListing=m.user_a_id===user.id?m.listing_b_id:m.listing_a_id,home=(homes||[]).find((h:any)=>h.match_id===m.id&&h.id===otherListing);return <Link key={m.id} href={`/matches/${m.id}`} className="group grid gap-5 rounded-[2rem] border border-white/10 bg-white/[.035] p-6 transition hover:-translate-y-1 hover:border-[#b8ff5a]/30 sm:grid-cols-[1fr_auto] sm:items-center"><div><div className="flex flex-wrap items-center gap-2"><span className="status-pill">{statusLabel(m.status)}</span><span className="text-xs font-black text-white/35">Matchscore {m.score}%</span></div><h2 className="mt-4 text-2xl font-black">{home?.city||'Woningmatch'} · {nameMap.get(otherId)||'Ruiler'}</h2><p className="mt-2 flex items-center gap-2 text-sm text-white/48"><MapPin size={15}/>{home?.district||home?.province||'Nederland'} · {home?.rooms||'?'} kamers · € {home?.monthly_rent?Number(home.monthly_rent).toFixed(0):'—'} p/m</p><div className="mt-4 flex flex-wrap gap-2 text-sm text-white/48">{(m.reasons||[]).slice(0,3).map((r:string)=><span key={r} className="rounded-full border border-white/10 px-3 py-1.5"><CheckCircle2 size={14} className="mr-1 inline text-[#b8ff5a]"/>{r}</span>)}</div></div><span className="grid h-12 w-12 place-items-center rounded-full border border-white/10 text-white/55 transition group-hover:bg-[#b8ff5a] group-hover:text-black"><ArrowRight/></span></Link>})}</div>:<div className="mt-8 rounded-[2rem] border border-white/10 bg-white/[.035] p-10 text-center"><Sparkles size={42} className="mx-auto text-[#b8ff5a]"/><h2 className="mt-5 text-3xl font-black">Nog geen wederzijdse match</h2><p className="mx-auto mt-3 max-w-xl leading-7 text-white/48">Zorg dat je woning én zoekprofiel actief zijn. Asorta blijft daarna automatisch zoeken.</p><div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/place-home" className="btn-primary">Controleer mijn woning</Link><Link href="/search-profile" className="btn-secondary">Controleer mijn zoekprofiel</Link></div></div>}
+    <div className="mt-8 flex items-start gap-3 rounded-2xl border border-white/10 p-5 text-sm leading-6 text-white/45"><MessageCircle className="mt-0.5 shrink-0 text-[#b8ff5a]" size={19}/>Je kunt bij iedere match eerst anoniem chatten. Pas wanneer jullie allebei verder willen, start Asorta het officiële ruilproces en verschijnen de gegevens van beide verhuurders.</div>
+  </main>
+}
+function statusLabel(status:string){return ({active:'In gesprek',swap_in_progress:'Ruil in behandeling',declined:'Afgewezen',temporarily_unavailable:'Tijdelijk gepauzeerd',cancelled:'Gestopt',completed:'Voltooid'} as Record<string,string>)[status]||status}
