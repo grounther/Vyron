@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit, daarna `v8_1_admin_operations.sql`, `v8_2_housing_staff_permissions.sql`, `v8_3_search_profile_and_users.sql`, `v8_4_national_housing_providers.sql` en vervolgens `v8_5_cash_search_passes.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
+Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit, daarna `v8_1_admin_operations.sql`, `v8_2_housing_staff_permissions.sql`, `v8_3_search_profile_and_users.sql`, `v8_4_national_housing_providers.sql`, `v8_5_cash_search_passes.sql` en vervolgens `v8_6_cash_listing_activation.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
 
 Versie 8.1 voegt Atlas-beheer toe voor fotomoderatie, rapportages, blokkades, Mollie-refunds, privacyverzoeken, corporatievoorstellen en auditlogging. Nieuwe woningfoto's zijn pas openbaar nadat een bevoegde beheerder ze heeft goedgekeurd.
 
@@ -28,6 +28,8 @@ Versie 8.3 repareert het opslaan van optionele zoekwensen, slaat het volledige z
 Versie 8.4 vult de verhuurderkeuze met alle unieke actuele corporatienamen uit het landelijke ILT-register. Het plaatsingsformulier heeft een doorzoekbare keuzelijst, bevat De Woningzoeker als herkenbaar woonruimteplatform en houdt “Andere verhuurder” beschikbaar zodat een ontbrekende naam niemand blokkeert.
 
 Versie 8.5 laat bevoegde Atlas-beheerders een zoekpas na ontvangst van €5 contant activeren of met 365 dagen verlengen. De contante transactie verschijnt in Betalingen, de gebruiker krijgt een melding en de beheeractie wordt vastgelegd in het auditlog.
+
+Versie 8.6 voegt in dezelfde gebruikerskaart de contante €2-activering voor een woningplaatsing toe. Na bevestiging wordt de betaling geregistreerd, gaat de woning direct live en start de gebruikelijke herbevestigingstermijn van 90 dagen.
 
 ## Vercel-variabelen
 

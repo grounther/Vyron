@@ -65,3 +65,21 @@ export async function activateCashSearchPass(formData:FormData){
   }catch(error){back({error:error instanceof Error?error.message:'Contante zoekpas activeren mislukt.',q:query})}
   back({saved:'cash-pass',q:query})
 }
+
+export async function activateCashListing(formData:FormData){
+  const path='/atlas/users',listingId=clean(formData.get('listing_id'),80),query=clean(formData.get('q'),100),note=clean(formData.get('payment_note'),500)
+  const{admin,user}=await assertAtlasPermission('payments',path)
+  try{
+    if(!validUuid(listingId))throw new Error('Woning ontbreekt.')
+    if(formData.get('cash_received')!=='on')throw new Error('Bevestig eerst dat €2 contant is ontvangen.')
+    const{data:listing,error:listingError}=await admin.from('listings').select('id,user_id,status').eq('id',listingId).single()
+    if(listingError||!listing)throw new Error('Woning niet gevonden.')
+    const email=await targetEmail(admin,listing.user_id)
+    const{data,error}=await admin.rpc('activate_cash_listing',{p_listing_id:listingId,p_actor_email:user.email||'',p_target_email:email,p_note:note||null})
+    if(error)throw error
+    const result=Array.isArray(data)?data[0]:data
+    if(!result?.payment_id)throw new Error('De woningactivering kon niet worden bevestigd.')
+    revalidatePath(path);revalidatePath('/atlas/payments');revalidatePath('/atlas/housing');revalidatePath('/account');revalidatePath('/homes');revalidatePath('/')
+  }catch(error){back({error:error instanceof Error?error.message:'Contante woningactivering mislukt.',q:query})}
+  back({saved:'cash-listing',q:query})
+}
