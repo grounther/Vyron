@@ -31,6 +31,8 @@ Versie 8.5 laat bevoegde Atlas-beheerders een zoekpas na ontvangst van €5 cont
 
 Versie 8.6 voegt in dezelfde gebruikerskaart de contante €2-activering voor een woningplaatsing toe. Na bevestiging wordt de betaling geregistreerd, gaat de woning direct live en start de gebruikelijke herbevestigingstermijn van 90 dagen.
 
+Versie 8.7 maakt het grote beeld op de homepage volledig datagestuurd. Een ingelogde gebruiker ziet bij voorkeur een willekeurige woning uit diens wederzijdse matches, daarna de eigen actieve woning en anders een willekeurige beschikbare woning. Zonder echte woningen toont de site een lege toestand in plaats van voorbeelddata. De oude webshop-, Pokémon-, ticket-, evenementen- en organisatorbroncode is uit de actieve applicatie verwijderd. Bekende oude URL's worden permanent doorgestuurd naar de relevante woningruilpagina; gepensioneerde API-routes antwoorden met HTTP 410.
+
 ## Vercel-variabelen
 
 ```text

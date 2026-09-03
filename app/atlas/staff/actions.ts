@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { assertAtlasPermission, displayNameFromEmail, HOUSING_ATLAS_PERMISSIONS, LEGACY_ATLAS_PERMISSIONS, type AtlasPermission } from '@/lib/atlas-auth'
+import { assertAtlasPermission, displayNameFromEmail, HOUSING_ATLAS_PERMISSIONS, type AtlasPermission } from '@/lib/atlas-auth'
 
 const BADGES = HOUSING_ATLAS_PERMISSIONS
-const MANAGED_BADGES: AtlasPermission[] = [...HOUSING_ATLAS_PERMISSIONS, ...LEGACY_ATLAS_PERMISSIONS]
+const MANAGED_BADGES: AtlasPermission[] = HOUSING_ATLAS_PERMISSIONS
 
 function clean(value: FormDataEntryValue | null, limit = 240) {
   return typeof value === 'string' ? value.trim().slice(0, limit) : ''

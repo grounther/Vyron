@@ -1,0 +1,45 @@
+ASORTA V8.7 — UITGELICHTE ECHTE WONINGEN
+==========================================
+
+Deze versie heeft geen nieuwe Supabase-migratie nodig.
+
+Wat verandert er?
+
+- De vaste voorbeeldafbeelding op de homepage is vervangen door een echte woning.
+- Een ingelogde gebruiker ziet bij voorkeur een willekeurige woning uit de eigen wederzijdse matches.
+- Zonder match wordt de eigen actieve woning uitgelicht.
+- Zonder eigen woning wordt willekeurig uit het beschikbare aanbod gekozen.
+- Als er nog geen echte woning actief is, verschijnt een nette lege toestand.
+- Alleen goedgekeurde woningfoto's worden getoond.
+- Oude webshop-, Pokémon-, ticket-, evenementen- en organisatorcode is uit de actieve applicatie verwijderd.
+- Bekende oude openbare URL's sturen permanent door naar ASORTA Woningruil.
+- Oude bijbehorende API-routes zijn uitgeschakeld met HTTP-status 410.
+
+Patch-zip installeren en pushen
+--------------------------------
+
+Omdat V8.7 oude bestanden verwijdert, moet je de meegeleverde patch toepassen. Alleen bestanden over de projectmap kopiëren is niet voldoende.
+
+1. Pak ASORTA-V8.7-PATCH.zip uit, bijvoorbeeld in je map Downloads.
+2. Open Bash in de hoofdmap van het bestaande Vyron-project.
+3. Controleer dat je op de actuele main-branch staat:
+
+   git checkout main
+   git pull origin main
+   git status
+
+4. Pas de patch toe. Vervang het voorbeeldpad door de plek waar jij de patch hebt uitgepakt:
+
+   git apply --index "/pad/naar/ASORTA-V8.7.patch"
+
+5. Controleer en push:
+
+   npm install
+   npm run typecheck
+   npm run build
+   git commit -m "Voeg persoonlijke uitlichting toe en ruim oude modules op"
+   git push origin main
+
+Als `git status` vóór stap 4 eigen wijzigingen toont, commit die dan eerst of stop en maak een back-up. Zo voorkom je dat eigen werk door elkaar raakt met V8.7.
+
+Vercel start na de push automatisch een nieuwe deployment.

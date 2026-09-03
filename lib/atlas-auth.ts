@@ -18,22 +18,7 @@ export type HousingAtlasPermission =
   | 'privacy'
   | 'settings'
 
-// Tijdelijke interne types voor oude, niet meer bereikbare Atlas-routes. Deze
-// rechten worden niet meer uitgegeven en worden door de v8.2-migratie uitgezet.
-type LegacyAtlasPermission =
-  | 'head_support'
-  | 'products'
-  | 'orders'
-  | 'pricing'
-  | 'inventory'
-  | 'pages'
-  | 'promotions'
-  | 'newsletter'
-  | 'recovery'
-  | 'seo'
-  | 'integrations'
-
-export type AtlasPermission = HousingAtlasPermission | LegacyAtlasPermission
+export type AtlasPermission = HousingAtlasPermission
 
 export type AtlasStaffAccess = {
   email: string
@@ -56,21 +41,7 @@ export const HOUSING_ATLAS_PERMISSIONS: HousingAtlasPermission[] = [
   'settings',
 ]
 
-export const LEGACY_ATLAS_PERMISSIONS: AtlasPermission[] = [
-  'head_support',
-  'products',
-  'orders',
-  'pricing',
-  'inventory',
-  'pages',
-  'promotions',
-  'newsletter',
-  'recovery',
-  'seo',
-  'integrations',
-]
-
-const ALL_PERMISSIONS: AtlasPermission[] = [...HOUSING_ATLAS_PERMISSIONS, ...LEGACY_ATLAS_PERMISSIONS]
+const ALL_PERMISSIONS: AtlasPermission[] = HOUSING_ATLAS_PERMISSIONS
 
 function titleCase(value: string) {
   return value
