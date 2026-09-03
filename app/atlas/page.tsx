@@ -17,7 +17,7 @@ export default async function Atlas(){
     admin.from('listing_photos').select('*',{count:'exact',head:true}).eq('moderation_status','pending'),
   ])
   const stats:[HousingAtlasPermission,typeof Users,string,number][]= [
-    ['support',Users,'Gebruikers',countUsers.count||0],
+    ['users',Users,'Gebruikers',countUsers.count||0],
     ['housing',Home,'Actieve woningen',countListings.count||0],
     ['swaps',Sparkles,'Open matches',countMatches.count||0],
     ['payments',CreditCard,'Betaalde transacties',countPayments.count||0],
@@ -27,6 +27,7 @@ export default async function Atlas(){
   ]
   const tiles:[HousingAtlasPermission,string,React.ReactNode,string,string][]= [
     ['support','/atlas/support',<MessageCircle key="support"/>,'Live support','Beantwoord vragen en herroepingsverzoeken.'],
+    ['users','/atlas/users',<Users key="users"/>,'Gebruikers','Zoek ruilers en beheer profiel- en accountstatus.'],
     ['housing','/atlas/housing',<Building2 key="housing"/>,'Woningen & foto’s','Beheer woningstatussen en keur nieuwe foto’s.'],
     ['providers','/atlas/providers',<Home key="providers"/>,'Corporaties','Voeg verhuurders toe en controleer woningruilgegevens.'],
     ['payments','/atlas/payments',<CreditCard key="payments"/>,'Betalingen & refunds','Controleer Mollie-transacties en volledige terugbetalingen.'],

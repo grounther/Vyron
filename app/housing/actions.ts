@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 const clean=(v:FormDataEntryValue|null,n=500)=>typeof v==='string'?v.trim().slice(0,n):''
-const number=(v:FormDataEntryValue|null)=>{const parsed=Number(clean(v,30).replace(',','.'));return Number.isFinite(parsed)?parsed:null}
+const number=(v:FormDataEntryValue|null)=>{const raw=clean(v,30).replace(',','.');if(!raw)return null;const parsed=Number(raw);return Number.isFinite(parsed)?parsed:null}
 const go=(path:string,key:string,value:string)=>redirect(`${path}?${key}=${encodeURIComponent(value)}`)
 
 async function session(next:string){
@@ -81,19 +81,14 @@ export async function createHousingListing(formData:FormData){
 }
 
 export async function saveSearchProfile(formData:FormData){
-  const {supabase,user}=await session('/search-profile')
+  const {supabase}=await session('/search-profile')
   try{
     const locations=clean(formData.get('locations'),500).split(',').map(x=>x.trim()).filter(Boolean).slice(0,12)
-    const propertyTypes=formData.getAll('property_types').map(x=>String(x)).filter(Boolean)
+    const propertyTypes=formData.getAll('property_types').map(x=>String(x)).filter(Boolean),minRent=number(formData.get('min_rent')),maxRent=number(formData.get('max_rent'))
     if(!locations.length)throw new Error('Vul minimaal één gewenste plaats of gemeente in.')
-    if(!propertyTypes.length)throw new Error('Kies minimaal één woningtype.')
-    const {data,error}=await supabase.from('search_profiles').upsert({user_id:user.id,status:'active',min_rent:number(formData.get('min_rent')),max_rent:number(formData.get('max_rent')),min_rooms:number(formData.get('min_rooms')),min_bedrooms:number(formData.get('min_bedrooms')),min_living_area_m2:number(formData.get('min_living_area_m2')),garden_required:formData.get('garden_required')==='on',balcony_required:formData.get('balcony_required')==='on',elevator_required:formData.get('elevator_required')==='on',ground_floor_required:formData.get('ground_floor_required')==='on',wheelchair_required:formData.get('wheelchair_required')==='on',notes:clean(formData.get('notes'),1000)||null,updated_at:new Date().toISOString()},{onConflict:'user_id'}).select('id').single()
-    if(error||!data)throw error||new Error('Zoekprofiel kon niet worden opgeslagen.')
-    await supabase.from('search_locations').delete().eq('search_profile_id',data.id)
-    await supabase.from('search_property_types').delete().eq('search_profile_id',data.id)
-    const {error:locationError}=await supabase.from('search_locations').insert(locations.map(city=>({search_profile_id:data.id,city})))
-    const {error:typeError}=await supabase.from('search_property_types').insert(propertyTypes.map(property_type=>({search_profile_id:data.id,property_type})))
-    if(locationError||typeError)throw locationError||typeError
+    if(minRent!==null&&maxRent!==null&&maxRent<minRent)throw new Error('De maximale huur kan niet lager zijn dan de minimale huur.')
+    const {error}=await supabase.rpc('save_search_profile',{p_locations:locations,p_property_types:propertyTypes,p_min_rent:minRent,p_max_rent:maxRent,p_min_rooms:number(formData.get('min_rooms')),p_min_bedrooms:number(formData.get('min_bedrooms')),p_min_living_area_m2:number(formData.get('min_living_area_m2')),p_garden_required:formData.get('garden_required')==='on',p_balcony_required:formData.get('balcony_required')==='on',p_elevator_required:formData.get('elevator_required')==='on',p_ground_floor_required:formData.get('ground_floor_required')==='on',p_wheelchair_required:formData.get('wheelchair_required')==='on',p_notes:clean(formData.get('notes'),1000)||null})
+    if(error)throw error
     revalidatePath('/search-profile');revalidatePath('/account')
   }catch(e){go('/search-profile','error',e instanceof Error?e.message:'Zoekprofiel opslaan mislukt.')}
   redirect('/search-profile?saved=1')

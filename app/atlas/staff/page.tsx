@@ -22,6 +22,7 @@ type StaffMember = {
 
 const BADGES = [
   { key: 'support', label: 'Klantenservice', text: 'Live support en vragen van woningruilers.' },
+  { key: 'users', label: 'Gebruikersbeheer', text: 'Ruilers zoeken en profiel- of accountstatus aanpassen.' },
   { key: 'housing', label: 'Woningen & foto’s', text: 'Woningstatussen beheren en foto’s beoordelen.' },
   { key: 'providers', label: 'Corporaties', text: 'Verhuurders toevoegen, controleren en bijwerken.' },
   { key: 'payments', label: 'Betalingen & refunds', text: 'Mollie-betalingen bekijken en terugbetalen.' },
