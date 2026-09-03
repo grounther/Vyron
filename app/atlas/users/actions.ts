@@ -49,3 +49,19 @@ export async function setAtlasUserBlock(formData:FormData){
   }catch(error){back({error:error instanceof Error?error.message:'Accountstatus bijwerken mislukt.',q:query})}
   back({saved:blocked?'blocked':'unblocked',q:query})
 }
+
+export async function activateCashSearchPass(formData:FormData){
+  const path='/atlas/users',userId=clean(formData.get('user_id'),80),query=clean(formData.get('q'),100),note=clean(formData.get('payment_note'),500)
+  const{admin,user}=await assertAtlasPermission('payments',path)
+  try{
+    if(!validUuid(userId))throw new Error('Gebruiker ontbreekt.')
+    if(formData.get('cash_received')!=='on')throw new Error('Bevestig eerst dat €5 contant is ontvangen.')
+    const email=await targetEmail(admin,userId)
+    const{data,error}=await admin.rpc('activate_cash_search_pass',{p_user_id:userId,p_actor_email:user.email||'',p_target_email:email,p_note:note||null})
+    if(error)throw error
+    const result=Array.isArray(data)?data[0]:data
+    if(!result?.payment_id)throw new Error('De zoekpas kon niet worden bevestigd.')
+    revalidatePath(path);revalidatePath('/atlas/payments');revalidatePath('/account');revalidatePath('/matches')
+  }catch(error){back({error:error instanceof Error?error.message:'Contante zoekpas activeren mislukt.',q:query})}
+  back({saved:'cash-pass',q:query})
+}
