@@ -17,13 +17,15 @@ npm install
 npm run dev
 ```
 
-Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit, daarna `v8_1_admin_operations.sql`, `v8_2_housing_staff_permissions.sql` en vervolgens `v8_3_search_profile_and_users.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
+Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit, daarna `v8_1_admin_operations.sql`, `v8_2_housing_staff_permissions.sql`, `v8_3_search_profile_and_users.sql` en vervolgens `v8_4_national_housing_providers.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
 
 Versie 8.1 voegt Atlas-beheer toe voor fotomoderatie, rapportages, blokkades, Mollie-refunds, privacyverzoeken, corporatievoorstellen en auditlogging. Nieuwe woningfoto's zijn pas openbaar nadat een bevoegde beheerder ze heeft goedgekeurd.
 
 Versie 8.2 vervangt de oude webshop- en ticketrechten door acht taakgerichte woningruilrechten. Oude Atlas-beheerpagina's worden niet meer aangeboden en bestaande medewerkers worden door de migratie veilig overgezet.
 
 Versie 8.3 repareert het opslaan van optionele zoekwensen, slaat het volledige zoekprofiel atomair op en gebruikt PDOK voor plaatsnaamsuggesties. Atlas krijgt daarnaast apart gebruikersbeheer met profielwijzigingen, zoekprofielstatus, blokkades en auditlogging.
+
+Versie 8.4 vult de verhuurderkeuze met alle unieke actuele corporatienamen uit het landelijke ILT-register. Het plaatsingsformulier heeft een doorzoekbare keuzelijst, bevat De Woningzoeker als herkenbaar woonruimteplatform en houdt “Andere verhuurder” beschikbaar zodat een ontbrekende naam niemand blokkeert.
 
 ## Vercel-variabelen
 
