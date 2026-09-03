@@ -37,6 +37,8 @@ Versie 8.8 geeft nieuwe én bij introductie bestaande gebruikers 30 dagen gratis
 
 Versie 8.9 legt op de tarievenpagina transparant uit dat registreren gratis is, waarom de plaatsingsbijdrage van €2 helpt om het woningaanbod serieus en actueel te houden en welke techniek, beveiliging en ondersteuning met de zoekpas van €5 worden onderhouden.
 
+Versie 8.10 geeft iedere aanbieder vanuit Mijn Asorta een eigen advertentie-editor. Woninggegevens, adres, voorzieningen en omschrijving kunnen gratis worden gecorrigeerd; aanvullende foto's worden veilig opgeslagen en opnieuw aan Atlas-fotomoderatie aangeboden. Tijdens een lopend ruildossier blijft de advertentie vergrendeld.
+
 ## Vercel-variabelen
 
 ```text

@@ -22,11 +22,12 @@ function providerLabel(provider: HousingProviderOption) {
   return provider.provider_type === 'housing_corporation' ? 'Woningcorporatie' : 'Verhuurder'
 }
 
-export default function HousingProviderPicker({ providers }: { providers: HousingProviderOption[] }) {
+export default function HousingProviderPicker({ providers, initialProviderId }: { providers: HousingProviderOption[]; initialProviderId?: string | null }) {
   const inputId = useId()
   const listId = useId()
-  const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<HousingProviderOption | null>(null)
+  const initialProvider = providers.find((provider) => provider.id === initialProviderId) || null
+  const [query, setQuery] = useState(initialProvider?.name || '')
+  const [selected, setSelected] = useState<HousingProviderOption | null>(initialProvider)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
 

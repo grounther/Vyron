@@ -1,0 +1,39 @@
+ASORTA V8.10 — WIJZIG MIJN ADVERTENTIE
+
+Deze versie voegt voor woningaanbieders een volledige advertentie-editor toe.
+
+Nieuw:
+
+- knop Wijzig mijn advertentie in Mijn Asorta;
+- bestaande woninggegevens zijn vooraf ingevuld;
+- kamers, slaapkamers, oppervlakte en huur kunnen worden gecorrigeerd;
+- adres, verhuurder, voorzieningen en beschikbaarheidsdatum kunnen worden bijgewerkt;
+- de omschrijving kan worden uitgebreid tot 3000 tekens;
+- aanvullende woningfoto's kunnen worden toegevoegd tot maximaal 8;
+- nieuwe foto's krijgen automatisch de status In controle in Atlas;
+- bestaande foto's kunnen bewust in twee stappen worden verwijderd;
+- de laatste woningfoto kan pas weg nadat eerst een vervangende foto is toegevoegd;
+- wijzigen kost geen nieuwe €2;
+- tijdens een lopend ruildossier is aanpassen geblokkeerd.
+
+ER IS VOOR V8.10 GEEN NIEUWE SUPABASE-MIGRATIE NODIG.
+
+PATCH TOEPASSEN
+
+1. Controleer dat package.json versie 8.9.0 bevat.
+2. Pak ASORTA-V8.10-PATCH.zip buiten de projectmap uit.
+3. Typ in Git Bash: git apply --check, voeg een spatie toe en sleep daarna
+   ASORTA-V8.10.patch vanuit Verkenner in Git Bash.
+4. Herhaal dit met git apply --index en hetzelfde patchbestand.
+5. Controleer daarna:
+
+   node -p "require('./package.json').version"
+
+   De uitvoer moet 8.10.0 zijn.
+
+6. Publiceer:
+
+   git commit -m "Voeg advertentie-editor toe"
+   git push origin main
+
+Voeg het patchbestand zelf niet toe aan Git.
