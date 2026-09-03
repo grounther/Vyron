@@ -1,0 +1,31 @@
+ASORTA WONINGRUIL — UPDATE V8.3
+================================
+
+Deze compacte update sluit aan op de huidige v8.2-versie in GitHub en kan
+direct over de bestaande repository worden gekopieerd.
+
+1. Pak ASORTA-v8.3-UPDATE.zip uit.
+2. Kopieer de mapinhoud over de bestaande GitHub-repository Vyron.
+3. Open Supabase > SQL Editor.
+4. Voer, als dat nog niet is gedaan, eerst volledig uit:
+   supabase/v8_2_housing_staff_permissions.sql
+5. Voer daarna één keer volledig uit:
+   supabase/v8_3_search_profile_and_users.sql
+6. Commit en push de wijzigingen naar de main-branch.
+7. Vercel bouwt de nieuwe main-commit daarna automatisch.
+
+VERSIE 8.3
+-----------
+
+- Zoekprofielen slaan weer betrouwbaar en volledig op.
+- Alleen een gewenste locatie is verplicht.
+- Lege getalvelden blijven echt leeg en beperken de matching niet.
+- Geen woningtype kiezen betekent alle woningtypen toestaan.
+- Elk zoekveld heeft uitleg via een informatie-icoon.
+- Plaatsnamen verschijnen tijdens het typen via de PDOK Locatieserver.
+- Atlas heeft een nieuwe sectie Gebruikers.
+- Beheerders kunnen profielgegevens en zoekprofielstatus aanpassen.
+- Accounts kunnen met verplichte reden worden geblokkeerd of gedeblokkeerd.
+- Beheerwijzigingen worden in de Atlas-auditlog vastgelegd.
+
+Er zijn voor deze update geen nieuwe Vercel-variabelen nodig.

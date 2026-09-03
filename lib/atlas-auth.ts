@@ -9,6 +9,7 @@ type AnyRow = Record<string, any>
 
 export type HousingAtlasPermission =
   | 'support'
+  | 'users'
   | 'housing'
   | 'providers'
   | 'payments'
@@ -45,6 +46,7 @@ export type AtlasStaffAccess = {
 
 export const HOUSING_ATLAS_PERMISSIONS: HousingAtlasPermission[] = [
   'support',
+  'users',
   'housing',
   'providers',
   'payments',
@@ -107,6 +109,7 @@ function accessFromAdminRow(row: AnyRow, email: string): AtlasStaffAccess {
 
   if (!ownerOrAdmin) {
     permissions.support = row.can_support === true || role === 'support'
+    permissions.users = row.can_users === true || role === 'users'
     permissions.housing = row.can_housing === true || role === 'housing'
     permissions.providers = row.can_providers === true || role === 'providers'
     permissions.payments = row.can_payments === true || role === 'payments'
