@@ -23,6 +23,17 @@ const nextConfig = {
       { source: '/returns', destination: '/terms', permanent: false },
       { source: '/shipping', destination: '/about', permanent: false },
       { source: '/track-order', destination: '/account', permanent: false },
+      { source: '/atlas/bookkeeping', destination: '/atlas', permanent: false },
+      { source: '/atlas/integrations', destination: '/atlas', permanent: false },
+      { source: '/atlas/newsletter', destination: '/atlas', permanent: false },
+      { source: '/atlas/orders', destination: '/atlas', permanent: false },
+      { source: '/atlas/organizers', destination: '/atlas', permanent: false },
+      { source: '/atlas/pages', destination: '/atlas', permanent: false },
+      { source: '/atlas/pricing', destination: '/atlas', permanent: false },
+      { source: '/atlas/products', destination: '/atlas', permanent: false },
+      { source: '/atlas/promotions', destination: '/atlas', permanent: false },
+      { source: '/atlas/recovery', destination: '/atlas', permanent: false },
+      { source: '/atlas/seo', destination: '/atlas', permanent: false },
     ];
   },
 };

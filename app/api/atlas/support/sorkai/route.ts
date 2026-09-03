@@ -14,7 +14,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const auth = await requireAtlasAdminApi()
   if ('error' in auth) return auth.error
-  if (!hasAtlasPermission(auth.staff, 'settings') && !hasAtlasPermission(auth.staff, 'head_support')) {
+  if (!hasAtlasPermission(auth.staff, 'settings')) {
     return NextResponse.json({ error: 'Alleen admin/head support mag Sorkai instellingen wijzigen.' }, { status: 403 })
   }
 

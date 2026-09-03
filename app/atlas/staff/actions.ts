@@ -2,23 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { assertAtlasPermission, displayNameFromEmail, type AtlasPermission } from '@/lib/atlas-auth'
+import { assertAtlasPermission, displayNameFromEmail, HOUSING_ATLAS_PERMISSIONS, LEGACY_ATLAS_PERMISSIONS, type AtlasPermission } from '@/lib/atlas-auth'
 
-const BADGES: AtlasPermission[] = [
-  'support',
-  'head_support',
-  'products',
-  'orders',
-  'pricing',
-  'inventory',
-  'pages',
-  'promotions',
-  'newsletter',
-  'recovery',
-  'seo',
-  'integrations',
-  'settings',
-]
+const BADGES = HOUSING_ATLAS_PERMISSIONS
+const MANAGED_BADGES: AtlasPermission[] = [...HOUSING_ATLAS_PERMISSIONS, ...LEGACY_ATLAS_PERMISSIONS]
 
 function clean(value: FormDataEntryValue | null, limit = 240) {
   return typeof value === 'string' ? value.trim().slice(0, limit) : ''
@@ -57,6 +44,7 @@ export async function createStaffMember(formData: FormData) {
   const email = normalizeEmail(clean(formData.get('email'), 180))
   const displayNameInput = clean(formData.get('display_name'), 120)
   const badges = selectedBadges(formData)
+  const selected = new Set<AtlasPermission>(badges)
 
   try {
     if (!email) throw new Error('Vul een e-mailadres of naam in.')
@@ -83,8 +71,8 @@ export async function createStaffMember(formData: FormData) {
     if (error) throw new Error(error.message)
 
     const staffId = member.id
-    for (const badge of BADGES) {
-      if (badges.includes(badge)) {
+    for (const badge of MANAGED_BADGES) {
+      if (selected.has(badge)) {
         const { error: badgeError } = await admin
           .from('atlas_staff_badges')
           .upsert({ staff_member_id: staffId, badge, active: true, granted_by: user.email, granted_at: new Date().toISOString() }, { onConflict: 'staff_member_id,badge' })
@@ -115,6 +103,7 @@ export async function updateStaffMember(formData: FormData) {
   const staffId = clean(formData.get('staff_id'), 80)
   const displayNameInput = clean(formData.get('display_name'), 120)
   const badges = selectedBadges(formData)
+  const selected = new Set<AtlasPermission>(badges)
   const active = checked(formData, 'active')
 
   try {
@@ -145,8 +134,8 @@ export async function updateStaffMember(formData: FormData) {
 
     if (error) throw new Error(error.message)
 
-    for (const badge of BADGES) {
-      if (badges.includes(badge)) {
+    for (const badge of MANAGED_BADGES) {
+      if (selected.has(badge)) {
         const { error: badgeError } = await admin
           .from('atlas_staff_badges')
           .upsert({ staff_member_id: staffId, badge, active: true, granted_by: user.email, granted_at: new Date().toISOString() }, { onConflict: 'staff_member_id,badge' })

@@ -7,8 +7,19 @@ type AtlasUser = { id: string; email?: string | null }
 
 type AnyRow = Record<string, any>
 
-export type AtlasPermission =
+export type HousingAtlasPermission =
   | 'support'
+  | 'housing'
+  | 'providers'
+  | 'payments'
+  | 'reports'
+  | 'swaps'
+  | 'privacy'
+  | 'settings'
+
+// Tijdelijke interne types voor oude, niet meer bereikbare Atlas-routes. Deze
+// rechten worden niet meer uitgegeven en worden door de v8.2-migratie uitgezet.
+type LegacyAtlasPermission =
   | 'head_support'
   | 'products'
   | 'orders'
@@ -20,7 +31,8 @@ export type AtlasPermission =
   | 'recovery'
   | 'seo'
   | 'integrations'
-  | 'settings'
+
+export type AtlasPermission = HousingAtlasPermission | LegacyAtlasPermission
 
 export type AtlasStaffAccess = {
   email: string
@@ -31,8 +43,18 @@ export type AtlasStaffAccess = {
   permissions: Record<AtlasPermission, boolean>
 }
 
-const ALL_PERMISSIONS: AtlasPermission[] = [
+export const HOUSING_ATLAS_PERMISSIONS: HousingAtlasPermission[] = [
   'support',
+  'housing',
+  'providers',
+  'payments',
+  'reports',
+  'swaps',
+  'privacy',
+  'settings',
+]
+
+export const LEGACY_ATLAS_PERMISSIONS: AtlasPermission[] = [
   'head_support',
   'products',
   'orders',
@@ -44,8 +66,9 @@ const ALL_PERMISSIONS: AtlasPermission[] = [
   'recovery',
   'seo',
   'integrations',
-  'settings',
 ]
+
+const ALL_PERMISSIONS: AtlasPermission[] = [...HOUSING_ATLAS_PERMISSIONS, ...LEGACY_ATLAS_PERMISSIONS]
 
 function titleCase(value: string) {
   return value
@@ -84,16 +107,12 @@ function accessFromAdminRow(row: AnyRow, email: string): AtlasStaffAccess {
 
   if (!ownerOrAdmin) {
     permissions.support = row.can_support === true || role === 'support'
-    permissions.products = row.can_products === true || row.can_inventory === true || role === 'products' || role === 'inventory'
-    permissions.inventory = row.can_inventory === true || row.can_products === true || role === 'inventory'
-    permissions.orders = row.can_orders === true || role === 'orders'
-    permissions.pricing = row.can_pricing === true || role === 'pricing'
-    permissions.pages = row.can_pages === true || role === 'pages'
-    permissions.promotions = row.can_promotions === true || role === 'promotions'
-    permissions.newsletter = row.can_newsletter === true || role === 'newsletter'
-    permissions.recovery = row.can_recovery === true || role === 'recovery'
-    permissions.seo = row.can_seo === true || role === 'seo'
-    permissions.integrations = row.can_integrations === true || role === 'integrations'
+    permissions.housing = row.can_housing === true || role === 'housing'
+    permissions.providers = row.can_providers === true || role === 'providers'
+    permissions.payments = row.can_payments === true || role === 'payments'
+    permissions.reports = row.can_reports === true || role === 'reports'
+    permissions.swaps = row.can_swaps === true || role === 'swaps'
+    permissions.privacy = row.can_privacy === true || role === 'privacy'
     permissions.settings = row.can_settings === true || role === 'settings'
   }
 
@@ -129,7 +148,7 @@ export function hasAtlasPermission(access: AtlasStaffAccess | null | undefined, 
 }
 
 export function isSupportOnly(access: AtlasStaffAccess) {
-  const enabled = ALL_PERMISSIONS.filter((permission) => hasAtlasPermission(access, permission))
+  const enabled = HOUSING_ATLAS_PERMISSIONS.filter((permission) => hasAtlasPermission(access, permission))
   return enabled.length === 1 && enabled[0] === 'support'
 }
 

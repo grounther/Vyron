@@ -18,7 +18,7 @@ async function audit(admin:any,actor:string|null|undefined,action:string,details
 
 export async function createProvider(formData:FormData){
   const path='/atlas/providers',name=clean(formData.get('name'),160),type=clean(formData.get('provider_type'),40)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('providers',path)
   try{
     if(name.length<2)throw new Error('Vul een geldige naam in.')
     if(!['housing_corporation','private_landlord','municipality','other'].includes(type))throw new Error('Ongeldig type verhuurder.')
@@ -33,7 +33,7 @@ export async function createProvider(formData:FormData){
 
 export async function reviewProviderSuggestion(formData:FormData){
   const path='/atlas/providers',id=clean(formData.get('id'),80),decision=clean(formData.get('decision'),20)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('providers',path)
   try{
     if(!validUuid(id)||!['approved','rejected'].includes(decision))throw new Error('Ongeldig voorstel.')
     const{data:suggestion,error}=await admin.from('housing_provider_suggestions').select('*').eq('id',id).single()
@@ -56,7 +56,7 @@ export async function reviewProviderSuggestion(formData:FormData){
 
 export async function setReportStatus(formData:FormData){
   const path='/atlas/reports',id=clean(formData.get('id'),80),status=clean(formData.get('status'),20)
-  const {admin,user}=await assertAtlasPermission('support',path)
+  const {admin,user}=await assertAtlasPermission('reports',path)
   try{
     if(!validUuid(id)||!['open','reviewing','resolved','dismissed'].includes(status))throw new Error('Ongeldige rapportstatus.')
     const{error}=await admin.from('reports').update({status,updated_at:new Date().toISOString()}).eq('id',id)
@@ -69,7 +69,7 @@ export async function setReportStatus(formData:FormData){
 
 export async function setUserBlock(formData:FormData){
   const path='/atlas/reports',userId=clean(formData.get('user_id'),80),blocked=clean(formData.get('blocked'),8)==='true',reason=clean(formData.get('reason'),500),confirmation=clean(formData.get('confirmation'),30)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('reports',path)
   try{
     if(!validUuid(userId))throw new Error('Gebruiker ontbreekt.')
     if(blocked&&confirmation!=='BLOKKEREN')throw new Error('Typ BLOKKEREN om dit account te blokkeren.')
@@ -84,7 +84,7 @@ export async function setUserBlock(formData:FormData){
 
 export async function moderatePhoto(formData:FormData){
   const path='/atlas/housing',id=clean(formData.get('photo_id'),80),status=clean(formData.get('status'),20),note=clean(formData.get('note'),500)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('housing',path)
   try{
     if(!validUuid(id)||!['approved','rejected'].includes(status))throw new Error('Ongeldige fotokeuze.')
     if(status==='rejected'&&note.length<3)throw new Error('Geef bij afwijzing een korte reden.')
@@ -98,7 +98,7 @@ export async function moderatePhoto(formData:FormData){
 
 export async function startHousingRefund(formData:FormData){
   const path='/atlas/payments',id=clean(formData.get('payment_id'),80),confirmation=clean(formData.get('confirmation'),30)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('payments',path)
   try{
     if(!validUuid(id)||confirmation!=='TERUGBETALEN')throw new Error('Typ TERUGBETALEN om de volledige refund te bevestigen.')
     const{data:payment,error}=await admin.from('payments').select('*').eq('id',id).single()
@@ -121,7 +121,7 @@ export async function startHousingRefund(formData:FormData){
 
 export async function syncHousingRefund(formData:FormData){
   const path='/atlas/payments',id=clean(formData.get('payment_id'),80)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('payments',path)
   try{
     const{data:payment,error}=await admin.from('payments').select('*').eq('id',id).single()
     if(error||!payment?.provider_payment_id||!payment.provider_refund_id)throw new Error('Refundgegevens ontbreken.')
@@ -140,7 +140,7 @@ export async function syncHousingRefund(formData:FormData){
 
 export async function setPrivacyRequestStatus(formData:FormData){
   const path='/atlas/privacy',id=clean(formData.get('id'),80),status=clean(formData.get('status'),20)
-  const {admin,user}=await assertAtlasPermission('settings',path)
+  const {admin,user}=await assertAtlasPermission('privacy',path)
   try{
     if(!validUuid(id)||!['open','reviewing','completed','rejected'].includes(status))throw new Error('Ongeldige verzoekstatus.')
     const payload={status,handled_by:['completed','rejected'].includes(status)?user.email:null,handled_at:['completed','rejected'].includes(status)?new Date().toISOString():null,updated_at:new Date().toISOString()}

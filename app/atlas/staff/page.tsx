@@ -21,19 +21,14 @@ type StaffMember = {
 }
 
 const BADGES = [
-  { key: 'support', label: 'Support', text: 'Live support voor kopers, verkopers en organisatoren.' },
-  { key: 'head_support', label: 'Head support', text: 'Support lead met toegang tot teaminstellingen.' },
-  { key: 'orders', label: 'Orders', text: 'Orderoverzicht en orderinformatie.' },
-  { key: 'products', label: 'Producten', text: 'Producten beheren.' },
-  { key: 'inventory', label: 'Voorraad', text: 'Online/marktvoorraad beheren.' },
-  { key: 'pricing', label: 'Prijsbeheer', text: 'Cardmarket paste-helper en prijzen toepassen.' },
-  { key: 'pages', label: 'Pagina’s', text: 'Page editor en homepage content.' },
-  { key: 'promotions', label: 'Acties', text: 'Promoties en acties.' },
-  { key: 'newsletter', label: 'Nieuwsbrief', text: 'Drops en e-mailinschrijvingen.' },
-  { key: 'recovery', label: 'Cart recovery', text: 'Abandoned carts.' },
-  { key: 'seo', label: 'SEO', text: 'SEO instellingen.' },
-  { key: 'integrations', label: 'Integraties', text: 'PayPal/Mollie/integratie-status.' },
-  { key: 'settings', label: 'Admin', text: 'Medewerkers en gevoelige instellingen.' },
+  { key: 'support', label: 'Klantenservice', text: 'Live support en vragen van woningruilers.' },
+  { key: 'housing', label: 'Woningen & foto’s', text: 'Woningstatussen beheren en foto’s beoordelen.' },
+  { key: 'providers', label: 'Corporaties', text: 'Verhuurders toevoegen, controleren en bijwerken.' },
+  { key: 'payments', label: 'Betalingen & refunds', text: 'Mollie-betalingen bekijken en terugbetalen.' },
+  { key: 'reports', label: 'Meldingen & blokkades', text: 'Gebruikersmeldingen behandelen en accounts blokkeren.' },
+  { key: 'swaps', label: 'Ruildossiers', text: 'Lopende en afgeronde woningruilen bekijken.' },
+  { key: 'privacy', label: 'Privacyverzoeken', text: 'Export- en verwijderverzoeken afhandelen.' },
+  { key: 'settings', label: 'Medewerkersbeheer', text: 'Rechten beheren en de beveiligde auditlog bekijken.' },
 ]
 
 function dateTime(value: unknown) {
@@ -68,7 +63,8 @@ async function loadStaff(admin: any): Promise<{ members: StaffMember[]; owners: 
   const mapped = ((members || []) as AnyRow[]).map((row) => {
     const email = String(row.email || '').toLowerCase()
     const badgeRows = Array.isArray(row.atlas_staff_badges) ? row.atlas_staff_badges : []
-    const badges = badgeRows.filter((badge: AnyRow) => badge.active !== false).map((badge: AnyRow) => String(badge.badge || '')).filter(Boolean)
+    const visibleBadges = new Set(BADGES.map((badge) => badge.key))
+    const badges = badgeRows.filter((badge: AnyRow) => badge.active !== false && visibleBadges.has(String(badge.badge || ''))).map((badge: AnyRow) => String(badge.badge || '')).filter(Boolean)
     return {
       id: String(row.id),
       email,
@@ -98,7 +94,7 @@ export default async function AtlasStaffPage({ searchParams }: { searchParams?: 
         <div>
           <p className="text-xs font-black uppercase tracking-[.35em] text-[#b7c8ad]">Atlas beheer</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Medewerkers</h1>
-          <p className="mt-4 max-w-2xl text-white/60">Beheer wie Atlas mag gebruiken. Supportmedewerkers kunnen alleen het supportportaal zien; owners/admins houden volledige controle.</p>
+          <p className="mt-4 max-w-2xl text-white/60">Geef iedere medewerker alleen toegang tot de onderdelen die nodig zijn voor woningruil. Owners en admins houden volledige controle.</p>
         </div>
         <Link href="/atlas" className="btn-secondary">Terug naar Atlas</Link>
       </div>
@@ -110,7 +106,7 @@ export default async function AtlasStaffPage({ searchParams }: { searchParams?: 
 
     <section className="mt-8 grid gap-4 md:grid-cols-3">
       <InfoCard icon={<UsersRound />} label="Medewerkers" value={String(members.length)} text="Actieve en uitgeschakelde staff accounts." />
-      <InfoCard icon={<BadgeCheck />} label="Support" value={String(members.filter((m) => m.active && m.badges.includes('support')).length)} text="Accounts met support badge." />
+      <InfoCard icon={<BadgeCheck />} label="Klantenservice" value={String(members.filter((m) => m.active && m.badges.includes('support')).length)} text="Accounts met toegang tot live support." />
       <InfoCard icon={<ShieldCheck />} label="Ingelogd als" value={staff.displayName} text={staff.email} />
     </section>
 
@@ -141,7 +137,7 @@ export default async function AtlasStaffPage({ searchParams }: { searchParams?: 
     <section className="mt-8 grid gap-5">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-2xl font-black">Alle medewerkers</h2>
-        <span className="rounded-full border border-white/10 bg-white/[.035] px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-white/45">{members.length} staff</span>
+        <span className="rounded-full border border-white/10 bg-white/[.035] px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-white/45">{members.length} medewerkers</span>
       </div>
       {members.length ? members.map((member) => <StaffEditor key={member.id} member={member} />) : <div className="card rounded-[2rem] p-8 text-center text-white/45">Nog geen medewerkers toegevoegd. Gebruik de knop hierboven om de eerste supportmedewerker aan te maken.</div>}
     </section>
@@ -166,8 +162,8 @@ function InfoCard({ icon, label, value, text }: { icon: React.ReactNode; label: 
 function BadgeGrid({ defaultBadges = [], memberBadges = [] }: { defaultBadges?: string[]; memberBadges?: string[] }) {
   const active = new Set([...defaultBadges, ...memberBadges])
   return <div className="mt-5">
-    <p className="mb-3 text-sm font-black uppercase tracking-[.18em] text-white/40">Badges / rechten</p>
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <p className="mb-3 text-sm font-black uppercase tracking-[.18em] text-white/40">Woningruilrechten</p>
+    <div className="grid gap-3 md:grid-cols-2">
       {BADGES.map((badge) => <label key={badge.key} className="flex cursor-pointer gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4 transition hover:border-white/20">
         <input type="checkbox" name={`badge_${badge.key}`} defaultChecked={active.has(badge.key)} className="mt-1 h-4 w-4 accent-[#b7c8ad]" />
         <span><span className="block font-black">{badge.label}</span><span className="mt-1 block text-xs leading-5 text-white/45">{badge.text}</span></span>

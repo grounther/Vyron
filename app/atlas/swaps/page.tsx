@@ -6,7 +6,7 @@ export const dynamic='force-dynamic'
 export const metadata={title:'Ruildossiers | Atlas',robots:{index:false,follow:false}}
 
 export default async function SwapsPage(){
-  const{admin}=await assertAtlasPermission('support','/atlas/swaps')
+  const{admin}=await assertAtlasPermission('swaps','/atlas/swaps')
   const{data:swaps=[]}=await admin.from('swap_cases').select('*,provider_a:housing_providers!swap_cases_provider_a_id_fkey(name),provider_b:housing_providers!swap_cases_provider_b_id_fkey(name),swap_provider_status(id,user_id,status,updated_at)').order('created_at',{ascending:false}).limit(200)
   const userIds=[...new Set((swaps||[]).flatMap((x:any)=>[x.user_a_id,x.user_b_id]))]
   const listingIds=[...new Set((swaps||[]).flatMap((x:any)=>[x.listing_a_id,x.listing_b_id]))]

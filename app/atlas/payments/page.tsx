@@ -7,7 +7,7 @@ export const dynamic='force-dynamic'
 export const metadata={title:'Betalingen | Atlas',robots:{index:false,follow:false}}
 
 export default async function PaymentsPage({searchParams}:{searchParams:Promise<{status?:string;purpose?:string;saved?:string;error?:string}>}){
-  const p=await searchParams,{admin}=await assertAtlasPermission('settings','/atlas/payments')
+  const p=await searchParams,{admin}=await assertAtlasPermission('payments','/atlas/payments')
   let query=admin.from('payments').select('*').order('created_at',{ascending:false}).limit(250)
   if(p.status)query=query.eq('status',p.status)
   if(p.purpose)query=query.eq('purpose',p.purpose)

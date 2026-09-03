@@ -17,9 +17,11 @@ npm install
 npm run dev
 ```
 
-Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit en daarna `v8_1_admin_operations.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
+Voer de SQL-bestanden in `supabase/` op versienummer uit. Voor woningruil voer je eerst `v8_0_housing_swap_foundation.sql` uit, daarna `v8_1_admin_operations.sql` en vervolgens `v8_2_housing_staff_permissions.sql`. De bestaande ticket-tabellen blijven voorlopig alleen als archief bestaan.
 
 Versie 8.1 voegt Atlas-beheer toe voor fotomoderatie, rapportages, blokkades, Mollie-refunds, privacyverzoeken, corporatievoorstellen en auditlogging. Nieuwe woningfoto's zijn pas openbaar nadat een bevoegde beheerder ze heeft goedgekeurd.
+
+Versie 8.2 vervangt de oude webshop- en ticketrechten door acht taakgerichte woningruilrechten. Oude Atlas-beheerpagina's worden niet meer aangeboden en bestaande medewerkers worden door de migratie veilig overgezet.
 
 ## Vercel-variabelen
 
