@@ -32,6 +32,15 @@ export async function updateProfile(formData:FormData){
   redirect('/profile?saved=1')
 }
 
+export async function suggestHousingProvider(formData:FormData){
+  const {supabase,user}=await session('/place-home')
+  const name=clean(formData.get('provider_name'),160),website=clean(formData.get('provider_website'),300),contact=clean(formData.get('provider_contact'),500)
+  if(name.length<2)go('/place-home','error','Vul de naam van je verhuurder in.')
+  const{error}=await supabase.from('housing_provider_suggestions').insert({submitted_by:user.id,name,website_url:website||null,contact_details:contact||null,status:'pending'})
+  if(error)go('/place-home','error',error.message)
+  redirect('/place-home?provider_suggested=1')
+}
+
 export async function createHousingListing(formData:FormData){
   const {supabase,user}=await session('/place-home')
   let listingId=''
@@ -106,6 +115,28 @@ export async function sendMatchMessage(formData:FormData){
   if(error)go(`/matches/${matchId}`,'error',error.message)
   await supabase.from('conversations').update({last_message_at:new Date().toISOString()}).eq('id',conversationId)
   revalidatePath(`/matches/${matchId}`);redirect(`/matches/${matchId}#chat`)
+}
+
+export async function reportMatchUser(formData:FormData){
+  const matchId=clean(formData.get('match_id'),80),reason=clean(formData.get('reason'),160),details=clean(formData.get('details'),1500)
+  const {supabase,user}=await session(`/matches/${matchId}`)
+  if(reason.length<3)go(`/matches/${matchId}`,'error','Kies of beschrijf een reden voor je melding.')
+  const[{data:match},{data:conversation}]=await Promise.all([supabase.from('matches').select('*').eq('id',matchId).maybeSingle(),supabase.from('conversations').select('id').eq('match_id',matchId).maybeSingle()])
+  if(!match)go(`/matches/${matchId}`,'error','Match niet gevonden.')
+  const reportedUserId=match.user_a_id===user.id?match.user_b_id:match.user_a_id
+  const listingId=match.user_a_id===user.id?match.listing_b_id:match.listing_a_id
+  const{error}=await supabase.from('reports').insert({reporter_id:user.id,reported_user_id:reportedUserId,listing_id:listingId,conversation_id:conversation?.id||null,reason,details:details||null,status:'open'})
+  if(error)go(`/matches/${matchId}`,'error',error.message)
+  redirect(`/matches/${matchId}?reported=1`)
+}
+
+export async function blockMatchUser(formData:FormData){
+  const matchId=clean(formData.get('match_id'),80),confirmation=clean(formData.get('confirmation'),30)
+  const {supabase}=await session(`/matches/${matchId}`)
+  if(confirmation!=='BLOKKEREN')go(`/matches/${matchId}`,'error','Typ BLOKKEREN om deze gebruiker te blokkeren.')
+  const{error}=await supabase.rpc('block_match_user',{p_match_id:matchId})
+  if(error)go(`/matches/${matchId}`,'error',error.message)
+  revalidatePath('/matches');redirect('/matches?blocked=1')
 }
 
 export async function updateProviderProgress(formData:FormData){

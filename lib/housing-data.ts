@@ -1,11 +1,11 @@
 import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { demoHomes, propertyLabel, type PublicHome } from '@/lib/housing'
+import { propertyLabel, type PublicHome } from '@/lib/housing'
 
 async function photoUrls(listingIds: string[]) {
   const admin = createAdminClient()
   if (!admin || !listingIds.length) return new Map<string,string>()
-  const { data } = await admin.from('listing_photos').select('listing_id,storage_path,position').in('listing_id',listingIds).order('position')
+  const { data } = await admin.from('listing_photos').select('listing_id,storage_path,position').in('listing_id',listingIds).eq('moderation_status','approved').order('position')
   const first = new Map<string,string>()
   for (const row of data || []) {
     if (first.has(row.listing_id)) continue
@@ -40,16 +40,14 @@ function mapRow(row: any, imageUrl: string | null): PublicHome {
 
 export async function getPublicHomes(): Promise<PublicHome[]> {
   const admin = createAdminClient()
-  if (!admin) return demoHomes
+  if (!admin) return []
   const { data, error } = await admin.from('public_listings').select('*').order('created_at',{ascending:false}).limit(60)
-  if (error || !data?.length) return demoHomes
+  if (error || !data?.length) return []
   const images = await photoUrls(data.map((row:any)=>row.id))
   return data.map((row:any)=>mapRow(row,images.get(row.id)||null))
 }
 
 export async function getPublicHome(id: string): Promise<PublicHome | null> {
-  const demo = demoHomes.find(home=>home.id===id)
-  if (demo) return demo
   const admin = createAdminClient()
   if (!admin) return null
   const { data, error } = await admin.from('public_listings').select('*').eq('id',id).maybeSingle()
