@@ -1,0 +1,28 @@
+ASORTA V8.9 — UITLEG BIJ DE TARIEVEN
+
+Deze versie voegt op de tarievenpagina duidelijke uitleg toe over:
+
+- gratis registreren en de proefperiode van 30 dagen;
+- waarom voor een woningplaatsing €2 wordt gevraagd;
+- waarom de zoekpas €5 kost;
+- wat Asorta met deze bijdragen onderhoudt;
+- dat betaling geen match of goedkeuring door verhuurders garandeert.
+
+ER IS VOOR V8.9 GEEN NIEUWE SUPABASE-MIGRATIE NODIG.
+
+PATCH TOEPASSEN IN GIT BASH
+
+1. Pak ASORTA-V8.9-PATCH.zip uit.
+2. Open Git Bash in je lokale Vyron/ASORTA-projectmap.
+3. Typ `git apply --index`, voeg één spatie toe en sleep daarna het
+   patchbestand naar Git Bash. Het volledige pad wordt automatisch ingevuld.
+
+   git apply --index "C:/volledig/pad/ASORTA-V8.9.patch"
+
+4. Druk op Enter en voer daarna uit:
+
+   git commit -m "Leg tarieven transparant uit"
+   git push origin main
+
+Na de Vercel-deployment staat het nieuwe uitlegblok onder de twee prijskaarten
+op /pricing.

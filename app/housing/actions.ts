@@ -15,6 +15,21 @@ async function session(next:string){
   return {supabase,user}
 }
 
+async function hasPaidSearchAccess(supabase:any,userId:string){
+  const{data}=await supabase.from('access_passes').select('id').eq('user_id',userId).eq('status','active').gt('expires_at',new Date().toISOString()).maybeSingle()
+  return Boolean(data)
+}
+
+async function canUseConversation(supabase:any,userId:string,matchId:string){
+  if(await hasPaidSearchAccess(supabase,userId))return true
+  const{data}=await supabase.from('matches').select('status').eq('id',matchId).maybeSingle()
+  return Boolean(data&&['swap_in_progress','completed'].includes(data.status))
+}
+
+function paidAccessRequired(next:string){
+  redirect(`/checkout-access?purpose=search_year&next=${encodeURIComponent(next)}&error=${encodeURIComponent('Activeer eerst je zoekpas voor €5 om contact te leggen of op deze match te reageren.')}`)
+}
+
 export async function updateProfile(formData:FormData){
   const {supabase,user}=await session('/profile')
   try{
@@ -96,7 +111,8 @@ export async function saveSearchProfile(formData:FormData){
 
 export async function decideMatch(formData:FormData){
   const id=clean(formData.get('match_id'),80),decision=clean(formData.get('decision'),10)
-  const {supabase}=await session(`/matches/${id}`)
+  const {supabase,user}=await session(`/matches/${id}`)
+  if(!await hasPaidSearchAccess(supabase,user.id))paidAccessRequired(`/matches/${id}`)
   const {error}=await supabase.rpc('set_match_decision',{p_match_id:id,p_decision:decision})
   if(error)go(`/matches/${id}`,'error',error.message)
   revalidatePath(`/matches/${id}`);revalidatePath('/matches');redirect(`/matches/${id}?decision=${decision}`)
@@ -105,6 +121,7 @@ export async function decideMatch(formData:FormData){
 export async function sendMatchMessage(formData:FormData){
   const matchId=clean(formData.get('match_id'),80),conversationId=clean(formData.get('conversation_id'),80),body=clean(formData.get('body'),2000)
   const {supabase,user}=await session(`/matches/${matchId}`)
+  if(!await canUseConversation(supabase,user.id,matchId))paidAccessRequired(`/matches/${matchId}#chat`)
   if(!body)go(`/matches/${matchId}`,'error','Schrijf eerst een bericht.')
   const {error}=await supabase.from('messages').insert({conversation_id:conversationId,sender_id:user.id,body})
   if(error)go(`/matches/${matchId}`,'error',error.message)

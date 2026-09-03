@@ -1,0 +1,47 @@
+ASORTA V8.8 — GRATIS PROEFPERIODE VAN 30 DAGEN
+
+Deze versie laat gebruikers 30 dagen gratis zoeken, matches ontvangen en
+matchende woningen bekijken. Chatten, reageren en een ruilproces starten kan
+pas na betaling van de zoekpas van €5. De zoekpas blijft één jaar geldig en
+wordt niet automatisch verlengd.
+
+BELANGRIJKE VOLGORDE
+
+1. Open eerst Supabase Dashboard > SQL Editor.
+2. Open uit dit pakket: supabase/v8_8_free_trial.sql
+3. Voer het volledige SQL-bestand één keer uit.
+4. Pas daarna de Git-patch toe en push de nieuwe versie naar GitHub.
+
+De SQL-migratie geeft ook alle bestaande accounts een nieuwe proefmaand van
+30 dagen vanaf het moment waarop je de migratie uitvoert.
+
+PATCH TOEPASSEN IN GIT BASH
+
+Ga eerst naar je lokale ASORTA-map:
+
+  cd "/c/pad/naar/Vyron"
+
+Controleer of je op de juiste branch zit:
+
+  git status
+
+Pas de patch toe vanuit de map waarin je dit pakket hebt uitgepakt:
+
+  git apply --index "/c/pad/naar/ASORTA-V8.8.patch"
+
+Maak de commit en push:
+
+  git commit -m "Voeg gratis proefperiode van 30 dagen toe"
+  git push origin main
+
+CONTROLE NA DEPLOYMENT
+
+- Nieuw account: Mijn Asorta toont de actieve proefperiode.
+- Zoekprofiel en matches zijn tijdens de proefperiode bereikbaar.
+- Een matchdetail toont woninginformatie, maar chat en Ja/Nee zijn vergrendeld.
+- De knop Activeer voor €5 opent de bestaande Mollie-betaling.
+- Na een geslaagde betaling zijn chat en reageren direct beschikbaar.
+- Atlas > Gebruikers toont Proefperiode t/m ... of Zoekpas t/m ....
+
+Let op: voer de SQL-migratie uit vóórdat Vercel de nieuwe code live zet. Zonder
+de nieuwe trial-kolommen kan de website de proefstatus nog niet bepalen.

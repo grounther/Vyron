@@ -51,7 +51,7 @@ export default function LoginClient({ next = '/account', mode = 'login' }: { nex
     <h1 className="mt-4 text-4xl font-black">{isRegister ? 'Account maken' : 'Login'}</h1>
     <p className="mt-3 text-sm leading-6 text-white/55">
       {isRegister
-        ? 'Maak veilig een account aan met je e-mailadres. Je krijgt automatisch een anonieme Ruiler-ID.'
+        ? 'Maak veilig een account aan met je e-mailadres. Je krijgt automatisch een anonieme Ruiler-ID en 30 dagen gratis zoeken en matchen.'
         : 'Log veilig in met een magic link. Open de link op hetzelfde apparaat als waar je wilt inloggen.'}
     </p>
 
